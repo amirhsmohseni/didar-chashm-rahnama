@@ -35,6 +35,8 @@ const Header = () => {
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/" className="font-medium hover:text-primary transition-colors">خانه</Link>
             <Link to="/doctors" className="font-medium hover:text-primary transition-colors">پزشکان</Link>
+            <Link to="/services" className="font-medium hover:text-primary transition-colors">خدمات</Link>
+            <Link to="/media" className="font-medium hover:text-primary transition-colors">مرکز رسانه</Link>
             <Link to="/faq" className="font-medium hover:text-primary transition-colors">سوالات متداول</Link>
             <Link to="/blog" className="font-medium hover:text-primary transition-colors">بلاگ</Link>
             <Link to="/about" className="font-medium hover:text-primary transition-colors">درباره ما</Link>
@@ -62,6 +64,8 @@ const Header = () => {
             <nav className="flex flex-col space-y-4">
               <Link to="/" className="px-4 py-2 hover:bg-secondary rounded-md" onClick={() => setIsMenuOpen(false)}>خانه</Link>
               <Link to="/doctors" className="px-4 py-2 hover:bg-secondary rounded-md" onClick={() => setIsMenuOpen(false)}>پزشکان</Link>
+              <Link to="/services" className="px-4 py-2 hover:bg-secondary rounded-md" onClick={() => setIsMenuOpen(false)}>خدمات</Link>
+              <Link to="/media" className="px-4 py-2 hover:bg-secondary rounded-md" onClick={() => setIsMenuOpen(false)}>مرکز رسانه</Link>
               <Link to="/faq" className="px-4 py-2 hover:bg-secondary rounded-md" onClick={() => setIsMenuOpen(false)}>سوالات متداول</Link>
               <Link to="/blog" className="px-4 py-2 hover:bg-secondary rounded-md" onClick={() => setIsMenuOpen(false)}>بلاگ</Link>
               <Link to="/about" className="px-4 py-2 hover:bg-secondary rounded-md" onClick={() => setIsMenuOpen(false)}>درباره ما</Link>
