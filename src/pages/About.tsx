@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Phone, Mail, MessageSquare } from 'lucide-react';
+import { CheckCircle, Phone, Mail, MessageSquare, BadgePercent, Award, HeartHandshake, ShieldCheck, Zap, BookOpen, Star } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from "@/hooks/use-toast";
@@ -63,6 +62,50 @@ const About = () => {
     }
   };
 
+  // Value propositions for infographic
+  const valueProps = [
+    {
+      icon: <BadgePercent className="h-10 w-10 text-eyecare-600" />,
+      title: "هزینه‌های پایین‌تر جراحی",
+      description: "تخفیف از محل کمیسیون پزشک برای بیماران ما"
+    },
+    {
+      icon: <Award className="h-10 w-10 text-eyecare-600" />,
+      title: "پزشکان تأیید شده",
+      description: "همکاری با بهترین متخصصان چشم پزشکی کشور"
+    },
+    {
+      icon: <MessageSquare className="h-10 w-10 text-eyecare-600" />,
+      title: "مشاوره رایگان",
+      description: "ارائه مشاوره تخصصی رایگان برای همه بیماران"
+    },
+    {
+      icon: <HeartHandshake className="h-10 w-10 text-eyecare-600" />,
+      title: "پیگیری پس از جراحی",
+      description: "پشتیبانی و پیگیری وضعیت بهبودی بعد از عمل"
+    },
+    {
+      icon: <ShieldCheck className="h-10 w-10 text-eyecare-600" />,
+      title: "ضمانت مسئولیت",
+      description: "در صورت بروز مشکل، مسئولیت کامل پذیرفته می‌شود"
+    },
+    {
+      icon: <Zap className="h-10 w-10 text-eyecare-600" />,
+      title: "دسترسی سریع به جراحی",
+      description: "هماهنگی سریع نوبت و مقایسه شفاف روش‌ها"
+    },
+    {
+      icon: <BookOpen className="h-10 w-10 text-eyecare-600" />,
+      title: "محتوای آموزشی",
+      description: "ارائه مقالات و محتوای مفید برای آگاهی بیماران"
+    },
+    {
+      icon: <Star className="h-10 w-10 text-eyecare-600" />,
+      title: "بررسی تجربیات بیماران واقعی",
+      description: "دسترسی به نظرات و تجربیات سایر بیماران"
+    },
+  ];
+
   return (
     <>
       <Header />
@@ -113,8 +156,40 @@ const About = () => {
         </div>
       </section>
 
+      {/* Value Propositions Infographic */}
+      <section className="section bg-eyecare-50">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">چرا دیدار چشم رهنما را انتخاب کنید؟</h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              مزایای همکاری با دیدار چشم رهنما برای دریافت خدمات چشم پزشکی
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {valueProps.map((prop, index) => (
+              <div key={index} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all">
+                <div className="flex flex-col items-center text-center">
+                  <div className="mb-4 bg-eyecare-100 p-4 rounded-full">
+                    {prop.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">{prop.title}</h3>
+                  <p className="text-muted-foreground">{prop.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Button size="lg" asChild>
+              <Link to="/consultation">درخواست مشاوره رایگان</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* How We Work */}
-      <section className="section bg-secondary">
+      <section className="section bg-white">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">نحوه کار ما</h2>
@@ -141,7 +216,7 @@ const About = () => {
                 description: "پس از انجام جراحی، تیم ما روند بهبودی شما را پیگیری می‌کند تا از نتیجه عالی و رضایت کامل شما اطمینان حاصل کند."
               }
             ].map((item, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg relative">
+              <div key={index} className="bg-secondary p-6 rounded-lg relative">
                 <div className="absolute top-4 right-4 text-3xl font-bold text-eyecare-100">
                   {item.step}
                 </div>
@@ -162,7 +237,7 @@ const About = () => {
       </section>
 
       {/* Our Team */}
-      <section className="section bg-white">
+      <section className="section bg-secondary">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">تیم ما</h2>

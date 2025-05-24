@@ -31,10 +31,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const formSchema = z.object({
   fullName: z.string().min(3, { message: "نام و نام خانوادگی باید حداقل 3 حرف باشد" }),
-  city: z.string().min(2, { message: "لطفا شهر خود را وارد کنید" }),
+  city: z.string().optional(),
   phone: z.string().min(10, { message: "شماره تماس معتبر نیست" }),
   email: z.string().email({ message: "ایمیل معتبر نیست" }).optional().or(z.literal('')),
-  eyeProblem: z.string().min(5, { message: "لطفا مشکل چشمی خود را توضیح دهید" }),
+  eyeProblem: z.string().optional(),
   surgeryType: z.string().optional(),
   medicalHistory: z.string().optional(),
   preferredContact: z.enum(["phone", "email", "whatsapp"], {
@@ -161,7 +161,7 @@ const Consultation = () => {
                           name="city"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>شهر *</FormLabel>
+                              <FormLabel>شهر (اختیاری)</FormLabel>
                               <FormControl>
                                 <Input placeholder="شهر خود را وارد کنید" {...field} />
                               </FormControl>
@@ -206,7 +206,7 @@ const Consultation = () => {
                         name="eyeProblem"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>مشکل چشمی یا علائم *</FormLabel>
+                            <FormLabel>مشکل چشمی یا علائم (اختیاری)</FormLabel>
                             <FormControl>
                               <Textarea 
                                 placeholder="لطفا مشکل چشمی یا علائمی که دارید را توضیح دهید"
