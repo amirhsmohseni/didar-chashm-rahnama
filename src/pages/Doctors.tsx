@@ -193,7 +193,7 @@ const Doctors = () => {
                     <SelectValue placeholder="شهر" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">همه شهرها</SelectItem>
+                    <SelectItem value="all-cities">همه شهرها</SelectItem>
                     {cities.map((city) => (
                       <SelectItem key={city} value={city}>{city}</SelectItem>
                     ))}
@@ -207,7 +207,7 @@ const Doctors = () => {
                     <SelectValue placeholder="تخصص" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">همه تخصص‌ها</SelectItem>
+                    <SelectItem value="all-specialties">همه تخصص‌ها</SelectItem>
                     {specialties.map((specialty) => (
                       <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
                     ))}
