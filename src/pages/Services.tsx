@@ -46,43 +46,49 @@ const Services = () => {
       title: 'جراحی لازیک',
       description: 'روشی محبوب برای اصلاح عیوب انکساری چشم با استفاده از لیزر که نتایج سریع و درد کمی دارد.',
       icon: <Eye className="h-10 w-10 text-primary" />,
+      image: "/lovable-uploads/d75e8494-d085-41f7-922f-4f066da0b842.png"
     },
     {
       id: 'femtosmile',
       title: 'جراحی فمتو اسمایل',
       description: 'روش پیشرفته برای اصلاح عیوب انکساری با حداقل آسیب به قرنیه و بهبودی سریع‌تر.',
       icon: <Eye className="h-10 w-10 text-primary" />,
-      image: "/zeiss-visumax-standalone-specularity-frontview_sqaure.jpg"
+      image: "/lovable-uploads/ab10ef65-363e-47ed-a1a5-dceee84d1d9d.png"
     },
     {
       id: 'femtolasik',
       title: 'جراحی فمتو لازیک',
       description: 'ترکیب تکنولوژی فمتوسکند لیزر با لازیک برای دقت بیشتر و نتایج بهتر در اصلاح بینایی.',
       icon: <Eye className="h-10 w-10 text-primary" />,
+      image: "/lovable-uploads/96386b66-70a1-44b5-a521-2e81071b8186.png"
     },
     {
       id: 'transprk',
       title: 'جراحی ترانس PRK',
       description: 'نسل جدید جراحی PRK با بهبودی سریع‌تر و راحتی بیشتر برای بیمار.',
       icon: <Eye className="h-10 w-10 text-primary" />,
+      image: "/lovable-uploads/6b3c0d2c-dd37-4d33-bf7a-9f0803fb8607.png"
     },
     {
       id: 'prk',
       title: 'جراحی PRK',
       description: 'روش کلاسیک اصلاح بینایی که برای برخی از افراد که کاندید لازیک نیستند مناسب است.',
       icon: <Eye className="h-10 w-10 text-primary" />,
+      image: "/lovable-uploads/af4748e4-e86a-4059-8c1e-21295741f2e8.png"
     },
     {
       id: 'checkup',
       title: 'معاینات چشم و اپتومتری',
       description: 'خدمات جامع معاینه چشم برای ارزیابی سلامت و بینایی چشم‌ها.',
       icon: <Eye className="h-10 w-10 text-primary" />,
+      image: "/lovable-uploads/580da3ff-de91-4073-bff4-eb9d41773013.png"
     },
     {
       id: 'eyewear',
       title: 'عینک طبی و فروش لوازم چشمی',
       description: 'تجویز و ارائه انواع عینک‌های طبی و لنزهای تماسی با کیفیت بالا.',
       icon: <Eye className="h-10 w-10 text-primary" />,
+      image: "/lovable-uploads/3ceab6cd-1fba-4c25-aaf8-254ac9aaaeb9.png"
     },
   ];
 

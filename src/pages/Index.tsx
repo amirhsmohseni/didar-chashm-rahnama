@@ -54,7 +54,7 @@ const Index = () => {
             
             <div className="relative rounded-lg overflow-hidden shadow-xl">
               <img 
-                src="/placeholder.svg" 
+                src="/lovable-uploads/2044c494-74f5-42c3-9979-6effb4059825.png" 
                 alt="جراحی چشم" 
                 className="w-full h-auto rounded-lg"
               />

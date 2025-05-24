@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play, Image, MessageSquare, ArrowRight } from 'lucide-react';
@@ -14,28 +13,28 @@ const MediaCenter = () => {
     {
       id: 'video1',
       title: 'جراحی لازیک چیست؟',
-      thumbnail: '/placeholder.svg',
+      thumbnail: '/lovable-uploads/7183b3ed-c0ee-4bc5-8705-53224a422b78.png',
       duration: '4:30',
       description: 'در این ویدیو، مراحل و جزئیات جراحی لازیک توضیح داده شده است.'
     },
     {
       id: 'video2',
       title: 'تفاوت لازیک و PRK',
-      thumbnail: '/placeholder.svg',
+      thumbnail: '/lovable-uploads/96386b66-70a1-44b5-a521-2e81071b8186.png',
       duration: '5:45',
       description: 'مقایسه دو روش رایج جراحی چشم و مزایا و معایب هر کدام.'
     },
     {
       id: 'video3',
       title: 'مراقبت‌های پس از جراحی',
-      thumbnail: '/placeholder.svg',
+      thumbnail: '/lovable-uploads/6b3c0d2c-dd37-4d33-bf7a-9f0803fb8607.png',
       duration: '3:20',
       description: 'نکاتی که بیماران بعد از جراحی چشم باید رعایت کنند.'
     },
     {
       id: 'video4',
       title: 'نحوه معاینه چشم پزشکی',
-      thumbnail: '/placeholder.svg',
+      thumbnail: '/lovable-uploads/580da3ff-de91-4073-bff4-eb9d41773013.png',
       duration: '7:15',
       description: 'آشنایی با مراحل معاینه چشم و بررسی‌های لازم قبل از جراحی.'
     }
@@ -45,24 +44,24 @@ const MediaCenter = () => {
     {
       id: 'result1',
       title: 'نتیجه جراحی لازیک',
-      before: '/placeholder.svg',
-      after: '/placeholder.svg',
+      before: '/lovable-uploads/96386b66-70a1-44b5-a521-2e81071b8186.png',
+      after: '/lovable-uploads/86c49559-961b-406b-a5c4-9d47e1c50501.png',
       condition: 'نزدیک‌بینی شدید',
       improvement: 'بهبود بینایی از 20/400 به 20/20'
     },
     {
       id: 'result2',
       title: 'نتیجه جراحی آب مروارید',
-      before: '/placeholder.svg',
-      after: '/placeholder.svg',
+      before: '/lovable-uploads/96386b66-70a1-44b5-a521-2e81071b8186.png',
+      after: '/lovable-uploads/86c49559-961b-406b-a5c4-9d47e1c50501.png',
       condition: 'آب مروارید پیشرفته',
       improvement: 'بهبود کامل وضوح و رنگ بینایی'
     },
     {
       id: 'result3',
       title: 'نتیجه جراحی PRK',
-      before: '/placeholder.svg',
-      after: '/placeholder.svg',
+      before: '/lovable-uploads/af4748e4-e86a-4059-8c1e-21295741f2e8.png',
+      after: '/lovable-uploads/86c49559-961b-406b-a5c4-9d47e1c50501.png',
       condition: 'آستیگماتیسم و نزدیک‌بینی',
       improvement: 'بهبود بینایی به حالت طبیعی'
     }
@@ -72,21 +71,21 @@ const MediaCenter = () => {
     {
       id: 'testimonial1',
       name: 'محمد رضایی',
-      photo: '/placeholder.svg',
+      photo: '/lovable-uploads/56cc2662-9b74-49e6-b2e9-3c799a4ba344.png',
       procedure: 'جراحی لازیک',
       quote: 'من با نمره چشم -4.5 جراحی لازیک انجام دادم و الان بدون عینک و با وضوح کامل می‌بینم. از تیم دیدار چشم رهنما بسیار ممنونم که بهترین دکتر را به من معرفی کردند.'
     },
     {
       id: 'testimonial2',
       name: 'سارا محمدی',
-      photo: '/placeholder.svg',
+      photo: '/lovable-uploads/3e392293-969b-428e-a78f-04e3afa8e257.png',
       procedure: 'جراحی فمتو اسمایل',
       quote: 'تیم مشاوره دیدار چشم رهنما با دقت زیادی نیاز من را ارزیابی کردند و مناسب‌ترین روش جراحی را پیشنهاد دادند. پس از جراحی، مرتب پیگیر وضعیت من بودند و واقعا احساس حمایت کردم.'
     },
     {
       id: 'testimonial3',
       name: 'علی اکبری',
-      photo: '/placeholder.svg',
+      photo: '/lovable-uploads/3bf77a26-5255-49db-ae88-bf1a5d13339c.png',
       procedure: 'جراحی آب مروارید',
       quote: 'بعد از سال‌ها مشکل آب مروارید، با مشاوره و راهنمایی دیدار چشم رهنما، تحت عمل جراحی قرار گرفتم و الان دنیا را با وضوح و رنگ‌های بهتری می‌بینم. از معرفی دکتر متخصص و پیگیری‌های منظم بسیار راضی هستم.'
     }

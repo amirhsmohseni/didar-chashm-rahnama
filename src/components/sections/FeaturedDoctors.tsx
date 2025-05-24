@@ -4,38 +4,38 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
 const FeaturedDoctors = () => {
-  // Sample doctor data
+  // Sample doctor data with updated images
   const doctors = [
     {
       id: 1,
-      name: "دکتر محمد رضایی",
+      name: "دکتر محمود جباوند",
       specialty: "جراح و متخصص چشم",
       city: "تهران",
-      imgUrl: "/placeholder.svg",
+      imgUrl: "/lovable-uploads/3e392293-969b-428e-a78f-04e3afa8e257.png",
       expertise: ["جراحی لازیک", "عمل آب مروارید"]
     },
     {
       id: 2,
-      name: "دکتر سارا احمدی",
+      name: "دکتر سعیدی فر",
       specialty: "فوق تخصص قرنیه",
       city: "شیراز",
-      imgUrl: "/placeholder.svg",
+      imgUrl: "/lovable-uploads/3bf77a26-5255-49db-ae88-bf1a5d13339c.png",
       expertise: ["پیوند قرنیه", "کراتوکونوس"]
     },
     {
       id: 3,
-      name: "دکتر علی حسینی",
+      name: "دکتر یدالله اسلامی",
       specialty: "جراح و متخصص شبکیه",
       city: "مشهد",
-      imgUrl: "/placeholder.svg",
+      imgUrl: "/lovable-uploads/2650818e-8b8d-4207-8ee3-d71dd5a870a8.png",
       expertise: ["جراحی شبکیه", "دیابت چشمی"]
     },
     {
       id: 4,
-      name: "دکتر فاطمه نوری",
+      name: "دکتر فرشید پورکار",
       specialty: "متخصص انکسار و لیزیک",
       city: "اصفهان",
-      imgUrl: "/placeholder.svg",
+      imgUrl: "/lovable-uploads/7002eea8-8935-4eb4-9a7f-e9d74d54a226.png",
       expertise: ["جراحی لازیک", "جراحی PRK"]
     }
   ];

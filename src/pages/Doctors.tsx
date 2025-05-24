@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -17,7 +18,7 @@ const Doctors = () => {
   const [cityFilter, setCityFilter] = useState('');
   const [specialtyFilter, setSpecialtyFilter] = useState('');
 
-  // Updated doctor data
+  // Updated doctor data with images
   const allDoctors = [
     {
       id: 1,
@@ -27,7 +28,7 @@ const Doctors = () => {
       city: "تهران",
       experience: 15,
       bio: "دکتر محمود جباوند، متخصص چشم پزشکی با تجربه طولانی در زمینه جراحی‌های انکساری و لازیک. ایشان دانش آموخته دانشگاه علوم پزشکی تهران و دارای فلوشیپ جراحی قرنیه هستند.",
-      imgUrl: "/placeholder.svg",
+      imgUrl: "/lovable-uploads/3e392293-969b-428e-a78f-04e3afa8e257.png",
       expertise: ["جراحی لازیک", "عمل آب مروارید", "فمتولیزیک"]
     },
     {
@@ -38,7 +39,7 @@ const Doctors = () => {
       city: "شیراز",
       experience: 12,
       bio: "دکتر سعیدی فر، فوق تخصص قرنیه و بیماری‌های سطح چشم با تجربه وسیع. ایشان در زمینه پیوند قرنیه و درمان کراتوکونوس یکی از پزشکان برجسته کشور هستند.",
-      imgUrl: "/placeholder.svg",
+      imgUrl: "/lovable-uploads/3bf77a26-5255-49db-ae88-bf1a5d13339c.png",
       expertise: ["پیوند قرنیه", "کراتوکونوس", "خشکی چشم"]
     },
     {
@@ -49,7 +50,7 @@ const Doctors = () => {
       city: "مشهد",
       experience: 18,
       bio: "دکتر یدالله اسلامی، متخصص جراحی شبکیه با سابقه درخشان در درمان بیماری‌های مرتبط با شبکیه و ویتره. ایشان دارای مدرک فوق تخصصی از آلمان هستند.",
-      imgUrl: "/placeholder.svg",
+      imgUrl: "/lovable-uploads/2650818e-8b8d-4207-8ee3-d71dd5a870a8.png",
       expertise: ["جراحی شبکیه", "دیابت چشمی", "ویترکتومی"]
     },
     {
@@ -60,7 +61,7 @@ const Doctors = () => {
       city: "اصفهان",
       experience: 10,
       bio: "دکتر فرشید پورکار، متخصص چشم با تمرکز بر جراحی‌های انکساری. ایشان در زمینه لازیک و PRK تجربه زیادی دارند و دانش‌آموخته دانشگاه علوم پزشکی اصفهان هستند.",
-      imgUrl: "/placeholder.svg",
+      imgUrl: "/lovable-uploads/7002eea8-8935-4eb4-9a7f-e9d74d54a226.png",
       expertise: ["جراحی لازیک", "جراحی PRK", "اصلاح آستیگماتیسم"]
     },
     {
@@ -82,7 +83,7 @@ const Doctors = () => {
       city: "تهران",
       experience: 8,
       bio: "دکتر علیرضا یزدانی آبیانه، متخصص در زمینه استرابیسم (انحراف چشم) و چشم پزشکی کودکان. ایشان دارای مدرک فلوشیپ هستند و با کودکان ارتباط بسیار خوبی برقرار می‌کنند.",
-      imgUrl: "/placeholder.svg",
+      imgUrl: "/lovable-uploads/56cc2662-9b74-49e6-b2e9-3c799a4ba344.png",
       expertise: ["استرابیسم", "چشم کودکان", "آمبلیوپی"]
     },
     {
@@ -133,14 +134,13 @@ const Doctors = () => {
 
   // Filter doctors based on search query and filters
   const filteredDoctors = allDoctors.filter(doctor => {
-    // ... keep existing code (filtering logic)
     const matchesSearch = searchQuery === '' || 
       doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
       doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doctor.subspecialty.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesCity = cityFilter === '' || doctor.city === cityFilter;
-    const matchesSpecialty = specialtyFilter === '' || 
+    const matchesCity = cityFilter === '' || cityFilter === 'all-cities' || doctor.city === cityFilter;
+    const matchesSpecialty = specialtyFilter === '' || specialtyFilter === 'all-specialties' || 
       doctor.specialty.includes(specialtyFilter) || 
       doctor.subspecialty.includes(specialtyFilter);
     
