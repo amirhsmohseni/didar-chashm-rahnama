@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Eye, Phone, Mail, MessageSquare } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
@@ -44,7 +43,7 @@ const ConsultationRequestsManager = () => {
   const fetchRequests = async () => {
     try {
       const { data, error } = await supabase
-        .from('consultation_requests')
+        .from('consultation_requests' as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -65,7 +64,7 @@ const ConsultationRequestsManager = () => {
   const updateStatus = async (requestId: string, newStatus: string) => {
     try {
       const { error } = await supabase
-        .from('consultation_requests')
+        .from('consultation_requests' as any)
         .update({ status: newStatus })
         .eq('id', requestId);
 

@@ -41,7 +41,7 @@ const doctorSchema = z.object({
   specialty: z.string().min(2, { message: "تخصص باید حداقل 2 حرف باشد" }),
   subspecialty: z.string().optional(),
   city: z.string().min(2, { message: "شهر باید حداقل 2 حرف باشد" }),
-  experience: z.string().transform((val) => parseInt(val) || 0),
+  experience: z.number().min(0, { message: "سابقه کار نمی‌تواند منفی باشد" }),
   bio: z.string().optional(),
   img_url: z.string().optional(),
   expertise: z.string().min(1, { message: "حداقل یک تخصص وارد کنید" }),
@@ -61,7 +61,7 @@ const DoctorsManager = () => {
       specialty: "",
       subspecialty: "",
       city: "",
-      experience: "",
+      experience: 0,
       bio: "",
       img_url: "",
       expertise: "",
@@ -75,7 +75,7 @@ const DoctorsManager = () => {
   const fetchDoctors = async () => {
     try {
       const { data, error } = await supabase
-        .from('doctors')
+        .from('doctors' as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -105,7 +105,7 @@ const DoctorsManager = () => {
 
       if (editingDoctor) {
         const { error } = await supabase
-          .from('doctors')
+          .from('doctors' as any)
           .update(doctorData)
           .eq('id', editingDoctor.id);
 
@@ -117,7 +117,7 @@ const DoctorsManager = () => {
         });
       } else {
         const { error } = await supabase
-          .from('doctors')
+          .from('doctors' as any)
           .insert([doctorData]);
 
         if (error) throw error;
@@ -149,7 +149,7 @@ const DoctorsManager = () => {
       specialty: doctor.specialty,
       subspecialty: doctor.subspecialty || "",
       city: doctor.city,
-      experience: doctor.experience.toString(),
+      experience: doctor.experience,
       bio: doctor.bio || "",
       img_url: doctor.img_url || "",
       expertise: doctor.expertise?.join(', ') || "",
@@ -162,7 +162,7 @@ const DoctorsManager = () => {
 
     try {
       const { error } = await supabase
-        .from('doctors')
+        .from('doctors' as any)
         .delete()
         .eq('id', doctorId);
 
@@ -285,7 +285,12 @@ const DoctorsManager = () => {
                         <FormItem>
                           <FormLabel>سابقه کار (سال)</FormLabel>
                           <FormControl>
-                            <Input type="number" placeholder="10" {...field} />
+                            <Input 
+                              type="number" 
+                              placeholder="10" 
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
