@@ -76,7 +76,7 @@ const BlogManager = () => {
   const fetchPosts = async () => {
     try {
       const { data, error } = await supabase
-        .from('blog_posts' as any)
+        .from('blog_posts')
         .select(`
           *,
           profiles:author_id (full_name)
@@ -106,7 +106,7 @@ const BlogManager = () => {
 
       if (editingPost) {
         const { error } = await supabase
-          .from('blog_posts' as any)
+          .from('blog_posts')
           .update(postData)
           .eq('id', editingPost.id);
 
@@ -118,7 +118,7 @@ const BlogManager = () => {
         });
       } else {
         const { error } = await supabase
-          .from('blog_posts' as any)
+          .from('blog_posts')
           .insert([postData]);
 
         if (error) throw error;
@@ -159,7 +159,7 @@ const BlogManager = () => {
 
     try {
       const { error } = await supabase
-        .from('blog_posts' as any)
+        .from('blog_posts')
         .delete()
         .eq('id', postId);
 
@@ -183,7 +183,7 @@ const BlogManager = () => {
   const togglePublished = async (postId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
-        .from('blog_posts' as any)
+        .from('blog_posts')
         .update({ published: !currentStatus })
         .eq('id', postId);
 

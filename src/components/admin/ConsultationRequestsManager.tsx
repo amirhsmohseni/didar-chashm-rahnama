@@ -43,7 +43,7 @@ const ConsultationRequestsManager = () => {
   const fetchRequests = async () => {
     try {
       const { data, error } = await supabase
-        .from('consultation_requests' as any)
+        .from('consultation_requests')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -64,7 +64,7 @@ const ConsultationRequestsManager = () => {
   const updateStatus = async (requestId: string, newStatus: string) => {
     try {
       const { error } = await supabase
-        .from('consultation_requests' as any)
+        .from('consultation_requests')
         .update({ status: newStatus })
         .eq('id', requestId);
 

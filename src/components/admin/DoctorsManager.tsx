@@ -75,7 +75,7 @@ const DoctorsManager = () => {
   const fetchDoctors = async () => {
     try {
       const { data, error } = await supabase
-        .from('doctors' as any)
+        .from('doctors')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -105,7 +105,7 @@ const DoctorsManager = () => {
 
       if (editingDoctor) {
         const { error } = await supabase
-          .from('doctors' as any)
+          .from('doctors')
           .update(doctorData)
           .eq('id', editingDoctor.id);
 
@@ -117,7 +117,7 @@ const DoctorsManager = () => {
         });
       } else {
         const { error } = await supabase
-          .from('doctors' as any)
+          .from('doctors')
           .insert([doctorData]);
 
         if (error) throw error;
@@ -162,7 +162,7 @@ const DoctorsManager = () => {
 
     try {
       const { error } = await supabase
-        .from('doctors' as any)
+        .from('doctors')
         .delete()
         .eq('id', doctorId);
 
