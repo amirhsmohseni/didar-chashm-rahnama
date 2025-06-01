@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { CheckCircle, Upload, User, Phone, Mail } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -79,20 +79,39 @@ const Consultation = () => {
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
 
-    // Simulate API call
     try {
-      console.log("Form data submitted:", data);
-      console.log("File:", selectedFile);
+      console.log("Submitting form data:", data);
       
-      // Simulating a delay for API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      // Save to database
+      const { error } = await supabase
+        .from('consultation_requests')
+        .insert([{
+          full_name: data.fullName,
+          city: data.city || null,
+          phone: data.phone,
+          email: data.email || null,
+          eye_problem: data.eyeProblem || null,
+          surgery_type: data.surgeryType || null,
+          medical_history: data.medicalHistory || null,
+          preferred_contact: data.preferredContact,
+          status: 'pending'
+        }]);
+
+      if (error) {
+        console.error("Database error:", error);
+        throw error;
+      }
+
       // Show success message
       setIsSuccess(true);
       toast({
         title: "درخواست ثبت شد",
         description: "مشاوران ما به زودی با شما تماس خواهند گرفت",
       });
+
+      // Reset form
+      form.reset();
+      setSelectedFile(null);
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({

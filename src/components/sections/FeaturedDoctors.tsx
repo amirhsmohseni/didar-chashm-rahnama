@@ -1,44 +1,53 @@
 
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
 
 const FeaturedDoctors = () => {
-  // Sample doctor data with updated images
-  const doctors = [
-    {
-      id: 1,
-      name: "دکتر محمود جباوند",
-      specialty: "جراح و متخصص چشم",
-      city: "تهران",
-      imgUrl: "/lovable-uploads/3e392293-969b-428e-a78f-04e3afa8e257.png",
-      expertise: ["جراحی لازیک", "عمل آب مروارید"]
-    },
-    {
-      id: 2,
-      name: "دکتر سعیدی فر",
-      specialty: "فوق تخصص قرنیه",
-      city: "شیراز",
-      imgUrl: "/lovable-uploads/3bf77a26-5255-49db-ae88-bf1a5d13339c.png",
-      expertise: ["پیوند قرنیه", "کراتوکونوس"]
-    },
-    {
-      id: 3,
-      name: "دکتر یدالله اسلامی",
-      specialty: "جراح و متخصص شبکیه",
-      city: "مشهد",
-      imgUrl: "/lovable-uploads/2650818e-8b8d-4207-8ee3-d71dd5a870a8.png",
-      expertise: ["جراحی شبکیه", "دیابت چشمی"]
-    },
-    {
-      id: 4,
-      name: "دکتر فرشید پورکار",
-      specialty: "متخصص انکسار و لیزیک",
-      city: "اصفهان",
-      imgUrl: "/lovable-uploads/7002eea8-8935-4eb4-9a7f-e9d74d54a226.png",
-      expertise: ["جراحی لازیک", "جراحی PRK"]
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
+  const fetchDoctors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('doctors')
+        .select('*')
+        .limit(4)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching doctors:', error);
+        return;
+      }
+
+      setDoctors(data || []);
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
+
+  if (isLoading) {
+    return (
+      <section className="section bg-white">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">پزشکان برتر</h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              در حال بارگذاری...
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="section bg-white">
@@ -55,7 +64,7 @@ const FeaturedDoctors = () => {
             <div key={doctor.id} className="bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
               <div className="aspect-square relative overflow-hidden">
                 <img 
-                  src={doctor.imgUrl} 
+                  src={doctor.img_url || '/placeholder.svg'} 
                   alt={doctor.name} 
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
@@ -63,9 +72,12 @@ const FeaturedDoctors = () => {
               <div className="p-4">
                 <h3 className="font-semibold text-lg">{doctor.name}</h3>
                 <p className="text-primary mb-1">{doctor.specialty}</p>
+                {doctor.subspecialty && (
+                  <p className="text-sm text-muted-foreground mb-1">{doctor.subspecialty}</p>
+                )}
                 <p className="text-sm text-muted-foreground mb-2">{doctor.city}</p>
                 <div className="flex flex-wrap gap-1 mt-3">
-                  {doctor.expertise.map((item, index) => (
+                  {doctor.expertise?.slice(0, 2).map((item: string, index: number) => (
                     <span key={index} className="text-xs bg-secondary rounded-full px-3 py-1">
                       {item}
                     </span>
