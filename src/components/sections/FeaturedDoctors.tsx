@@ -12,7 +12,7 @@ const FeaturedDoctors = () => {
 
   const fetchDoctors = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('doctors')
         .select('*')
         .limit(4);

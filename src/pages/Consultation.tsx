@@ -63,7 +63,7 @@ const Consultation = () => {
   const onSubmit = async (data: z.infer<typeof consultationSchema>) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('consultation_requests')
         .insert([{
           full_name: data.fullName,

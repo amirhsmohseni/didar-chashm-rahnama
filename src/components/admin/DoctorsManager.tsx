@@ -74,7 +74,7 @@ const DoctorsManager = () => {
 
   const fetchDoctors = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('doctors')
         .select('*')
         .order('created_at', { ascending: false });
@@ -104,7 +104,7 @@ const DoctorsManager = () => {
       };
 
       if (editingDoctor) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('doctors')
           .update(doctorData)
           .eq('id', editingDoctor.id);
@@ -116,7 +116,7 @@ const DoctorsManager = () => {
           description: "اطلاعات پزشک با موفقیت ویرایش شد",
         });
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('doctors')
           .insert([doctorData]);
 
@@ -161,7 +161,7 @@ const DoctorsManager = () => {
     if (!confirm('آیا از حذف این پزشک مطمئن هستید؟')) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('doctors')
         .delete()
         .eq('id', doctorId);

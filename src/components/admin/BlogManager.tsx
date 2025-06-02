@@ -75,7 +75,7 @@ const BlogManager = () => {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('blog_posts')
         .select(`
           *,
@@ -105,7 +105,7 @@ const BlogManager = () => {
       };
 
       if (editingPost) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('blog_posts')
           .update(postData)
           .eq('id', editingPost.id);
@@ -117,7 +117,7 @@ const BlogManager = () => {
           description: "مقاله با موفقیت ویرایش شد",
         });
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('blog_posts')
           .insert([postData]);
 
@@ -158,7 +158,7 @@ const BlogManager = () => {
     if (!confirm('آیا از حذف این مقاله مطمئن هستید؟')) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('blog_posts')
         .delete()
         .eq('id', postId);
@@ -182,7 +182,7 @@ const BlogManager = () => {
 
   const togglePublished = async (postId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('blog_posts')
         .update({ published: !currentStatus })
         .eq('id', postId);
