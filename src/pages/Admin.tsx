@@ -37,13 +37,13 @@ const Admin = () => {
       setUser(session.user);
 
       // Get user profile
-      const { data: profileData, error } = await supabase
+      const { data: profileData, error } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('id', session.user.id)
         .single();
 
-      if (error || !profileData || profileData.role !== 'admin') {
+      if (error || !profileData || (profileData as any).role !== 'admin') {
         toast({
           title: "دسترسی محدود",
           description: "شما دسترسی به پنل مدیریت ندارید",
