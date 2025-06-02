@@ -42,12 +42,19 @@ const Auth = () => {
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { 
+      email: "", 
+      password: "" 
+    },
   });
 
   const signupForm = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { email: "", password: "", fullName: "" },
+    defaultValues: { 
+      email: "", 
+      password: "", 
+      fullName: "" 
+    },
   });
 
   const onLogin = async (data: z.infer<typeof loginSchema>) => {
@@ -174,6 +181,7 @@ const Auth = () => {
                                 <Input 
                                   placeholder="example@gmail.com" 
                                   className="pr-9"
+                                  type="email"
                                   {...field} 
                                 />
                               </div>
@@ -232,7 +240,11 @@ const Auth = () => {
                                 <Input 
                                   placeholder="نام و نام خانوادگی خود را وارد کنید" 
                                   className="pr-9"
-                                  {...field} 
+                                  type="text"
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  onBlur={field.onBlur}
+                                  name={field.name}
                                 />
                               </div>
                             </FormControl>
@@ -253,6 +265,7 @@ const Auth = () => {
                                 <Input 
                                   placeholder="example@gmail.com" 
                                   className="pr-9"
+                                  type="email"
                                   {...field} 
                                 />
                               </div>
