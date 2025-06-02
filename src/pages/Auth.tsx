@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from "react-hook-form";
@@ -241,10 +240,7 @@ const Auth = () => {
                                   placeholder="نام و نام خانوادگی خود را وارد کنید" 
                                   className="pr-9"
                                   type="text"
-                                  value={field.value}
-                                  onChange={field.onChange}
-                                  onBlur={field.onBlur}
-                                  name={field.name}
+                                  {...field}
                                 />
                               </div>
                             </FormControl>
