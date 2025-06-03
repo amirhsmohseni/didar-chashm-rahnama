@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Eye, Phone, Mail, MessageSquare } from 'lucide-react';
+import { Eye, Phone, Mail, MessageSquare, Calendar, Clock } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,10 +31,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+interface ConsultationRequest {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  age: number | null;
+  gender: string | null;
+  medical_condition: string;
+  preferred_date: string | null;
+  preferred_time: string | null;
+  status: string;
+  notes: string | null;
+  created_at: string;
+  doctor_id: string | null;
+  doctors?: {
+    name: string;
+  };
+}
+
 const ConsultationRequestsManager = () => {
-  const [requests, setRequests] = useState<any[]>([]);
+  const [requests, setRequests] = useState<ConsultationRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<ConsultationRequest | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -43,9 +62,14 @@ const ConsultationRequestsManager = () => {
 
   const fetchRequests = async () => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('consultation_requests')
-        .select('*')
+        .select(`
+          *,
+          doctors (
+            name
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -64,7 +88,7 @@ const ConsultationRequestsManager = () => {
 
   const updateStatus = async (requestId: string, newStatus: string) => {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('consultation_requests')
         .update({ status: newStatus })
         .eq('id', requestId);
@@ -107,6 +131,11 @@ const ConsultationRequestsManager = () => {
     });
   };
 
+  const formatPreferredDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('fa-IR');
+  };
+
   if (isLoading) {
     return <div className="text-center py-8">در حال بارگذاری...</div>;
   }
@@ -127,123 +156,117 @@ const ConsultationRequestsManager = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>نام</TableHead>
-                <TableHead>شهر</TableHead>
-                <TableHead>تماس</TableHead>
+                <TableHead>شماره تماس</TableHead>
+                <TableHead>مشکل پزشکی</TableHead>
                 <TableHead>وضعیت</TableHead>
-                <TableHead>تاریخ</TableHead>
+                <TableHead>تاریخ ثبت</TableHead>
                 <TableHead>عملیات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {requests.map((request) => (
                 <TableRow key={request.id}>
-                  <TableCell className="font-medium">{request.full_name}</TableCell>
-                  <TableCell>{request.city || '-'}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {request.preferred_contact === 'phone' && <Phone className="h-4 w-4" />}
-                      {request.preferred_contact === 'email' && <Mail className="h-4 w-4" />}
-                      {request.preferred_contact === 'whatsapp' && <MessageSquare className="h-4 w-4" />}
-                      {request.phone}
-                    </div>
-                  </TableCell>
+                  <TableCell className="font-medium">{request.name}</TableCell>
+                  <TableCell>{request.phone}</TableCell>
+                  <TableCell className="max-w-xs truncate">{request.medical_condition}</TableCell>
                   <TableCell>{getStatusBadge(request.status)}</TableCell>
                   <TableCell>{formatDate(request.created_at)}</TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setSelectedRequest(request)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>جزئیات درخواست مشاوره</DialogTitle>
-                            <DialogDescription>
-                              درخواست ثبت شده در {selectedRequest && formatDate(selectedRequest.created_at)}
-                            </DialogDescription>
-                          </DialogHeader>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedRequest(request)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>جزئیات درخواست مشاوره</DialogTitle>
+                          <DialogDescription>
+                            درخواست ثبت شده در {selectedRequest && formatDate(selectedRequest.created_at)}
+                          </DialogDescription>
+                        </DialogHeader>
 
-                          {selectedRequest && (
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium">نام و نام خانوادگی:</label>
-                                  <p className="text-sm text-muted-foreground">{selectedRequest.full_name}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium">شهر:</label>
-                                  <p className="text-sm text-muted-foreground">{selectedRequest.city || '-'}</p>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium">شماره تماس:</label>
-                                  <p className="text-sm text-muted-foreground">{selectedRequest.phone}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium">ایمیل:</label>
-                                  <p className="text-sm text-muted-foreground">{selectedRequest.email || '-'}</p>
-                                </div>
-                              </div>
-
+                        {selectedRequest && (
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <label className="text-sm font-medium">روش ارتباطی ترجیحی:</label>
-                                <p className="text-sm text-muted-foreground">
-                                  {selectedRequest.preferred_contact === 'phone' && 'تماس تلفنی'}
-                                  {selectedRequest.preferred_contact === 'email' && 'ایمیل'}
-                                  {selectedRequest.preferred_contact === 'whatsapp' && 'واتساپ'}
-                                </p>
+                                <label className="text-sm font-medium">نام:</label>
+                                <p className="text-sm text-muted-foreground">{selectedRequest.name}</p>
                               </div>
-
-                              {selectedRequest.surgery_type && (
-                                <div>
-                                  <label className="text-sm font-medium">نوع جراحی مورد نظر:</label>
-                                  <p className="text-sm text-muted-foreground">{selectedRequest.surgery_type}</p>
-                                </div>
-                              )}
-
-                              {selectedRequest.eye_problem && (
-                                <div>
-                                  <label className="text-sm font-medium">مشکل چشمی:</label>
-                                  <p className="text-sm text-muted-foreground">{selectedRequest.eye_problem}</p>
-                                </div>
-                              )}
-
-                              {selectedRequest.medical_history && (
-                                <div>
-                                  <label className="text-sm font-medium">سوابق پزشکی:</label>
-                                  <p className="text-sm text-muted-foreground">{selectedRequest.medical_history}</p>
-                                </div>
-                              )}
-
                               <div>
-                                <label className="text-sm font-medium">تغییر وضعیت:</label>
-                                <Select
-                                  value={selectedRequest.status}
-                                  onValueChange={(value) => updateStatus(selectedRequest.id, value)}
-                                >
-                                  <SelectTrigger className="w-full mt-1">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="pending">در انتظار</SelectItem>
-                                    <SelectItem value="contacted">تماس گرفته شده</SelectItem>
-                                    <SelectItem value="completed">تکمیل شده</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                <label className="text-sm font-medium">سن:</label>
+                                <p className="text-sm text-muted-foreground">{selectedRequest.age || '-'}</p>
                               </div>
                             </div>
-                          )}
-                        </DialogContent>
-                      </Dialog>
-                    </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="text-sm font-medium">شماره تماس:</label>
+                                <p className="text-sm text-muted-foreground">{selectedRequest.phone}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">ایمیل:</label>
+                                <p className="text-sm text-muted-foreground">{selectedRequest.email}</p>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="text-sm font-medium">جنسیت:</label>
+                                <p className="text-sm text-muted-foreground">{selectedRequest.gender || '-'}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">تاریخ مراجعه ترجیحی:</label>
+                                <p className="text-sm text-muted-foreground">{formatPreferredDate(selectedRequest.preferred_date)}</p>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="text-sm font-medium">زمان ترجیحی: </label>
+                              <p className="text-sm text-muted-foreground">{selectedRequest.preferred_time || '-'}</p>
+                            </div>
+
+                            <div>
+                              <label className="text-sm font-medium">پزشک منتخب:</label>
+                              <p className="text-sm text-muted-foreground">{selectedRequest.doctors?.name || 'انتخاب نشده'}</p>
+                            </div>
+
+                            <div>
+                              <label className="text-sm font-medium">مشکل پزشکی:</label>
+                              <p className="text-sm text-muted-foreground">{selectedRequest.medical_condition}</p>
+                            </div>
+
+                            {selectedRequest.notes && (
+                              <div>
+                                <label className="text-sm font-medium">یادداشت‌ها:</label>
+                                <p className="text-sm text-muted-foreground">{selectedRequest.notes}</p>
+                              </div>
+                            )}
+
+                            <div>
+                              <label className="text-sm font-medium">تغییر وضعیت:</label>
+                              <Select
+                                value={selectedRequest.status}
+                                onValueChange={(value) => updateStatus(selectedRequest.id, value)}
+                              >
+                                <SelectTrigger className="w-full mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pending">در انتظار</SelectItem>
+                                  <SelectItem value="contacted">تماس گرفته شده</SelectItem>
+                                  <SelectItem value="completed">تکمیل شده</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        )}
+                      </DialogContent>
+                    </Dialog>
                   </TableCell>
                 </TableRow>
               ))}

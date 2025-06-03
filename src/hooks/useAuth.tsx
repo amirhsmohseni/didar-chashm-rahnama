@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: any;
+  userRole: string | null;
   isLoading: boolean;
 }
 
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   profile: null,
+  userRole: null,
   isLoading: true,
 });
 
@@ -29,6 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -40,12 +43,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile after authentication
+          // Fetch user profile and role after authentication
           setTimeout(() => {
             fetchUserProfile(session.user.id);
+            fetchUserRole(session.user.id);
           }, 0);
         } else {
           setProfile(null);
+          setUserRole(null);
         }
         setIsLoading(false);
       }
@@ -58,6 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (session?.user) {
         fetchUserProfile(session.user.id);
+        fetchUserRole(session.user.id);
       }
       setIsLoading(false);
     });
@@ -67,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
@@ -84,8 +90,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const fetchUserRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching role:', error);
+        setUserRole('user'); // Default role
+        return;
+      }
+
+      setUserRole(data?.role || 'user');
+    } catch (error) {
+      console.error('Error fetching user role:', error);
+      setUserRole('user');
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, profile, isLoading }}>
+    <AuthContext.Provider value={{ user, session, profile, userRole, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
