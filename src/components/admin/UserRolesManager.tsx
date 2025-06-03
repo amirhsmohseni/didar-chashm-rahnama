@@ -28,9 +28,7 @@ interface UserProfile {
   full_name: string;
   phone: string | null;
   created_at: string;
-  user_roles: Array<{
-    role: string;
-  }>;
+  role?: string;
 }
 
 const UserRolesManager = () => {
@@ -44,21 +42,31 @@ const UserRolesManager = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
+      // First get all profiles
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          id,
-          full_name,
-          phone,
-          created_at,
-          user_roles (
-            role
-          )
-        `)
+        .select('id, full_name, phone, created_at')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setUsers(data || []);
+      if (profilesError) throw profilesError;
+
+      // Then get user roles separately
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+
+      if (rolesError) throw rolesError;
+
+      // Combine the data
+      const usersWithRoles = profiles?.map(profile => {
+        const userRole = roles?.find(role => role.user_id === profile.id);
+        return {
+          ...profile,
+          role: userRole?.role || 'user'
+        };
+      }) || [];
+
+      setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -73,6 +81,9 @@ const UserRolesManager = () => {
 
   const updateUserRole = async (userId: string, newRole: string) => {
     try {
+      // Type assertion to ensure newRole is one of the allowed enum values
+      const roleValue = newRole as 'admin' | 'doctor' | 'user';
+      
       // حذف نقش فعلی
       await supabase
         .from('user_roles')
@@ -82,7 +93,7 @@ const UserRolesManager = () => {
       // اضافه کردن نقش جدید
       const { error } = await supabase
         .from('user_roles')
-        .insert({ user_id: userId, role: newRole });
+        .insert({ user_id: userId, role: roleValue });
 
       if (error) throw error;
 
@@ -164,7 +175,7 @@ const UserRolesManager = () => {
             </TableHeader>
             <TableBody>
               {users.map((user) => {
-                const currentRole = user.user_roles[0]?.role || 'user';
+                const currentRole = user.role || 'user';
                 return (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.full_name}</TableCell>
