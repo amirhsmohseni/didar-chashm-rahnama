@@ -1,12 +1,14 @@
 
 import { useState, useEffect } from 'react';
-import { Calendar, User, Eye, BookOpen } from 'lucide-react';
+import { Calendar, User, Eye, BookOpen, ArrowLeft } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from 'react-router-dom';
 
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from '@/components/ui/button';
 
 interface BlogPost {
   id: string;
@@ -95,7 +97,13 @@ const Blog = () => {
             <div className="text-center py-16">
               <BookOpen className="h-24 w-24 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-2xl font-semibold mb-2">هیچ مقاله‌ای یافت نشد</h3>
-              <p className="text-muted-foreground">در حال حاضر هیچ مقاله منتشر شده‌ای وجود ندارد.</p>
+              <p className="text-muted-foreground mb-6">در حال حاضر هیچ مقاله منتشر شده‌ای وجود ندارد.</p>
+              <Button asChild variant="outline">
+                <Link to="/">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  بازگشت به صفحه اصلی
+                </Link>
+              </Button>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
