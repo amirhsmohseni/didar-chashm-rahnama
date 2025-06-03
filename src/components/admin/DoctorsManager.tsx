@@ -1,32 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -35,37 +15,54 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
-const doctorSchema = z.object({
-  name: z.string().min(2, { message: "نام باید حداقل 2 حرف باشد" }),
-  specialty: z.string().min(2, { message: "تخصص باید حداقل 2 حرف باشد" }),
-  subspecialty: z.string().optional(),
-  city: z.string().min(2, { message: "شهر باید حداقل 2 حرف باشد" }),
-  experience: z.number().min(0, { message: "سابقه کار نمی‌تواند منفی باشد" }),
-  bio: z.string().optional(),
-  img_url: z.string().optional(),
-  expertise: z.string().min(1, { message: "حداقل یک تخصص وارد کنید" }),
-});
+interface Doctor {
+  id: string;
+  name: string;
+  specialty: string;
+  experience_years: number;
+  education: string | null;
+  image_url: string | null;
+  bio: string | null;
+  is_featured: boolean;
+  is_active: boolean;
+  created_at: string;
+}
 
 const DoctorsManager = () => {
-  const [doctors, setDoctors] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingDoctor, setEditingDoctor] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof doctorSchema>>({
-    resolver: zodResolver(doctorSchema),
-    defaultValues: {
-      name: "",
-      specialty: "",
-      subspecialty: "",
-      city: "",
-      experience: 0,
-      bio: "",
-      img_url: "",
-      expertise: "",
-    },
+  const [formData, setFormData] = useState({
+    name: '',
+    specialty: '',
+    experience_years: 0,
+    education: '',
+    image_url: '',
+    bio: '',
+    is_featured: false,
+    is_active: true,
   });
 
   useEffect(() => {
@@ -74,7 +71,7 @@ const DoctorsManager = () => {
 
   const fetchDoctors = async () => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('doctors')
         .select('*')
         .order('created_at', { ascending: false });
@@ -85,7 +82,7 @@ const DoctorsManager = () => {
       console.error('Error fetching doctors:', error);
       toast({
         title: "خطا",
-        description: "خطا در دریافت اطلاعات پزشکان",
+        description: "خطا در دریافت پزشکان",
         variant: "destructive",
       });
     } finally {
@@ -93,45 +90,86 @@ const DoctorsManager = () => {
     }
   };
 
-  const onSubmit = async (data: z.infer<typeof doctorSchema>) => {
-    try {
-      const expertise = data.expertise.split(',').map(item => item.trim());
-      
-      const doctorData = {
-        ...data,
-        expertise,
-        experience: Number(data.experience),
-      };
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      specialty: '',
+      experience_years: 0,
+      education: '',
+      image_url: '',
+      bio: '',
+      is_featured: false,
+      is_active: true,
+    });
+    setEditingDoctor(null);
+  };
 
+  const openModal = (doctor?: Doctor) => {
+    if (doctor) {
+      setEditingDoctor(doctor);
+      setFormData({
+        name: doctor.name,
+        specialty: doctor.specialty,
+        experience_years: doctor.experience_years,
+        education: doctor.education || '',
+        image_url: doctor.image_url || '',
+        bio: doctor.bio || '',
+        is_featured: doctor.is_featured,
+        is_active: doctor.is_active,
+      });
+    } else {
+      resetForm();
+    }
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    resetForm();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.specialty) {
+      toast({
+        title: "خطا",
+        description: "نام و تخصص الزامی است",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
       if (editingDoctor) {
-        const { error } = await (supabase as any)
+        // Update existing doctor
+        const { error } = await supabase
           .from('doctors')
-          .update(doctorData)
+          .update(formData)
           .eq('id', editingDoctor.id);
 
         if (error) throw error;
 
         toast({
-          title: "ویرایش موفق",
-          description: "اطلاعات پزشک با موفقیت ویرایش شد",
+          title: "بروزرسانی موفق",
+          description: "اطلاعات پزشک بروزرسانی شد",
         });
       } else {
-        const { error } = await (supabase as any)
+        // Create new doctor
+        const { error } = await supabase
           .from('doctors')
-          .insert([doctorData]);
+          .insert([formData]);
 
         if (error) throw error;
 
         toast({
-          title: "اضافه شد",
-          description: "پزشک جدید با موفقیت اضافه شد",
+          title: "ایجاد موفق",
+          description: "پزشک جدید اضافه شد",
         });
       }
 
-      setIsDialogOpen(false);
-      setEditingDoctor(null);
-      form.reset();
       fetchDoctors();
+      closeModal();
     } catch (error) {
       console.error('Error saving doctor:', error);
       toast({
@@ -142,26 +180,11 @@ const DoctorsManager = () => {
     }
   };
 
-  const handleEdit = (doctor: any) => {
-    setEditingDoctor(doctor);
-    form.reset({
-      name: doctor.name,
-      specialty: doctor.specialty,
-      subspecialty: doctor.subspecialty || "",
-      city: doctor.city,
-      experience: doctor.experience,
-      bio: doctor.bio || "",
-      img_url: doctor.img_url || "",
-      expertise: doctor.expertise?.join(', ') || "",
-    });
-    setIsDialogOpen(true);
-  };
-
   const handleDelete = async (doctorId: string) => {
-    if (!confirm('آیا از حذف این پزشک مطمئن هستید؟')) return;
+    if (!confirm('آیا از حذف این پزشک اطمینان دارید؟')) return;
 
     try {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('doctors')
         .delete()
         .eq('id', doctorId);
@@ -169,8 +192,8 @@ const DoctorsManager = () => {
       if (error) throw error;
 
       toast({
-        title: "حذف شد",
-        description: "پزشک با موفقیت حذف شد",
+        title: "حذف موفق",
+        description: "پزشک حذف شد",
       });
       fetchDoctors();
     } catch (error) {
@@ -183,10 +206,28 @@ const DoctorsManager = () => {
     }
   };
 
-  const handleAddNew = () => {
-    setEditingDoctor(null);
-    form.reset();
-    setIsDialogOpen(true);
+  const toggleStatus = async (doctorId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('doctors')
+        .update({ is_active: !currentStatus })
+        .eq('id', doctorId);
+
+      if (error) throw error;
+
+      toast({
+        title: "بروزرسانی موفق",
+        description: `وضعیت پزشک ${!currentStatus ? 'فعال' : 'غیرفعال'} شد`,
+      });
+      fetchDoctors();
+    } catch (error) {
+      console.error('Error updating doctor status:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در بروزرسانی وضعیت",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -195,173 +236,115 @@ const DoctorsManager = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>مدیریت پزشکان</CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={handleAddNew}>
-                <Plus className="ml-2 h-4 w-4" />
-                افزودن پزشک جدید
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingDoctor ? 'ویرایش پزشک' : 'افزودن پزشک جدید'}
-                </DialogTitle>
-                <DialogDescription>
-                  اطلاعات پزشک را تکمیل کنید
-                </DialogDescription>
-              </DialogHeader>
-
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>نام پزشک</FormLabel>
-                          <FormControl>
-                            <Input placeholder="دکتر ..." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="specialty"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>تخصص</FormLabel>
-                          <FormControl>
-                            <Input placeholder="متخصص چشم" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="subspecialty"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>فوق تخصص (اختیاری)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="جراحی شبکیه" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="city"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>شهر</FormLabel>
-                          <FormControl>
-                            <Input placeholder="تهران" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="experience"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>سابقه کار (سال)</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              placeholder="10" 
-                              {...field}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="img_url"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>URL عکس (اختیاری)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://..." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="expertise"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>تخصص‌ها (با کاما جدا کنید)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="لازیک، آب مروارید، جراحی شبکیه" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>مدیریت پزشکان</CardTitle>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => openModal()}>
+              <Plus className="h-4 w-4 mr-2" />
+              افزودن پزشک
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                {editingDoctor ? 'ویرایش پزشک' : 'افزودن پزشک جدید'}
+              </DialogTitle>
+              <DialogDescription>
+                اطلاعات پزشک را وارد کنید
+              </DialogDescription>
+            </DialogHeader>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">نام</label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    placeholder="نام پزشک"
+                    required
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="bio"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>بیوگرافی (اختیاری)</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="توضیحات کوتاه درباره پزشک..."
-                            className="min-h-[100px]"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">تخصص</label>
+                  <Input
+                    value={formData.specialty}
+                    onChange={(e) => setFormData({...formData, specialty: e.target.value})}
+                    placeholder="تخصص"
+                    required
                   />
+                </div>
+              </div>
 
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setIsDialogOpen(false)}
-                    >
-                      لغو
-                    </Button>
-                    <Button type="submit">
-                      <Save className="ml-2 h-4 w-4" />
-                      ذخیره
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">سال تجربه</label>
+                  <Input
+                    type="number"
+                    value={formData.experience_years}
+                    onChange={(e) => setFormData({...formData, experience_years: parseInt(e.target.value) || 0})}
+                    placeholder="سال تجربه"
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">تحصیلات</label>
+                  <Input
+                    value={formData.education}
+                    onChange={(e) => setFormData({...formData, education: e.target.value})}
+                    placeholder="تحصیلات"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">URL تصویر</label>
+                <Input
+                  value={formData.image_url}
+                  onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+                  placeholder="لینک تصویر پزشک"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">بیوگرافی</label>
+                <Textarea
+                  value={formData.bio}
+                  onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                  placeholder="بیوگرافی پزشک"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex items-center space-x-4 space-x-reverse">
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <Switch
+                    checked={formData.is_featured}
+                    onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                  />
+                  <label className="text-sm">پزشک برجسته</label>
+                </div>
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <Switch
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
+                  />
+                  <label className="text-sm">فعال</label>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button type="submit">
+                  {editingDoctor ? 'بروزرسانی' : 'ایجاد'}
+                </Button>
+                <Button type="button" variant="outline" onClick={closeModal}>
+                  انصراف
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </CardHeader>
 
       <CardContent>
@@ -375,8 +358,9 @@ const DoctorsManager = () => {
               <TableRow>
                 <TableHead>نام</TableHead>
                 <TableHead>تخصص</TableHead>
-                <TableHead>شهر</TableHead>
-                <TableHead>سابقه</TableHead>
+                <TableHead>تجربه</TableHead>
+                <TableHead>وضعیت</TableHead>
+                <TableHead>برجسته</TableHead>
                 <TableHead>عملیات</TableHead>
               </TableRow>
             </TableHeader>
@@ -385,16 +369,32 @@ const DoctorsManager = () => {
                 <TableRow key={doctor.id}>
                   <TableCell className="font-medium">{doctor.name}</TableCell>
                   <TableCell>{doctor.specialty}</TableCell>
-                  <TableCell>{doctor.city}</TableCell>
-                  <TableCell>{doctor.experience} سال</TableCell>
+                  <TableCell>{doctor.experience_years} سال</TableCell>
+                  <TableCell>
+                    <Badge variant={doctor.is_active ? 'default' : 'secondary'}>
+                      {doctor.is_active ? 'فعال' : 'غیرفعال'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={doctor.is_featured ? 'destructive' : 'outline'}>
+                      {doctor.is_featured ? 'برجسته' : 'عادی'}
+                    </Badge>
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleEdit(doctor)}
+                        onClick={() => openModal(doctor)}
                       >
                         <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => toggleStatus(doctor.id, doctor.is_active)}
+                      >
+                        {doctor.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                       <Button
                         size="sm"

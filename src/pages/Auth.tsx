@@ -1,9 +1,6 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,27 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
-const loginSchema = z.object({
-  email: z.string().email({ message: "ایمیل معتبر نیست" }),
-  password: z.string().min(6, { message: "رمز عبور باید حداقل 6 حرف باشد" }),
-});
-
-const signupSchema = z.object({
-  email: z.string().email({ message: "ایمیل معتبر نیست" }),
-  password: z.string().min(6, { message: "رمز عبور باید حداقل 6 حرف باشد" }),
-  fullName: z.string().min(2, { message: "نام و نام خانوادگی باید حداقل 2 حرف باشد" }),
-});
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -40,29 +18,57 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const loginForm = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { 
-      email: "", 
-      password: "" 
-    },
-  });
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
 
-  const signupForm = useForm<z.infer<typeof signupSchema>>({
-    resolver: zodResolver(signupSchema),
-    defaultValues: { 
-      email: "", 
-      password: "", 
-      fullName: "" 
-    },
-  });
+  // Signup form state
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [signupFullName, setSignupFullName] = useState('');
 
-  const onLogin = async (data: z.infer<typeof loginSchema>) => {
+  // Validation
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateForm = (isLoginForm: boolean) => {
+    const newErrors: {[key: string]: string} = {};
+
+    if (isLoginForm) {
+      if (!loginEmail) newErrors.email = 'ایمیل الزامی است';
+      else if (!validateEmail(loginEmail)) newErrors.email = 'ایمیل معتبر نیست';
+      
+      if (!loginPassword) newErrors.password = 'رمز عبور الزامی است';
+      else if (loginPassword.length < 6) newErrors.password = 'رمز عبور باید حداقل 6 حرف باشد';
+    } else {
+      if (!signupFullName) newErrors.fullName = 'نام و نام خانوادگی الزامی است';
+      else if (signupFullName.length < 2) newErrors.fullName = 'نام باید حداقل 2 حرف باشد';
+      
+      if (!signupEmail) newErrors.email = 'ایمیل الزامی است';
+      else if (!validateEmail(signupEmail)) newErrors.email = 'ایمیل معتبر نیست';
+      
+      if (!signupPassword) newErrors.password = 'رمز عبور الزامی است';
+      else if (signupPassword.length < 6) newErrors.password = 'رمز عبور باید حداقل 6 حرف باشد';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const onLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm(true)) return;
+    
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
+        email: loginEmail,
+        password: loginPassword,
       });
 
       if (error) {
@@ -97,18 +103,22 @@ const Auth = () => {
     }
   };
 
-  const onSignup = async (data: z.infer<typeof signupSchema>) => {
+  const onSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm(false)) return;
+    
     setIsLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/`;
       
       const { error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
+        email: signupEmail,
+        password: signupPassword,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            full_name: data.fullName,
+            full_name: signupFullName,
           }
         }
       });
@@ -167,145 +177,121 @@ const Auth = () => {
               
               <CardContent>
                 {isLogin ? (
-                  <Form {...loginForm}>
-                    <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
-                      <FormField
-                        control={loginForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>ایمیل</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Mail className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                  placeholder="example@gmail.com" 
-                                  className="pr-9"
-                                  type="email"
-                                  {...field} 
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                  <form onSubmit={onLogin} className="space-y-4">
+                    <div>
+                      <label htmlFor="login-email" className="block text-sm font-medium mb-1">
+                        ایمیل
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          id="login-email"
+                          type="email"
+                          placeholder="example@gmail.com" 
+                          className="pr-9"
+                          value={loginEmail}
+                          onChange={(e) => setLoginEmail(e.target.value)}
+                        />
+                      </div>
+                      {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                    </div>
 
-                      <FormField
-                        control={loginForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>رمز عبور</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Lock className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                  type={showPassword ? "text" : "password"}
-                                  placeholder="رمز عبور خود را وارد کنید"
-                                  className="pr-9 pl-9"
-                                  {...field} 
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => setShowPassword(!showPassword)}
-                                  className="absolute left-3 top-3 text-muted-foreground hover:text-foreground"
-                                >
-                                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <div>
+                      <label htmlFor="login-password" className="block text-sm font-medium mb-1">
+                        رمز عبور
+                      </label>
+                      <div className="relative">
+                        <Lock className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          id="login-password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="رمز عبور خود را وارد کنید"
+                          className="pr-9 pl-9"
+                          value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute left-3 top-3 text-muted-foreground hover:text-foreground"
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                      {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                    </div>
 
-                      <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? 'در حال ورود...' : 'ورود'}
-                      </Button>
-                    </form>
-                  </Form>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? 'در حال ورود...' : 'ورود'}
+                    </Button>
+                  </form>
                 ) : (
-                  <Form {...signupForm}>
-                    <form onSubmit={signupForm.handleSubmit(onSignup)} className="space-y-4">
-                      <FormField
-                        control={signupForm.control}
-                        name="fullName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>نام و نام خانوادگی</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                  placeholder="نام و نام خانوادگی خود را وارد کنید" 
-                                  className="pr-9"
-                                  type="text"
-                                  {...field}
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                  <form onSubmit={onSignup} className="space-y-4">
+                    <div>
+                      <label htmlFor="signup-fullname" className="block text-sm font-medium mb-1">
+                        نام و نام خانوادگی
+                      </label>
+                      <div className="relative">
+                        <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          id="signup-fullname"
+                          type="text"
+                          placeholder="نام و نام خانوادگی خود را وارد کنید" 
+                          className="pr-9"
+                          value={signupFullName}
+                          onChange={(e) => setSignupFullName(e.target.value)}
+                        />
+                      </div>
+                      {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
+                    </div>
 
-                      <FormField
-                        control={signupForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>ایمیل</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Mail className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                  placeholder="example@gmail.com" 
-                                  className="pr-9"
-                                  type="email"
-                                  {...field} 
-                                />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <div>
+                      <label htmlFor="signup-email" className="block text-sm font-medium mb-1">
+                        ایمیل
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          id="signup-email"
+                          type="email"
+                          placeholder="example@gmail.com" 
+                          className="pr-9"
+                          value={signupEmail}
+                          onChange={(e) => setSignupEmail(e.target.value)}
+                        />
+                      </div>
+                      {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                    </div>
 
-                      <FormField
-                        control={signupForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>رمز عبور</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Lock className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                  type={showPassword ? "text" : "password"}
-                                  placeholder="رمز عبور خود را وارد کنید"
-                                  className="pr-9 pl-9"
-                                  {...field} 
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => setShowPassword(!showPassword)}
-                                  className="absolute left-3 top-3 text-muted-foreground hover:text-foreground"
-                                >
-                                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <div>
+                      <label htmlFor="signup-password" className="block text-sm font-medium mb-1">
+                        رمز عبور
+                      </label>
+                      <div className="relative">
+                        <Lock className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          id="signup-password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="رمز عبور خود را وارد کنید"
+                          className="pr-9 pl-9"
+                          value={signupPassword}
+                          onChange={(e) => setSignupPassword(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute left-3 top-3 text-muted-foreground hover:text-foreground"
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                      {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                    </div>
 
-                      <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? 'در حال ثبت نام...' : 'ثبت نام'}
-                      </Button>
-                    </form>
-                  </Form>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? 'در حال ثبت نام...' : 'ثبت نام'}
+                    </Button>
+                  </form>
                 )}
 
                 <div className="mt-6 text-center">

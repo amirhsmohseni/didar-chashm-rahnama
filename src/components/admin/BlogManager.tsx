@@ -1,33 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, Eye } from 'lucide-react';
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -36,51 +15,55 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 
-const blogSchema = z.object({
-  title: z.string().min(5, { message: "عنوان باید حداقل 5 حرف باشد" }),
-  content: z.string().min(50, { message: "محتوا باید حداقل 50 حرف باشد" }),
-  excerpt: z.string().min(20, { message: "خلاصه باید حداقل 20 حرف باشد" }),
-  published: z.boolean().default(false),
-});
+interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  excerpt: string | null;
+  image_url: string | null;
+  slug: string | null;
+  is_published: boolean;
+  published_at: string | null;
+  created_at: string;
+}
 
 const BlogManager = () => {
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingPost, setEditingPost] = useState<any>(null);
-  const [user, setUser] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof blogSchema>>({
-    resolver: zodResolver(blogSchema),
-    defaultValues: {
-      title: "",
-      content: "",
-      excerpt: "",
-      published: false,
-    },
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    excerpt: '',
+    image_url: '',
+    slug: '',
+    is_published: false,
   });
 
   useEffect(() => {
-    getCurrentUser();
     fetchPosts();
   }, []);
 
-  const getCurrentUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setUser(session?.user);
-  };
-
   const fetchPosts = async () => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('blog_posts')
-        .select(`
-          *,
-          profiles:author_id (full_name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -97,42 +80,98 @@ const BlogManager = () => {
     }
   };
 
-  const onSubmit = async (data: z.infer<typeof blogSchema>) => {
-    try {
-      const postData = {
-        ...data,
-        author_id: user?.id,
-      };
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      content: '',
+      excerpt: '',
+      image_url: '',
+      slug: '',
+      is_published: false,
+    });
+    setEditingPost(null);
+  };
 
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  };
+
+  const openModal = (post?: BlogPost) => {
+    if (post) {
+      setEditingPost(post);
+      setFormData({
+        title: post.title,
+        content: post.content,
+        excerpt: post.excerpt || '',
+        image_url: post.image_url || '',
+        slug: post.slug || '',
+        is_published: post.is_published,
+      });
+    } else {
+      resetForm();
+    }
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    resetForm();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.title || !formData.content) {
+      toast({
+        title: "خطا",
+        description: "عنوان و محتوا الزامی است",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const slug = formData.slug || generateSlug(formData.title);
+    const dataToSave = {
+      ...formData,
+      slug,
+      published_at: formData.is_published ? new Date().toISOString() : null,
+    };
+
+    try {
       if (editingPost) {
-        const { error } = await (supabase as any)
+        // Update existing post
+        const { error } = await supabase
           .from('blog_posts')
-          .update(postData)
+          .update(dataToSave)
           .eq('id', editingPost.id);
 
         if (error) throw error;
 
         toast({
-          title: "ویرایش موفق",
-          description: "مقاله با موفقیت ویرایش شد",
+          title: "بروزرسانی موفق",
+          description: "مقاله بروزرسانی شد",
         });
       } else {
-        const { error } = await (supabase as any)
+        // Create new post
+        const { error } = await supabase
           .from('blog_posts')
-          .insert([postData]);
+          .insert([dataToSave]);
 
         if (error) throw error;
 
         toast({
-          title: "اضافه شد",
-          description: "مقاله جدید با موفقیت اضافه شد",
+          title: "ایجاد موفق",
+          description: "مقاله جدید اضافه شد",
         });
       }
 
-      setIsDialogOpen(false);
-      setEditingPost(null);
-      form.reset();
       fetchPosts();
+      closeModal();
     } catch (error) {
       console.error('Error saving post:', error);
       toast({
@@ -143,22 +182,11 @@ const BlogManager = () => {
     }
   };
 
-  const handleEdit = (post: any) => {
-    setEditingPost(post);
-    form.reset({
-      title: post.title,
-      content: post.content,
-      excerpt: post.excerpt || "",
-      published: post.published,
-    });
-    setIsDialogOpen(true);
-  };
-
   const handleDelete = async (postId: string) => {
-    if (!confirm('آیا از حذف این مقاله مطمئن هستید؟')) return;
+    if (!confirm('آیا از حذف این مقاله اطمینان دارید؟')) return;
 
     try {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('blog_posts')
         .delete()
         .eq('id', postId);
@@ -166,8 +194,8 @@ const BlogManager = () => {
       if (error) throw error;
 
       toast({
-        title: "حذف شد",
-        description: "مقاله با موفقیت حذف شد",
+        title: "حذف موفق",
+        description: "مقاله حذف شد",
       });
       fetchPosts();
     } catch (error) {
@@ -180,38 +208,31 @@ const BlogManager = () => {
     }
   };
 
-  const togglePublished = async (postId: string, currentStatus: boolean) => {
+  const togglePublish = async (postId: string, currentStatus: boolean) => {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('blog_posts')
-        .update({ published: !currentStatus })
+        .update({ 
+          is_published: !currentStatus,
+          published_at: !currentStatus ? new Date().toISOString() : null
+        })
         .eq('id', postId);
 
       if (error) throw error;
 
       toast({
-        title: "وضعیت تغییر کرد",
+        title: "بروزرسانی موفق",
         description: `مقاله ${!currentStatus ? 'منتشر' : 'پیش‌نویس'} شد`,
       });
       fetchPosts();
     } catch (error) {
-      console.error('Error toggling published status:', error);
+      console.error('Error updating post status:', error);
       toast({
         title: "خطا",
-        description: "خطا در تغییر وضعیت",
+        description: "خطا در بروزرسانی وضعیت",
         variant: "destructive",
       });
     }
-  };
-
-  const handleAddNew = () => {
-    setEditingPost(null);
-    form.reset();
-    setIsDialogOpen(true);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fa-IR');
   };
 
   if (isLoading) {
@@ -220,119 +241,95 @@ const BlogManager = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>مدیریت مقالات</CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={handleAddNew}>
-                <Plus className="ml-2 h-4 w-4" />
-                افزودن مقاله جدید
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingPost ? 'ویرایش مقاله' : 'افزودن مقاله جدید'}
-                </DialogTitle>
-                <DialogDescription>
-                  اطلاعات مقاله را تکمیل کنید
-                </DialogDescription>
-              </DialogHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>مدیریت مقالات</CardTitle>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => openModal()}>
+              <Plus className="h-4 w-4 mr-2" />
+              افزودن مقاله
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingPost ? 'ویرایش مقاله' : 'افزودن مقاله جدید'}
+              </DialogTitle>
+              <DialogDescription>
+                اطلاعات مقاله را وارد کنید
+              </DialogDescription>
+            </DialogHeader>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">عنوان</label>
+                <Input
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  placeholder="عنوان مقاله"
+                  required
+                />
+              </div>
 
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>عنوان مقاله</FormLabel>
-                        <FormControl>
-                          <Input placeholder="عنوان مقاله را وارد کنید..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">اسلاگ (URL)</label>
+                  <Input
+                    value={formData.slug}
+                    onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                    placeholder="اسلاگ مقاله (اختیاری)"
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="excerpt"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>خلاصه مقاله</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="خلاصه کوتاهی از مقاله..."
-                            className="min-h-[80px]"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">URL تصویر</label>
+                  <Input
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+                    placeholder="لینک تصویر مقاله"
                   />
+                </div>
+              </div>
 
-                  <FormField
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>محتوای مقاله</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="محتوای کامل مقاله را بنویسید..."
-                            className="min-h-[300px]"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <div>
+                <label className="block text-sm font-medium mb-1">خلاصه</label>
+                <Textarea
+                  value={formData.excerpt}
+                  onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
+                  placeholder="خلاصه‌ای از مقاله"
+                  rows={2}
+                />
+              </div>
 
-                  <FormField
-                    control={form.control}
-                    name="published"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
-                            انتشار مقاله
-                          </FormLabel>
-                          <div className="text-sm text-muted-foreground">
-                            آیا این مقاله منتشر شود؟
-                          </div>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+              <div>
+                <label className="block text-sm font-medium mb-1">محتوا</label>
+                <Textarea
+                  value={formData.content}
+                  onChange={(e) => setFormData({...formData, content: e.target.value})}
+                  placeholder="محتوای مقاله"
+                  rows={10}
+                  required
+                />
+              </div>
 
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setIsDialogOpen(false)}
-                    >
-                      لغو
-                    </Button>
-                    <Button type="submit">
-                      <Save className="ml-2 h-4 w-4" />
-                      ذخیره
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <Switch
+                  checked={formData.is_published}
+                  onCheckedChange={(checked) => setFormData({...formData, is_published: checked})}
+                />
+                <label className="text-sm">انتشار مقاله</label>
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button type="submit">
+                  {editingPost ? 'بروزرسانی' : 'ایجاد'}
+                </Button>
+                <Button type="button" variant="outline" onClick={closeModal}>
+                  انصراف
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </CardHeader>
 
       <CardContent>
@@ -345,39 +342,40 @@ const BlogManager = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>عنوان</TableHead>
-                <TableHead>نویسنده</TableHead>
                 <TableHead>وضعیت</TableHead>
-                <TableHead>تاریخ</TableHead>
+                <TableHead>تاریخ ایجاد</TableHead>
                 <TableHead>عملیات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {posts.map((post) => (
                 <TableRow key={post.id}>
-                  <TableCell className="font-medium">{post.title}</TableCell>
-                  <TableCell>{post.profiles?.full_name || 'نامشخص'}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {post.published ? (
-                        <Badge>منتشر شده</Badge>
-                      ) : (
-                        <Badge variant="secondary">پیش‌نویس</Badge>
-                      )}
-                      <Switch
-                        checked={post.published}
-                        onCheckedChange={() => togglePublished(post.id, post.published)}
-                      />
-                    </div>
+                  <TableCell className="font-medium max-w-xs truncate">
+                    {post.title}
                   </TableCell>
-                  <TableCell>{formatDate(post.created_at)}</TableCell>
+                  <TableCell>
+                    <Badge variant={post.is_published ? 'default' : 'secondary'}>
+                      {post.is_published ? 'منتشر شده' : 'پیش‌نویس'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {new Date(post.created_at).toLocaleDateString('fa-IR')}
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleEdit(post)}
+                        onClick={() => openModal(post)}
                       >
                         <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => togglePublish(post.id, post.is_published)}
+                      >
+                        {post.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                       <Button
                         size="sm"
