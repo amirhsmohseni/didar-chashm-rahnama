@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Crown, User, Stethoscope } from 'lucide-react';
+import { Crown, User, Stethoscope, Trash2 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,17 +22,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
-interface UserProfile {
+interface UserWithRole {
   id: string;
+  email: string;
   full_name: string;
   phone: string | null;
   created_at: string;
-  role?: string;
+  role: string;
 }
 
 const UserRolesManager = () => {
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -42,29 +54,34 @@ const UserRolesManager = () => {
 
   const fetchUsers = async () => {
     try {
-      // First get all profiles
+      // Get profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, created_at')
-        .order('created_at', { ascending: false });
+        .select('id, full_name, phone, created_at');
 
       if (profilesError) throw profilesError;
 
-      // Then get user roles separately
+      // Get user roles
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id, role');
 
       if (rolesError) throw rolesError;
 
-      // Combine the data
-      const usersWithRoles = profiles?.map(profile => {
-        const userRole = roles?.find(role => role.user_id === profile.id);
-        return {
-          ...profile,
-          role: userRole?.role || 'user'
-        };
-      }) || [];
+      // Get user emails from auth metadata (we'll need to get this differently)
+      const usersWithRoles = await Promise.all(
+        (profiles || []).map(async (profile) => {
+          const userRole = roles?.find(role => role.user_id === profile.id);
+          
+          // Try to get email from auth.users (this might not work due to RLS)
+          // For now, we'll use a placeholder
+          return {
+            ...profile,
+            email: `user-${profile.id.slice(0, 8)}@example.com`, // Placeholder
+            role: userRole?.role || 'user'
+          };
+        })
+      );
 
       setUsers(usersWithRoles);
     } catch (error) {
@@ -81,32 +98,64 @@ const UserRolesManager = () => {
 
   const updateUserRole = async (userId: string, newRole: string) => {
     try {
-      // Type assertion to ensure newRole is one of the allowed enum values
-      const roleValue = newRole as 'admin' | 'doctor' | 'user';
-      
-      // حذف نقش فعلی
+      // Delete existing role
       await supabase
         .from('user_roles')
         .delete()
         .eq('user_id', userId);
 
-      // اضافه کردن نقش جدید
-      const { error } = await supabase
-        .from('user_roles')
-        .insert({ user_id: userId, role: roleValue });
+      // Insert new role if not 'user' (which is default)
+      if (newRole !== 'user') {
+        const { error } = await supabase
+          .from('user_roles')
+          .insert({ user_id: userId, role: newRole as any });
 
-      if (error) throw error;
+        if (error) throw error;
+      }
 
       toast({
         title: "نقش بروزرسانی شد",
         description: "نقش کاربر با موفقیت تغییر کرد",
       });
+      
       fetchUsers();
     } catch (error) {
       console.error('Error updating role:', error);
       toast({
         title: "خطا",
         description: "خطا در بروزرسانی نقش",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    try {
+      // Delete user roles first
+      await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId);
+
+      // Delete profile
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "کاربر حذف شد",
+        description: "کاربر با موفقیت حذف شد",
+      });
+      
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در حذف کاربر",
         variant: "destructive",
       });
     }
@@ -139,16 +188,14 @@ const UserRolesManager = () => {
     );
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fa-IR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
   if (isLoading) {
-    return <div className="text-center py-8">در حال بارگذاری...</div>;
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center h-32">
+          <div className="text-center">در حال بارگذاری...</div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -156,7 +203,6 @@ const UserRolesManager = () => {
       <CardHeader>
         <CardTitle>مدیریت نقش‌های کاربری</CardTitle>
       </CardHeader>
-
       <CardContent>
         {users.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
@@ -167,24 +213,36 @@ const UserRolesManager = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>نام</TableHead>
-                <TableHead>شماره تماس</TableHead>
+                <TableHead>شناسه کاربر</TableHead>
                 <TableHead>نقش فعلی</TableHead>
                 <TableHead>تاریخ ثبت‌نام</TableHead>
-                <TableHead>تغییر نقش</TableHead>
+                <TableHead>عملیات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => {
-                const currentRole = user.role || 'user';
-                return (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.full_name}</TableCell>
-                    <TableCell>{user.phone || '-'}</TableCell>
-                    <TableCell>{getRoleBadge(currentRole)}</TableCell>
-                    <TableCell>{formatDate(user.created_at)}</TableCell>
-                    <TableCell>
+              {users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium">
+                    <div>
+                      <div>{user.full_name}</div>
+                      {user.phone && (
+                        <div className="text-sm text-muted-foreground">{user.phone}</div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                      {user.id.slice(0, 8)}...
+                    </code>
+                  </TableCell>
+                  <TableCell>{getRoleBadge(user.role)}</TableCell>
+                  <TableCell>
+                    {new Date(user.created_at).toLocaleDateString('fa-IR')}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
                       <Select
-                        value={currentRole}
+                        value={user.role}
                         onValueChange={(value) => updateUserRole(user.id, value)}
                       >
                         <SelectTrigger className="w-32">
@@ -196,10 +254,35 @@ const UserRolesManager = () => {
                           <SelectItem value="admin">مدیر</SelectItem>
                         </SelectContent>
                       </Select>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>حذف کاربر</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              آیا از حذف کاربر "{user.full_name}" اطمینان دارید؟ این عمل قابل بازگشت نیست.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>لغو</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => deleteUser(user.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              حذف
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         )}

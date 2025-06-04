@@ -1,17 +1,14 @@
 
-import { Users, Stethoscope, MessageSquare, FileText, UserCheck, Shield } from 'lucide-react';
+import { Users, Stethoscope, MessageSquare, FileText, Shield, Settings } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute';
+import AdminToolbox from '@/components/admin/AdminToolbox';
 import UserRolesManager from '@/components/admin/UserRolesManager';
-import DoctorsManager from '@/components/admin/DoctorsManager';
-import ConsultationRequestsManager from '@/components/admin/ConsultationRequestsManager';
-import BlogManager from '@/components/admin/BlogManager';
-import UserDebugInfo from '@/components/admin/UserDebugInfo';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from '@/hooks/useAuth';
 
 const Admin = () => {
   return (
@@ -30,18 +27,16 @@ const Admin = () => {
             </p>
           </div>
 
-          {/* اطلاعات دیباگ کاربر - برای تست دسترسی */}
-          <UserDebugInfo />
+          <AdminToolbox />
 
           <AdminProtectedRoute>
             <AdminWelcome />
             
             <Tabs defaultValue="users" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-4">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="users" className="flex items-center gap-2">
-                  <UserCheck className="h-4 w-4" />
-                  <span className="hidden sm:inline">نقش‌های کاربری</span>
-                  <span className="sm:hidden">کاربران</span>
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">کاربران</span>
                 </TabsTrigger>
                 <TabsTrigger value="doctors" className="flex items-center gap-2">
                   <Stethoscope className="h-4 w-4" />
@@ -49,12 +44,11 @@ const Admin = () => {
                 </TabsTrigger>
                 <TabsTrigger value="consultations" className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
-                  <span className="hidden sm:inline">درخواست‌ها</span>
-                  <span className="sm:hidden">مشاوره</span>
+                  <span className="hidden sm:inline">مشاوره‌ها</span>
                 </TabsTrigger>
-                <TabsTrigger value="blog" className="flex items-center gap-2">
+                <TabsTrigger value="content" className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  <span className="hidden sm:inline">مقالات</span>
+                  <span className="hidden sm:inline">محتوا</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -63,15 +57,36 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="doctors">
-                <DoctorsManager />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>مدیریت پزشکان</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">این بخش در حال توسعه است...</p>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="consultations">
-                <ConsultationRequestsManager />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>مدیریت درخواست‌های مشاوره</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">این بخش در حال توسعه است...</p>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
-              <TabsContent value="blog">
-                <BlogManager />
+              <TabsContent value="content">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>مدیریت محتوا و مقالات</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">این بخش در حال توسعه است...</p>
+                  </CardContent>
+                </Card>
               </TabsContent>
             </Tabs>
           </AdminProtectedRoute>
@@ -90,7 +105,7 @@ const AdminWelcome = () => {
     <Card className="mb-6">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
+          <Shield className="h-5 w-5" />
           خوش آمدید به پنل مدیریت
         </CardTitle>
         <CardDescription>
@@ -100,9 +115,9 @@ const AdminWelcome = () => {
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center p-4 bg-background rounded-lg border">
-            <UserCheck className="h-8 w-8 mx-auto mb-2 text-primary" />
+            <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
             <p className="text-sm font-medium">مدیریت کاربران</p>
-            <p className="text-xs text-muted-foreground mt-1">نقش‌های کاربری</p>
+            <p className="text-xs text-muted-foreground mt-1">نقش‌ها و دسترسی‌ها</p>
           </div>
           <div className="text-center p-4 bg-background rounded-lg border">
             <Stethoscope className="h-8 w-8 mx-auto mb-2 text-primary" />
@@ -112,12 +127,12 @@ const AdminWelcome = () => {
           <div className="text-center p-4 bg-background rounded-lg border">
             <MessageSquare className="h-8 w-8 mx-auto mb-2 text-primary" />
             <p className="text-sm font-medium">درخواست‌های مشاوره</p>
-            <p className="text-xs text-muted-foreground mt-1">مدیریت درخواست‌ها</p>
+            <p className="text-xs text-muted-foreground mt-1">بررسی و پاسخ</p>
           </div>
           <div className="text-center p-4 bg-background rounded-lg border">
             <FileText className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <p className="text-sm font-medium">مدیریت مقالات</p>
-            <p className="text-xs text-muted-foreground mt-1">نوشتن و انتشار</p>
+            <p className="text-sm font-medium">مدیریت محتوا</p>
+            <p className="text-xs text-muted-foreground mt-1">مقالات و اخبار</p>
           </div>
         </div>
       </CardContent>

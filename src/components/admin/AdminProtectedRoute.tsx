@@ -1,73 +1,29 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from 'react-router-dom';
+import { Shield, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const AdminProtectedRoute = ({ children }: AdminProtectedRouteProps) => {
-  const { user, isLoading } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [checkingRole, setCheckingRole] = useState(true);
+  const { user, isLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkAdminRole = async () => {
-      console.log('Checking admin role for user:', user?.id);
-      
-      if (!user) {
-        console.log('No user found, redirecting to auth');
-        setCheckingRole(false);
-        setIsAdmin(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .maybeSingle();
-
-        console.log('Admin role check result:', { data, error });
-        
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error checking admin role:', error);
-          setIsAdmin(false);
-        } else {
-          setIsAdmin(!!data);
-          console.log('User is admin:', !!data);
-        }
-      } catch (error) {
-        console.error('Error checking admin role:', error);
-        setIsAdmin(false);
-      } finally {
-        setCheckingRole(false);
-      }
-    };
-
     if (!isLoading) {
-      checkAdminRole();
-    }
-  }, [user, isLoading]);
-
-  useEffect(() => {
-    if (!isLoading && !checkingRole) {
       if (!user) {
         console.log('Redirecting to auth - no user');
         navigate('/auth');
-      } else if (!isAdmin) {
-        console.log('Redirecting to home - not admin');
-        navigate('/');
       }
     }
-  }, [user, isAdmin, isLoading, checkingRole, navigate]);
+  }, [user, isLoading, navigate]);
 
-  if (isLoading || checkingRole) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary">
         <div className="text-center">
@@ -87,16 +43,38 @@ const AdminProtectedRoute = ({ children }: AdminProtectedRouteProps) => {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-secondary">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">دسترسی محدود</h2>
-          <p className="text-muted-foreground mb-4">
-            شما به این بخش دسترسی ندارید.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            کاربر فعلی: {user.email}
-          </p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+              <AlertCircle className="h-6 w-6 text-red-600" />
+            </div>
+            <CardTitle className="text-xl">دسترسی محدود</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-muted-foreground">
+              شما به این بخش دسترسی ندارید. برای دسترسی به پنل مدیریت نیاز به نقش ادمین دارید.
+            </p>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>کاربر فعلی: {user.email}</p>
+              <p>نقش شما: کاربر عادی</p>
+            </div>
+            <div className="flex gap-2 justify-center">
+              <Button 
+                onClick={() => navigate('/')}
+                variant="outline"
+              >
+                بازگشت به خانه
+              </Button>
+              <Button 
+                onClick={() => navigate('/auth')}
+                variant="default"
+              >
+                تغییر حساب
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

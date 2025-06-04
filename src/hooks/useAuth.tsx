@@ -9,6 +9,7 @@ interface AuthContextType {
   profile: any;
   userRole: string | null;
   isLoading: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   userRole: null,
   isLoading: true,
+  isAdmin: false,
 });
 
 export const useAuth = () => {
@@ -43,7 +45,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile and role after authentication
           setTimeout(() => {
             fetchUserProfile(session.user.id);
             fetchUserRole(session.user.id);
@@ -79,7 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .eq('id', userId)
         .single();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
         return;
       }
@@ -98,9 +99,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .eq('user_id', userId)
         .single();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching role:', error);
-        setUserRole('user'); // Default role
+        setUserRole('user');
         return;
       }
 
@@ -111,8 +112,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const isAdmin = userRole === 'admin';
+
   return (
-    <AuthContext.Provider value={{ user, session, profile, userRole, isLoading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      profile, 
+      userRole, 
+      isLoading, 
+      isAdmin 
+    }}>
       {children}
     </AuthContext.Provider>
   );
