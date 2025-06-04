@@ -1,12 +1,22 @@
 
 import { useState, useEffect } from 'react';
-import { MessageSquare, Eye, Phone, Mail, Calendar, User, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { MessageSquare, Eye, Check, X, Clock } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -16,21 +26,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 
 interface ConsultationRequest {
   id: string;
@@ -40,23 +41,19 @@ interface ConsultationRequest {
   age: number | null;
   gender: string | null;
   medical_condition: string;
-  doctor_id: string | null;
-  status: string;
   notes: string | null;
+  status: string;
   preferred_date: string | null;
   preferred_time: string | null;
   created_at: string;
-  doctors?: {
-    name: string;
-    specialty: string;
-  };
+  updated_at: string;
 }
 
 const ConsultationRequestsManager = () => {
   const [requests, setRequests] = useState<ConsultationRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedRequest, setSelectedRequest] = useState<ConsultationRequest | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingRequest, setViewingRequest] = useState<ConsultationRequest | null>(null);
+  const [adminNotes, setAdminNotes] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -67,22 +64,16 @@ const ConsultationRequestsManager = () => {
     try {
       const { data, error } = await supabase
         .from('consultation_requests')
-        .select(`
-          *,
-          doctors:doctor_id (
-            name,
-            specialty
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setRequests(data || []);
     } catch (error) {
-      console.error('Error fetching consultation requests:', error);
+      console.error('Error fetching requests:', error);
       toast({
         title: "خطا",
-        description: "خطا در دریافت درخواست‌ها",
+        description: "خطا در دریافت درخواست‌های مشاوره",
         variant: "destructive",
       });
     } finally {
@@ -90,22 +81,29 @@ const ConsultationRequestsManager = () => {
     }
   };
 
-  const updateRequestStatus = async (requestId: string, newStatus: string) => {
+  const updateStatus = async (id: string, newStatus: string) => {
     try {
       const { error } = await supabase
         .from('consultation_requests')
-        .update({ status: newStatus })
-        .eq('id', requestId);
+        .update({ 
+          status: newStatus,
+          notes: adminNotes || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
 
       if (error) throw error;
 
       toast({
-        title: "بروزرسانی موفق",
-        description: "وضعیت درخواست بروزرسانی شد",
+        title: "وضعیت بروزرسانی شد",
+        description: "وضعیت درخواست با موفقیت تغییر کرد",
       });
+
       fetchRequests();
+      setViewingRequest(null);
+      setAdminNotes('');
     } catch (error) {
-      console.error('Error updating request status:', error);
+      console.error('Error updating status:', error);
       toast({
         title: "خطا",
         description: "خطا در بروزرسانی وضعیت",
@@ -117,17 +115,17 @@ const ConsultationRequestsManager = () => {
   const getStatusBadge = (status: string) => {
     const statusMap = {
       pending: { label: 'در انتظار', variant: 'secondary' as const, icon: Clock },
-      approved: { label: 'تایید شده', variant: 'default' as const, icon: CheckCircle },
-      rejected: { label: 'رد شده', variant: 'destructive' as const, icon: XCircle },
-      completed: { label: 'تکمیل شده', variant: 'outline' as const, icon: CheckCircle },
+      approved: { label: 'تایید شده', variant: 'default' as const, icon: Check },
+      rejected: { label: 'رد شده', variant: 'destructive' as const, icon: X },
+      completed: { label: 'تکمیل شده', variant: 'outline' as const, icon: Check },
     };
     
     const statusInfo = statusMap[status as keyof typeof statusMap] || statusMap.pending;
-    const Icon = statusInfo.icon;
+    const IconComponent = statusInfo.icon;
     
     return (
       <Badge variant={statusInfo.variant} className="flex items-center gap-1">
-        <Icon className="h-3 w-3" />
+        <IconComponent className="h-3 w-3" />
         {statusInfo.label}
       </Badge>
     );
@@ -136,21 +134,18 @@ const ConsultationRequestsManager = () => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fa-IR', {
       year: 'numeric',
-      month: 'short',
+      month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
   };
 
-  const openModal = (request: ConsultationRequest) => {
-    setSelectedRequest(request);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedRequest(null);
+  const formatTime = (timeString: string) => {
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('fa-IR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   if (isLoading) {
@@ -176,10 +171,10 @@ const ConsultationRequestsManager = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>نام</TableHead>
-                <TableHead>تماس</TableHead>
-                <TableHead>پزشک</TableHead>
+                <TableHead>ایمیل</TableHead>
+                <TableHead>شماره تماس</TableHead>
                 <TableHead>وضعیت</TableHead>
-                <TableHead>تاریخ ثبت</TableHead>
+                <TableHead>تاریخ درخواست</TableHead>
                 <TableHead>عملیات</TableHead>
               </TableRow>
             </TableHeader>
@@ -188,180 +183,137 @@ const ConsultationRequestsManager = () => {
                 <TableRow key={request.id}>
                   <TableCell className="font-medium">
                     <div>
-                      <div className="font-semibold">{request.name}</div>
+                      <div>{request.name}</div>
                       {request.age && (
                         <div className="text-sm text-muted-foreground">
-                          {request.age} ساله {request.gender && `- ${request.gender}`}
+                          {request.age} ساله
+                          {request.gender && ` - ${request.gender === 'male' ? 'آقای' : 'خانم'}`}
                         </div>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1 text-sm">
-                        <Phone className="h-3 w-3" />
-                        {request.phone}
-                      </div>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Mail className="h-3 w-3" />
-                        {request.email}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {request.doctors ? (
-                      <div>
-                        <div className="font-medium">{request.doctors.name}</div>
-                        <div className="text-sm text-muted-foreground">{request.doctors.specialty}</div>
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">انتخاب نشده</span>
-                    )}
-                  </TableCell>
+                  <TableCell>{request.email}</TableCell>
+                  <TableCell>{request.phone}</TableCell>
                   <TableCell>{getStatusBadge(request.status)}</TableCell>
                   <TableCell>{formatDate(request.created_at)}</TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => openModal(request)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Select
-                        value={request.status}
-                        onValueChange={(value) => updateRequestStatus(request.id, value)}
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">در انتظار</SelectItem>
-                          <SelectItem value="approved">تایید شده</SelectItem>
-                          <SelectItem value="rejected">رد شده</SelectItem>
-                          <SelectItem value="completed">تکمیل شده</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setViewingRequest(request);
+                            setAdminNotes(request.notes || '');
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                          مشاهده
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>جزئیات درخواست مشاوره</DialogTitle>
+                          <DialogDescription>
+                            درخواست {request.name} - {formatDate(request.created_at)}
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        {viewingRequest && (
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <strong>نام:</strong> {viewingRequest.name}
+                              </div>
+                              <div>
+                                <strong>ایمیل:</strong> {viewingRequest.email}
+                              </div>
+                              <div>
+                                <strong>شماره تماس:</strong> {viewingRequest.phone}
+                              </div>
+                              <div>
+                                <strong>سن:</strong> {viewingRequest.age || 'نامشخص'}
+                              </div>
+                              <div>
+                                <strong>جنسیت:</strong> 
+                                {viewingRequest.gender === 'male' ? ' آقا' : 
+                                 viewingRequest.gender === 'female' ? ' خانم' : ' نامشخص'}
+                              </div>
+                              <div>
+                                <strong>وضعیت:</strong> {getStatusBadge(viewingRequest.status)}
+                              </div>
+                              {viewingRequest.preferred_date && (
+                                <div>
+                                  <strong>تاریخ مطلوب:</strong> {new Date(viewingRequest.preferred_date).toLocaleDateString('fa-IR')}
+                                </div>
+                              )}
+                              {viewingRequest.preferred_time && (
+                                <div>
+                                  <strong>زمان مطلوب:</strong> {formatTime(viewingRequest.preferred_time)}
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div>
+                              <strong>شرح وضعیت پزشکی:</strong>
+                              <p className="mt-1 p-3 bg-secondary rounded-md">
+                                {viewingRequest.medical_condition}
+                              </p>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                یادداشت مدیر (اختیاری):
+                              </label>
+                              <Textarea
+                                value={adminNotes}
+                                onChange={(e) => setAdminNotes(e.target.value)}
+                                placeholder="یادداشت خود را اینجا بنویسید..."
+                                rows={3}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                تغییر وضعیت:
+                              </label>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="default"
+                                  onClick={() => updateStatus(viewingRequest.id, 'approved')}
+                                  disabled={viewingRequest.status === 'approved'}
+                                >
+                                  <Check className="h-4 w-4 mr-2" />
+                                  تایید
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  onClick={() => updateStatus(viewingRequest.id, 'rejected')}
+                                  disabled={viewingRequest.status === 'rejected'}
+                                >
+                                  <X className="h-4 w-4 mr-2" />
+                                  رد
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => updateStatus(viewingRequest.id, 'completed')}
+                                  disabled={viewingRequest.status === 'completed'}
+                                >
+                                  <Check className="h-4 w-4 mr-2" />
+                                  تکمیل
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </DialogContent>
+                    </Dialog>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         )}
-
-        {/* Request Details Modal */}
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>جزئیات درخواست مشاوره</DialogTitle>
-              <DialogDescription>
-                اطلاعات کامل درخواست مشاوره
-              </DialogDescription>
-            </DialogHeader>
-            
-            {selectedRequest && (
-              <div className="space-y-6">
-                {/* Personal Information */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    اطلاعات شخصی
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium">نام:</span>
-                      <p className="mt-1">{selectedRequest.name}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">شماره تماس:</span>
-                      <p className="mt-1">{selectedRequest.phone}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">ایمیل:</span>
-                      <p className="mt-1">{selectedRequest.email}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">سن و جنسیت:</span>
-                      <p className="mt-1">
-                        {selectedRequest.age ? `${selectedRequest.age} ساله` : 'نامشخص'}
-                        {selectedRequest.gender && ` - ${selectedRequest.gender}`}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Medical Information */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-lg">شرح مشکل پزشکی</h3>
-                  <div className="p-3 bg-secondary rounded-lg">
-                    <p className="text-sm">{selectedRequest.medical_condition}</p>
-                  </div>
-                </div>
-
-                {/* Doctor Information */}
-                {selectedRequest.doctors && (
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg">پزشک انتخابی</h3>
-                    <div className="p-3 bg-secondary rounded-lg">
-                      <p className="font-medium">{selectedRequest.doctors.name}</p>
-                      <p className="text-sm text-muted-foreground">{selectedRequest.doctors.specialty}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Appointment Preferences */}
-                {(selectedRequest.preferred_date || selectedRequest.preferred_time) && (
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      ترجیحات زمان ملاقات
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      {selectedRequest.preferred_date && (
-                        <div>
-                          <span className="font-medium">تاریخ مورد نظر:</span>
-                          <p className="mt-1">{selectedRequest.preferred_date}</p>
-                        </div>
-                      )}
-                      {selectedRequest.preferred_time && (
-                        <div>
-                          <span className="font-medium">ساعت مورد نظر:</span>
-                          <p className="mt-1">{selectedRequest.preferred_time}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Additional Notes */}
-                {selectedRequest.notes && (
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg">توضیحات اضافی</h3>
-                    <div className="p-3 bg-secondary rounded-lg">
-                      <p className="text-sm">{selectedRequest.notes}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Status and Date */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-lg">وضعیت و تاریخ</h3>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-medium">وضعیت فعلی:</span>
-                      <div className="mt-1">{getStatusBadge(selectedRequest.status)}</div>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      ثبت شده در {formatDate(selectedRequest.created_at)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
       </CardContent>
     </Card>
   );

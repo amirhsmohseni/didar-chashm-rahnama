@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { Users, Stethoscope, MessageSquare, FileText, UserCheck, Shield } from 'lucide-react';
 
 import Header from '@/components/layout/Header';
@@ -31,6 +30,7 @@ const Admin = () => {
             </p>
           </div>
 
+          {/* اطلاعات دیباگ کاربر - برای تست دسترسی */}
           <UserDebugInfo />
 
           <AdminProtectedRoute>
@@ -91,7 +91,7 @@ const AdminWelcome = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
-          خوش آمدید
+          خوش آمدید به پنل مدیریت
         </CardTitle>
         <CardDescription>
           شما با حساب {user?.email} وارد شده‌اید و دسترسی مدیر دارید.
@@ -99,21 +99,25 @@ const AdminWelcome = () => {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-3 bg-secondary rounded-lg">
-            <UserCheck className="h-6 w-6 mx-auto mb-2 text-primary" />
+          <div className="text-center p-4 bg-background rounded-lg border">
+            <UserCheck className="h-8 w-8 mx-auto mb-2 text-primary" />
             <p className="text-sm font-medium">مدیریت کاربران</p>
+            <p className="text-xs text-muted-foreground mt-1">نقش‌های کاربری</p>
           </div>
-          <div className="text-center p-3 bg-secondary rounded-lg">
-            <Stethoscope className="h-6 w-6 mx-auto mb-2 text-primary" />
+          <div className="text-center p-4 bg-background rounded-lg border">
+            <Stethoscope className="h-8 w-8 mx-auto mb-2 text-primary" />
             <p className="text-sm font-medium">مدیریت پزشکان</p>
+            <p className="text-xs text-muted-foreground mt-1">افزودن و ویرایش</p>
           </div>
-          <div className="text-center p-3 bg-secondary rounded-lg">
-            <MessageSquare className="h-6 w-6 mx-auto mb-2 text-primary" />
+          <div className="text-center p-4 bg-background rounded-lg border">
+            <MessageSquare className="h-8 w-8 mx-auto mb-2 text-primary" />
             <p className="text-sm font-medium">درخواست‌های مشاوره</p>
+            <p className="text-xs text-muted-foreground mt-1">مدیریت درخواست‌ها</p>
           </div>
-          <div className="text-center p-3 bg-secondary rounded-lg">
-            <FileText className="h-6 w-6 mx-auto mb-2 text-primary" />
+          <div className="text-center p-4 bg-background rounded-lg border">
+            <FileText className="h-8 w-8 mx-auto mb-2 text-primary" />
             <p className="text-sm font-medium">مدیریت مقالات</p>
+            <p className="text-xs text-muted-foreground mt-1">نوشتن و انتشار</p>
           </div>
         </div>
       </CardContent>
