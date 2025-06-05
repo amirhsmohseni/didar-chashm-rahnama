@@ -1,5 +1,5 @@
 
-import { Users, Stethoscope, MessageSquare, FileText, Shield, Settings, BarChart3 } from 'lucide-react';
+import { Users, Stethoscope, MessageSquare, FileText, Shield, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 import Header from '@/components/layout/Header';
@@ -9,6 +9,8 @@ import AdminToolbox from '@/components/admin/AdminToolbox';
 import UserRolesManager from '@/components/admin/UserRolesManager';
 import ConsultationRequestsManager from '@/components/admin/ConsultationRequestsManager';
 import AdminDashboard from '@/components/admin/AdminDashboard';
+import DoctorsManager from '@/components/admin/DoctorsManager';
+import BlogManager from '@/components/admin/BlogManager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -67,7 +69,7 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="doctors">
-                <DoctorsManagerSection />
+                <DoctorsManager />
               </TabsContent>
 
               <TabsContent value="consultations">
@@ -75,7 +77,7 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="content">
-                <ContentManagerSection />
+                <BlogManager />
               </TabsContent>
             </Tabs>
           </AdminProtectedRoute>
@@ -102,7 +104,7 @@ const AdminWelcome = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="text-center p-4 bg-background rounded-lg border">
             <BarChart3 className="h-8 w-8 mx-auto mb-2 text-primary" />
             <p className="text-sm font-medium">داشبورد آمار</p>
@@ -123,112 +125,10 @@ const AdminWelcome = () => {
             <p className="text-sm font-medium">درخواست‌های مشاوره</p>
             <p className="text-xs text-muted-foreground mt-1">بررسی و پاسخ</p>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-const DoctorsManagerSection = () => {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>مدیریت پزشکان</CardTitle>
-        <CardDescription>
-          اضافه کردن، ویرایش و حذف پزشکان
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <p className="text-muted-foreground">
-            از این بخش می‌توانید پزشکان جدید اضافه کنید، اطلاعات آن‌ها را ویرایش کنید و پزشکان غیرفعال را حذف کنید.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">افزودن پزشک جدید</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                اطلاعات پزشک جدید را وارد کنید
-              </p>
-              <button className="w-full bg-primary text-white px-4 py-2 rounded hover:bg-primary/90">
-                افزودن پزشک
-              </button>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">لیست پزشکان</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                مشاهده و ویرایش پزشکان موجود
-              </p>
-              <button className="w-full bg-secondary text-foreground px-4 py-2 rounded hover:bg-secondary/80">
-                مشاهده لیست
-              </button>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">تنظیمات تخصص‌ها</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                مدیریت تخصص‌های پزشکی
-              </p>
-              <button className="w-full bg-secondary text-foreground px-4 py-2 rounded hover:bg-secondary/80">
-                تنظیمات
-              </button>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-const ContentManagerSection = () => {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>مدیریت محتوا</CardTitle>
-        <CardDescription>
-          مدیریت مقالات، اخبار و محتوای سایت
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <p className="text-muted-foreground">
-            از این بخش می‌توانید مقالات وبلاگ، اخبار و سایر محتوای سایت را مدیریت کنید.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">مقالات وبلاگ</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                ایجاد و ویرایش مقالات آموزشی
-              </p>
-              <button className="w-full bg-primary text-white px-4 py-2 rounded hover:bg-primary/90">
-                مدیریت مقالات
-              </button>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">صفحات سایت</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                ویرایش محتوای صفحات اصلی
-              </p>
-              <button className="w-full bg-secondary text-foreground px-4 py-2 rounded hover:bg-secondary/80">
-                ویرایش صفحات
-              </button>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">رسانه</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                مدیریت تصاویر و فایل‌ها
-              </p>
-              <button className="w-full bg-secondary text-foreground px-4 py-2 rounded hover:bg-secondary/80">
-                کتابخانه رسانه
-              </button>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h3 className="font-medium mb-2">سوالات متداول</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                مدیریت FAQ و راهنماها
-              </p>
-              <button className="w-full bg-secondary text-foreground px-4 py-2 rounded hover:bg-secondary/80">
-                مدیریت FAQ
-              </button>
-            </div>
+          <div className="text-center p-4 bg-background rounded-lg border">
+            <FileText className="h-8 w-8 mx-auto mb-2 text-primary" />
+            <p className="text-sm font-medium">مدیریت محتوا</p>
+            <p className="text-xs text-muted-foreground mt-1">مقالات و اخبار</p>
           </div>
         </div>
       </CardContent>
