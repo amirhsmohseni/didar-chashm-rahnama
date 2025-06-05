@@ -9,19 +9,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const AdminToolbox = () => {
-  const { user, userRole, isAdmin } = useAuth();
+  const { user, userRole, isAdmin, refreshAuth } = useAuth();
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
   const { toast } = useToast();
 
   const makeCurrentUserAdmin = async () => {
-    if (!user) return;
+    if (!user) {
+      toast({
+        title: "خطا",
+        description: "ابتدا وارد حساب کاربری خود شوید",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsCreatingAdmin(true);
     try {
-      const { error } = await supabase
+      console.log('Making user admin:', user.id);
+      
+      const { data, error } = await supabase
         .from('user_roles')
         .insert({ user_id: user.id, role: 'admin' })
         .select();
+      
+      console.log('Insert result:', { data, error });
       
       if (error) {
         if (error.code === '23505') {
@@ -30,18 +41,17 @@ const AdminToolbox = () => {
             description: "نقش ادمین برای شما تعیین شده است",
           });
         } else {
+          console.error('Supabase error:', error);
           throw error;
         }
       } else {
         toast({
           title: "ادمین شدید!",
-          description: "نقش ادمین با موفقیت برای شما تعیین شد. صفحه را رفرش کنید.",
+          description: "نقش ادمین با موفقیت برای شما تعیین شد.",
         });
         
-        // Refresh the page to update auth state
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
+        // Refresh auth data
+        await refreshAuth();
       }
     } catch (error) {
       console.error('Error making admin:', error);
@@ -107,6 +117,17 @@ const AdminToolbox = () => {
               <Shield className="h-4 w-4 mr-2" />
               {isCreatingAdmin ? 'در حال ایجاد دسترسی...' : 'ایجاد دسترسی مدیر برای من'}
             </Button>
+          </div>
+        )}
+
+        {isAdmin && (
+          <div className="border-t pt-4">
+            <p className="text-sm text-green-600 mb-2">
+              ✅ شما دسترسی مدیر دارید
+            </p>
+            <p className="text-xs text-muted-foreground">
+              حالا می‌توانید از تمام قابلیت‌های پنل مدیریت استفاده کنید.
+            </p>
           </div>
         )}
       </CardContent>

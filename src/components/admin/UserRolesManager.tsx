@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Crown, User, Stethoscope, Trash2 } from 'lucide-react';
+import { Crown, User, Stethoscope, Trash2, RefreshCw } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -53,6 +53,7 @@ const UserRolesManager = () => {
   }, []);
 
   const fetchUsers = async () => {
+    setIsLoading(true);
     try {
       // Get profiles
       const { data: profiles, error: profilesError } = await supabase
@@ -68,20 +69,15 @@ const UserRolesManager = () => {
 
       if (rolesError) throw rolesError;
 
-      // Get user emails from auth metadata (we'll need to get this differently)
-      const usersWithRoles = await Promise.all(
-        (profiles || []).map(async (profile) => {
-          const userRole = roles?.find(role => role.user_id === profile.id);
-          
-          // Try to get email from auth.users (this might not work due to RLS)
-          // For now, we'll use a placeholder
-          return {
-            ...profile,
-            email: `user-${profile.id.slice(0, 8)}@example.com`, // Placeholder
-            role: userRole?.role || 'user'
-          };
-        })
-      );
+      const usersWithRoles = (profiles || []).map((profile) => {
+        const userRole = roles?.find(role => role.user_id === profile.id);
+        
+        return {
+          ...profile,
+          email: `user-${profile.id.slice(0, 8)}@example.com`,
+          role: userRole?.role || 'user'
+        };
+      });
 
       setUsers(usersWithRoles);
     } catch (error) {
@@ -108,7 +104,7 @@ const UserRolesManager = () => {
       if (newRole !== 'user') {
         const { error } = await supabase
           .from('user_roles')
-          .insert({ user_id: userId, role: newRole as any });
+          .insert({ user_id: userId, role: newRole });
 
         if (error) throw error;
       }
@@ -200,8 +196,11 @@ const UserRolesManager = () => {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>مدیریت نقش‌های کاربری</CardTitle>
+        <Button onClick={fetchUsers} variant="outline" size="sm">
+          <RefreshCw className="h-4 w-4" />
+        </Button>
       </CardHeader>
       <CardContent>
         {users.length === 0 ? (
