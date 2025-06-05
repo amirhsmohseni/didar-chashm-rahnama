@@ -104,7 +104,10 @@ const UserRolesManager = () => {
       if (newRole !== 'user') {
         const { error } = await supabase
           .from('user_roles')
-          .insert({ user_id: userId, role: newRole });
+          .insert({ 
+            user_id: userId, 
+            role: newRole as 'admin' | 'doctor' | 'user'
+          });
 
         if (error) throw error;
       }
