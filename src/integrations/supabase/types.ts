@@ -51,6 +51,45 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_settings: {
+        Row: {
+          ai_enabled: boolean | null
+          amount_threshold: number | null
+          auto_trading_enabled: boolean | null
+          created_at: string
+          id: string
+          max_risk: number | null
+          percent_threshold: number | null
+          triangular_enabled: boolean | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          ai_enabled?: boolean | null
+          amount_threshold?: number | null
+          auto_trading_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          max_risk?: number | null
+          percent_threshold?: number | null
+          triangular_enabled?: boolean | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          ai_enabled?: boolean | null
+          amount_threshold?: number | null
+          auto_trading_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          max_risk?: number | null
+          percent_threshold?: number | null
+          triangular_enabled?: boolean | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       consultation_requests: {
         Row: {
           age: number | null
@@ -158,6 +197,45 @@ export type Database = {
         }
         Relationships: []
       }
+      exchanges: {
+        Row: {
+          api_key: string | null
+          api_secret: string | null
+          created_at: string
+          enabled: boolean
+          fee_buy: number | null
+          fee_sell: number | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          api_key?: string | null
+          api_secret?: string | null
+          created_at?: string
+          enabled?: boolean
+          fee_buy?: number | null
+          fee_sell?: number | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          api_key?: string | null
+          api_secret?: string | null
+          created_at?: string
+          enabled?: boolean
+          fee_buy?: number | null
+          fee_sell?: number | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -182,6 +260,54 @@ export type Database = {
         }
         Relationships: []
       }
+      transactions: {
+        Row: {
+          amount: number
+          buy_exchange: string
+          buy_price: number
+          created_at: string
+          currency: string
+          id: string
+          profit: number
+          profit_percent: number
+          sell_exchange: string
+          sell_price: number
+          status: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          buy_exchange: string
+          buy_price: number
+          created_at?: string
+          currency: string
+          id?: string
+          profit: number
+          profit_percent: number
+          sell_exchange: string
+          sell_price: number
+          status?: string
+          type?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          buy_exchange?: string
+          buy_price?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          profit?: number
+          profit_percent?: number
+          sell_exchange?: string
+          sell_price?: number
+          status?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -202,6 +328,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      withdrawal_fees: {
+        Row: {
+          created_at: string
+          currency: string
+          exchange_id: string | null
+          fee: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          exchange_id?: string | null
+          fee: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          exchange_id?: string | null
+          fee?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawal_fees_exchange_id_fkey"
+            columns: ["exchange_id"]
+            isOneToOne: false
+            referencedRelation: "exchanges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { Shield, AlertCircle } from 'lucide-react';
+import { Shield, AlertCircle, UserCheck, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -11,7 +11,7 @@ interface AdminProtectedRouteProps {
 }
 
 const AdminProtectedRoute = ({ children }: AdminProtectedRouteProps) => {
-  const { user, isLoading, isAdmin } = useAuth();
+  const { user, isLoading, isAdmin, userRole } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,19 +46,35 @@ const AdminProtectedRoute = ({ children }: AdminProtectedRouteProps) => {
       <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+              <Shield className="h-6 w-6 text-blue-600" />
             </div>
-            <CardTitle className="text-xl">دسترسی محدود</CardTitle>
+            <CardTitle className="text-xl">پنل مدیریت</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-muted-foreground">
-              شما به این بخش دسترسی ندارید. برای دسترسی به پنل مدیریت نیاز به نقش ادمین دارید.
-            </p>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>کاربر فعلی: {user.email}</p>
-              <p>نقش شما: کاربر عادی</p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle className="h-4 w-4" />
+                <span className="text-sm">شما وارد سیستم شده‌اید</span>
+              </div>
+              
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p><strong>کاربر فعلی:</strong> {user.email}</p>
+                <p><strong>نقش فعلی:</strong> {userRole || 'کاربر عادی'}</p>
+              </div>
+              
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                <div className="flex items-center gap-2 text-yellow-800 mb-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium">نیاز به دسترسی ادمین</span>
+                </div>
+                <p className="text-xs text-yellow-700">
+                  برای دسترسی به پنل مدیریت، نیاز به نقش "ادمین" دارید. 
+                  می‌توانید از دکمه زیر برای خود نقش ادمین ایجاد کنید.
+                </p>
+              </div>
             </div>
+            
             <div className="flex gap-2 justify-center">
               <Button 
                 onClick={() => navigate('/')}
@@ -68,7 +84,7 @@ const AdminProtectedRoute = ({ children }: AdminProtectedRouteProps) => {
               </Button>
               <Button 
                 onClick={() => navigate('/auth')}
-                variant="default"
+                variant="outline"
               >
                 تغییر حساب
               </Button>

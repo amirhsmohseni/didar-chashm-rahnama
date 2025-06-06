@@ -72,6 +72,17 @@ const Header = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Admin Link - prominently displayed for admins */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
+              >
+                <Shield className="h-4 w-4" />
+                پنل مدیریت
+              </Link>
+            )}
           </nav>
 
           {/* Auth Section */}
@@ -87,6 +98,12 @@ const Header = () => {
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="p-2">
                     <p className="text-sm font-medium">{user.email}</p>
+                    {isAdmin && (
+                      <p className="text-xs text-blue-600 flex items-center gap-1 mt-1">
+                        <Shield className="h-3 w-3" />
+                        مدیر سیستم
+                      </p>
+                    )}
                   </div>
                   <DropdownMenuSeparator />
                   {isAdmin && (
