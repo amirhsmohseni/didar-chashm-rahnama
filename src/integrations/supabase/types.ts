@@ -182,6 +182,39 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_status: {
+        Row: {
+          created_at: string
+          id: string
+          is_running: boolean | null
+          last_started: string | null
+          last_stopped: string | null
+          total_runtime_minutes: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_running?: boolean | null
+          last_started?: string | null
+          last_stopped?: string | null
+          total_runtime_minutes?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_running?: boolean | null
+          last_started?: string | null
+          last_stopped?: string | null
+          total_runtime_minutes?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       consultation_requests: {
         Row: {
           age: number | null
@@ -314,11 +347,13 @@ export type Database = {
         Row: {
           api_key: string | null
           api_secret: string | null
+          api_url: string | null
           created_at: string
           enabled: boolean
           fee_buy: number | null
           fee_sell: number | null
           id: string
+          is_active: boolean | null
           name: string
           updated_at: string
           user_id: string | null
@@ -326,11 +361,13 @@ export type Database = {
         Insert: {
           api_key?: string | null
           api_secret?: string | null
+          api_url?: string | null
           created_at?: string
           enabled?: boolean
           fee_buy?: number | null
           fee_sell?: number | null
           id?: string
+          is_active?: boolean | null
           name: string
           updated_at?: string
           user_id?: string | null
@@ -338,11 +375,13 @@ export type Database = {
         Update: {
           api_key?: string | null
           api_secret?: string | null
+          api_url?: string | null
           created_at?: string
           enabled?: boolean
           fee_buy?: number | null
           fee_sell?: number | null
           id?: string
+          is_active?: boolean | null
           name?: string
           updated_at?: string
           user_id?: string | null
@@ -403,6 +442,36 @@ export type Database = {
           id?: string
           phone?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      real_prices: {
+        Row: {
+          buy_price: number
+          created_at: string
+          currency: string
+          exchange_name: string
+          id: string
+          last_updated: string
+          sell_price: number
+        }
+        Insert: {
+          buy_price: number
+          created_at?: string
+          currency: string
+          exchange_name: string
+          id?: string
+          last_updated?: string
+          sell_price: number
+        }
+        Update: {
+          buy_price?: number
+          created_at?: string
+          currency?: string
+          exchange_name?: string
+          id?: string
+          last_updated?: string
+          sell_price?: number
         }
         Relationships: []
       }
@@ -524,7 +593,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "doctor" | "user"
+      app_role: "admin" | "doctor" | "user" | "editor" | "manager" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -640,7 +709,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "doctor", "user"],
+      app_role: ["admin", "doctor", "user", "editor", "manager", "viewer"],
     },
   },
 } as const
