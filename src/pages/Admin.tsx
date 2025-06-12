@@ -44,7 +44,7 @@ const Admin = () => {
       
       <div className="bg-gray-50 min-h-screen">
         <AdminProtectedRoute>
-          {/* Always show AdminToolbox - it will handle showing/hiding based on admin status */}
+          {/* همیشه AdminToolbox را نمایش می‌دهیم - حتی برای کاربران غیر ادمین */}
           <AdminToolbox />
           
           {isAdmin ? (
@@ -61,17 +61,7 @@ const Admin = () => {
                 </main>
               </div>
             </div>
-          ) : (
-            // If not admin, just show a message since AdminToolbox will handle the button
-            <div className="container mx-auto px-4 py-8">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold mb-4">به پنل مدیریت خوش آمدید</h2>
-                <p className="text-muted-foreground">
-                  برای دسترسی به پنل مدیریت، از بخش بالا نقش ادمین را برای خود ایجاد کنید.
-                </p>
-              </div>
-            </div>
-          )}
+          ) : null}
         </AdminProtectedRoute>
       </div>
 
