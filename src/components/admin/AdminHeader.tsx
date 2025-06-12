@@ -1,8 +1,8 @@
 
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, User, Bell } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,26 +10,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import NotificationCenter from './NotificationCenter';
 
 const AdminHeader = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const { user, signOut } = useAuth();
 
-  const handleLogout = async () => {
+  const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
-      toast({
-        title: "خروج موفقیت‌آمیز",
-        description: "با موفقیت از حساب کاربری خارج شدید",
-      });
+      await signOut();
     } catch (error) {
-      toast({
-        title: "خطا",
-        description: "خطا در خروج از حساب کاربری",
-        variant: "destructive",
-      });
+      console.error('Error signing out:', error);
     }
   };
 
@@ -37,18 +27,20 @@ const AdminHeader = () => {
     <header className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">پنل مدیریت</h1>
-          <p className="text-sm text-gray-500">مدیریت کامل سایت</p>
+          <h1 className="text-xl font-semibold text-gray-900">پنل مدیریت</h1>
+          <p className="text-sm text-gray-500">
+            {new Date().toLocaleDateString('fa-IR', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </p>
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-              3
-            </span>
-          </Button>
-
+          <NotificationCenter />
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
@@ -57,21 +49,21 @@ const AdminHeader = () => {
                     {user?.email?.charAt(0).toUpperCase() || 'A'}
                   </AvatarFallback>
                 </Avatar>
-                <div className="text-right">
-                  <p className="text-sm font-medium">{user?.email}</p>
-                  <p className="text-xs text-gray-500">مدیر سیستم</p>
-                </div>
+                <span className="text-sm font-medium">
+                  {user?.email || 'مدیر'}
+                </span>
               </Button>
             </DropdownMenuTrigger>
+            
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                پروفایل
+                <Settings className="mr-2 h-4 w-4" />
+                تنظیمات حساب
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+              <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
                 <LogOut className="mr-2 h-4 w-4" />
-                خروج
+                خروج از حساب
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

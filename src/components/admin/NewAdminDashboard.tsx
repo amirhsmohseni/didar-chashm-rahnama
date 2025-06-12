@@ -2,6 +2,7 @@
 import AdminStats from './AdminStats';
 import QuickActions from './QuickActions';
 import RecentActivity from './RecentActivity';
+import AdvancedAnalytics from './AdvancedAnalytics';
 
 interface NewAdminDashboardProps {
   onTabChange: (tab: string) => void;
@@ -21,6 +22,8 @@ const NewAdminDashboard = ({ onTabChange }: NewAdminDashboardProps) => {
         <QuickActions onTabChange={onTabChange} />
         <RecentActivity />
       </div>
+
+      <AdvancedAnalytics />
     </div>
   );
 };

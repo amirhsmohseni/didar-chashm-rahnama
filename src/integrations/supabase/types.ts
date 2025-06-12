@@ -9,47 +9,139 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_activity_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      blog_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string | null
+          category_id: string | null
           content: string
           created_at: string
           excerpt: string | null
+          featured_image_alt: string | null
           id: string
           image_url: string | null
           is_published: boolean | null
+          meta_description: string | null
+          meta_keywords: string | null
+          meta_title: string | null
           published_at: string | null
+          reading_time: number | null
           slug: string | null
           title: string
           updated_at: string
+          views_count: number | null
         }
         Insert: {
           author_id?: string | null
+          category_id?: string | null
           content: string
           created_at?: string
           excerpt?: string | null
+          featured_image_alt?: string | null
           id?: string
           image_url?: string | null
           is_published?: boolean | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
           published_at?: string | null
+          reading_time?: number | null
           slug?: string | null
           title: string
           updated_at?: string
+          views_count?: number | null
         }
         Update: {
           author_id?: string | null
+          category_id?: string | null
           content?: string
           created_at?: string
           excerpt?: string | null
+          featured_image_alt?: string | null
           id?: string
           image_url?: string | null
           is_published?: boolean | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
           published_at?: string | null
+          reading_time?: number | null
           slug?: string | null
           title?: string
           updated_at?: string
+          views_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "blog_posts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "blog_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bot_settings: {
         Row: {
@@ -93,53 +185,74 @@ export type Database = {
       consultation_requests: {
         Row: {
           age: number | null
+          assigned_admin_id: string | null
           created_at: string
+          current_medications: string | null
           doctor_id: string | null
           email: string
+          follow_up_required: boolean | null
           gender: string | null
           id: string
           medical_condition: string
+          medical_history: string | null
           name: string
           notes: string | null
           phone: string
+          preferred_contact_method: string | null
           preferred_date: string | null
           preferred_time: string | null
+          response_sent_at: string | null
           status: string | null
           updated_at: string
+          urgency_level: string | null
           user_id: string | null
         }
         Insert: {
           age?: number | null
+          assigned_admin_id?: string | null
           created_at?: string
+          current_medications?: string | null
           doctor_id?: string | null
           email: string
+          follow_up_required?: boolean | null
           gender?: string | null
           id?: string
           medical_condition: string
+          medical_history?: string | null
           name: string
           notes?: string | null
           phone: string
+          preferred_contact_method?: string | null
           preferred_date?: string | null
           preferred_time?: string | null
+          response_sent_at?: string | null
           status?: string | null
           updated_at?: string
+          urgency_level?: string | null
           user_id?: string | null
         }
         Update: {
           age?: number | null
+          assigned_admin_id?: string | null
           created_at?: string
+          current_medications?: string | null
           doctor_id?: string | null
           email?: string
+          follow_up_required?: boolean | null
           gender?: string | null
           id?: string
           medical_condition?: string
+          medical_history?: string | null
           name?: string
           notes?: string | null
           phone?: string
+          preferred_contact_method?: string | null
           preferred_date?: string | null
           preferred_time?: string | null
+          response_sent_at?: string | null
           status?: string | null
           updated_at?: string
+          urgency_level?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -233,6 +346,39 @@ export type Database = {
           name?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          type?: string | null
+          user_id?: string
         }
         Relationships: []
       }

@@ -115,47 +115,53 @@ const Blog = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map((post) => (
-                <Card key={post.id} className="h-full flex flex-col hover:shadow-lg transition-shadow cursor-pointer">
-                  {post.image_url && (
-                    <div className="aspect-video overflow-hidden rounded-t-lg">
-                      <img
-                        src={post.image_url}
-                        alt={post.title}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform"
-                      />
-                    </div>
-                  )}
-                  
-                  <CardHeader className="flex-1">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                      <Calendar className="h-4 w-4" />
-                      {post.published_at ? formatDate(post.published_at) : formatDate(post.created_at)}
-                    </div>
-                    
-                    <CardTitle className="line-clamp-2 hover:text-primary transition-colors">
-                      {post.title}
-                    </CardTitle>
-                    
-                    {post.excerpt ? (
-                      <p className="text-muted-foreground line-clamp-3">
-                        {post.excerpt}
-                      </p>
-                    ) : (
-                      <p className="text-muted-foreground line-clamp-3">
-                        {truncateContent(post.content)}
-                      </p>
+                <Link 
+                  key={post.id} 
+                  to={`/blog/${post.slug || post.id}`}
+                  className="block h-full"
+                >
+                  <Card className="h-full flex flex-col hover:shadow-lg transition-shadow cursor-pointer">
+                    {post.image_url && (
+                      <div className="aspect-video overflow-hidden rounded-t-lg">
+                        <img
+                          src={post.image_url}
+                          alt={post.title}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform"
+                        />
+                      </div>
                     )}
-                  </CardHeader>
+                    
+                    <CardHeader className="flex-1">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                        <Calendar className="h-4 w-4" />
+                        {post.published_at ? formatDate(post.published_at) : formatDate(post.created_at)}
+                      </div>
+                      
+                      <CardTitle className="line-clamp-2 hover:text-primary transition-colors">
+                        {post.title}
+                      </CardTitle>
+                      
+                      {post.excerpt ? (
+                        <p className="text-muted-foreground line-clamp-3">
+                          {post.excerpt}
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground line-clamp-3">
+                          {truncateContent(post.content)}
+                        </p>
+                      )}
+                    </CardHeader>
 
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        مطالعه
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
+                    <CardContent className="pt-0">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <Eye className="h-3 w-3" />
+                          مطالعه
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           )}
