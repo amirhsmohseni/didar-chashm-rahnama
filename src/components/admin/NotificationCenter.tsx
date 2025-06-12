@@ -32,7 +32,6 @@ const NotificationCenter = () => {
   useEffect(() => {
     fetchNotifications();
     
-    // Subscribe to real-time notifications
     const channel = supabase
       .channel('notifications')
       .on(
@@ -70,8 +69,14 @@ const NotificationCenter = () => {
 
       if (error) throw error;
       
-      setNotifications(data || []);
-      setUnreadCount(data?.filter(n => !n.is_read).length || 0);
+      // Type assertion to ensure proper typing
+      const typedData = (data || []).map(item => ({
+        ...item,
+        type: item.type as 'info' | 'success' | 'warning' | 'error'
+      }));
+      
+      setNotifications(typedData);
+      setUnreadCount(typedData.filter(n => !n.is_read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }

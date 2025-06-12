@@ -34,12 +34,21 @@ interface BlogPost {
   };
 }
 
+interface RelatedPost {
+  id: string;
+  title: string;
+  slug: string | null;
+  image_url: string | null;
+  excerpt: string | null;
+  published_at: string | null;
+}
+
 const BlogPost = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
+  const [relatedPosts, setRelatedPosts] = useState<RelatedPost[]>([]);
 
   useEffect(() => {
     if (slug) {
@@ -72,7 +81,7 @@ const BlogPost = () => {
         .update({ views_count: (data.views_count || 0) + 1 })
         .eq('id', data.id);
 
-      // Fetch related posts
+      // Fetch related posts with proper typing
       if (data.category_id) {
         const { data: related } = await supabase
           .from('blog_posts')

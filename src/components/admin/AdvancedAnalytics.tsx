@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { TrendingUp, Users, Calendar, Activity } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
@@ -38,7 +37,7 @@ const AdvancedAnalytics = () => {
     monthlyStats: [],
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('30'); // days
+  const [timeRange, setTimeRange] = useState('30');
 
   useEffect(() => {
     fetchAnalyticsData();
@@ -48,26 +47,20 @@ const AdvancedAnalytics = () => {
     try {
       setIsLoading(true);
       
-      // Fetch consultation trends
       const { data: consultations } = await supabase
         .from('consultation_requests')
         .select('created_at, status')
         .gte('created_at', new Date(Date.now() - parseInt(timeRange) * 24 * 60 * 60 * 1000).toISOString());
 
-      // Fetch blog views
       const { data: blogs } = await supabase
         .from('blog_posts')
         .select('published_at, views_count')
         .eq('is_published', true)
         .gte('published_at', new Date(Date.now() - parseInt(timeRange) * 24 * 60 * 60 * 1000).toISOString());
 
-      // Process consultation trends
       const consultationTrends = processTimeSeriesData(consultations || [], 'created_at');
-      
-      // Process blog views
       const blogViews = processViewsData(blogs || []);
       
-      // Status distribution
       const statusCounts = (consultations || []).reduce((acc, item) => {
         acc[item.status] = (acc[item.status] || 0) + 1;
         return acc;
@@ -79,7 +72,6 @@ const AdvancedAnalytics = () => {
         color: getStatusColor(status),
       }));
 
-      // Monthly stats
       const monthlyStats = processMonthlyStats(consultations || [], blogs || []);
 
       setData({
@@ -95,7 +87,7 @@ const AdvancedAnalytics = () => {
     }
   };
 
-  const processTimeSeriesData = (data: any[], dateField: string) => {
+  const processTimeSeriesData = (data: any[], dateField: string): Array<{ date: string; count: number; }> => {
     const groupedData = data.reduce((acc, item) => {
       const date = new Date(item[dateField]).toISOString().split('T')[0];
       acc[date] = (acc[date] || 0) + 1;
@@ -103,18 +95,18 @@ const AdvancedAnalytics = () => {
     }, {} as Record<string, number>);
 
     return Object.entries(groupedData)
-      .map(([date, count]) => ({ date, count }))
+      .map(([date, count]) => ({ date, count: Number(count) }))
       .sort((a, b) => a.date.localeCompare(b.date));
   };
 
-  const processViewsData = (blogs: any[]) => {
+  const processViewsData = (blogs: any[]): Array<{ date: string; views: number; }> => {
     return blogs.map(blog => ({
       date: blog.published_at,
-      views: blog.views_count || 0,
+      views: Number(blog.views_count || 0),
     })).sort((a, b) => a.date.localeCompare(b.date));
   };
 
-  const processMonthlyStats = (consultations: any[], blogs: any[]) => {
+  const processMonthlyStats = (consultations: any[], blogs: any[]): Array<{ month: string; consultations: number; blogs: number; }> => {
     const months = Array.from({ length: 6 }, (_, i) => {
       const date = new Date();
       date.setMonth(date.getMonth() - i);

@@ -11,6 +11,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
   refreshAuth: () => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   isAdmin: false,
   refreshAuth: async () => {},
+  signOut: async () => {},
 });
 
 export const useAuth = () => {
@@ -85,6 +87,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -131,7 +141,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       userRole, 
       isLoading, 
       isAdmin,
-      refreshAuth
+      refreshAuth,
+      signOut
     }}>
       {children}
     </AuthContext.Provider>
