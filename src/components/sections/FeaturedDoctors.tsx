@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Star, Award, Calendar, MapPin, Phone } from 'lucide-react';
+import { Star, Award, Calendar, MapPin, Phone, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,14 +23,15 @@ interface Doctor {
 const FeaturedDoctors = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
 
   useEffect(() => {
     fetchDoctors();
-  }, []);
+  }, [lastUpdate]);
 
   const fetchDoctors = async () => {
     try {
-      console.log('Fetching featured doctors...');
+      console.log('FeaturedDoctors: Fetching featured doctors...', new Date().toISOString());
       const { data, error } = await supabase
         .from('doctors')
         .select('id, name, specialty, bio, education, experience_years, image_url, is_featured, is_active, consultation_fee')
@@ -40,17 +41,23 @@ const FeaturedDoctors = () => {
         .limit(3);
 
       if (error) {
-        console.error('Error fetching doctors:', error);
+        console.error('FeaturedDoctors: Error fetching doctors:', error);
         throw error;
       }
       
-      console.log('Featured doctors data:', data);
+      console.log('FeaturedDoctors: Featured doctors data:', data);
       setDoctors(data || []);
     } catch (error) {
-      console.error('Error fetching featured doctors:', error);
+      console.error('FeaturedDoctors: Error fetching featured doctors:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const refreshData = () => {
+    console.log('FeaturedDoctors: Manual refresh triggered');
+    setIsLoading(true);
+    setLastUpdate(Date.now());
   };
 
   if (isLoading) {
@@ -67,8 +74,26 @@ const FeaturedDoctors = () => {
   }
 
   if (doctors.length === 0) {
-    console.log('No featured doctors found');
-    return null;
+    console.log('FeaturedDoctors: No featured doctors found');
+    return (
+      <section className="py-16 bg-secondary">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-eyecare-800 mb-4">پزشکان متخصص ما</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              با بهترین متخصصان چشم‌پزشکی کشور آشنا شوید
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">در حال حاضر هیچ پزشک برجسته‌ای موجود نیست</p>
+            <Button onClick={refreshData} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              بازخوانی
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -79,6 +104,10 @@ const FeaturedDoctors = () => {
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             با بهترین متخصصان چشم‌پزشکی کشور آشنا شوید
           </p>
+          <Button onClick={refreshData} variant="ghost" size="sm" className="mt-2">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            بروزرسانی اطلاعات
+          </Button>
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -90,6 +119,10 @@ const FeaturedDoctors = () => {
                     src={doctor.image_url}
                     alt={doctor.name}
                     className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
+                    onError={(e) => {
+                      console.log('FeaturedDoctors: Image failed to load:', doctor.image_url);
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-full mx-auto mb-4 bg-primary/10 flex items-center justify-center">

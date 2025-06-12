@@ -26,16 +26,17 @@ interface Doctor {
 const Doctors = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchDoctors();
-  }, []);
+  }, [lastUpdate]);
 
   const fetchDoctors = async () => {
     setIsLoading(true);
     try {
-      console.log('Fetching all doctors...');
+      console.log('Doctors: Fetching all doctors...', new Date().toISOString());
       const { data, error } = await supabase
         .from('doctors')
         .select('*')
@@ -44,14 +45,14 @@ const Doctors = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching doctors:', error);
+        console.error('Doctors: Error fetching doctors:', error);
         throw error;
       }
       
-      console.log('All doctors data:', data);
+      console.log('Doctors: All doctors data:', data);
       setDoctors(data || []);
     } catch (error) {
-      console.error('Error fetching doctors:', error);
+      console.error('Doctors: Error fetching doctors:', error);
     } finally {
       setIsLoading(false);
     }
@@ -59,6 +60,11 @@ const Doctors = () => {
 
   const handleConsultationRequest = (doctorId: string) => {
     navigate(`/consultation?doctor=${doctorId}`);
+  };
+
+  const refreshData = () => {
+    console.log('Doctors: Manual refresh triggered');
+    setLastUpdate(Date.now());
   };
 
   if (isLoading) {
@@ -89,6 +95,10 @@ const Doctors = () => {
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
               با بهترین متخصصان چشم کشور آشنا شوید و درخواست مشاوره ارسال کنید
             </p>
+            <Button onClick={refreshData} variant="secondary" className="mt-4">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              بروزرسانی لیست پزشکان
+            </Button>
           </div>
         </div>
 
@@ -99,7 +109,7 @@ const Doctors = () => {
               <Stethoscope className="h-24 w-24 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-2xl font-semibold mb-2">هیچ پزشکی یافت نشد</h3>
               <p className="text-muted-foreground mb-4">در حال حاضر هیچ پزشک فعالی ثبت نشده است.</p>
-              <Button onClick={fetchDoctors} variant="outline">
+              <Button onClick={refreshData} variant="outline">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 بازخوانی
               </Button>
@@ -115,7 +125,7 @@ const Doctors = () => {
                         alt={doctor.name}
                         className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
                         onError={(e) => {
-                          console.log('Image failed to load:', doctor.image_url);
+                          console.log('Doctors: Image failed to load:', doctor.image_url);
                           e.currentTarget.style.display = 'none';
                         }}
                       />

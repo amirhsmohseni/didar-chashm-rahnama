@@ -21,6 +21,8 @@ const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  console.log('Header: User data:', { user: user?.email, isAdmin });
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -74,7 +76,7 @@ const Header = () => {
             ))}
             
             {/* Admin Link - prominently displayed for admins */}
-            {isAdmin && (
+            {user && isAdmin && (
               <Link
                 to="/admin"
                 className="flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
@@ -155,10 +157,10 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
-              {isAdmin && (
+              {user && isAdmin && (
                 <Link
                   to="/admin"
-                  className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium px-4 py-2 flex items-center gap-2"
+                  className="text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium px-4 py-2 flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Shield className="h-4 w-4" />
