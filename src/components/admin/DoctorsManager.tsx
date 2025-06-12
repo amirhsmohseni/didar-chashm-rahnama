@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, EyeOff, Star, Stethoscope, Upload } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
@@ -497,7 +496,6 @@ const DoctorsManager = () => {
                       <Switch
                         checked={doctor.is_active}
                         onCheckedChange={() => toggleStatus(doctor.id, 'is_active', doctor.is_active)}
-                        size="sm"
                       />
                       <span className="text-xs">
                         {doctor.is_active ? 'فعال' : 'غیرفعال'}

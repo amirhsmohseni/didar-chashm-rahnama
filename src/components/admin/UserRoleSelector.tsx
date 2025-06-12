@@ -18,6 +18,8 @@ interface UserRoleSelectorProps {
   onRolesChange: () => void;
 }
 
+type AppRole = 'admin' | 'manager' | 'editor' | 'doctor' | 'viewer' | 'user';
+
 const UserRoleSelector = ({ userId, currentRoles, onRolesChange }: UserRoleSelectorProps) => {
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +41,7 @@ const UserRoleSelector = ({ userId, currentRoles, onRolesChange }: UserRoleSelec
     try {
       const { error } = await supabase
         .from('user_roles')
-        .insert([{ user_id: userId, role: selectedRole }]);
+        .insert([{ user_id: userId, role: selectedRole as AppRole }]);
 
       if (error) throw error;
 
