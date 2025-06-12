@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Stethoscope, Award, Calendar, Phone, Mail } from 'lucide-react';
+import { Stethoscope, Award, Calendar, Phone, Mail, RefreshCw } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 
 import Header from '@/components/layout/Header';
@@ -20,6 +20,7 @@ interface Doctor {
   bio: string | null;
   is_featured: boolean;
   is_active: boolean;
+  consultation_fee: number | null;
 }
 
 const Doctors = () => {
@@ -32,7 +33,9 @@ const Doctors = () => {
   }, []);
 
   const fetchDoctors = async () => {
+    setIsLoading(true);
     try {
+      console.log('Fetching all doctors...');
       const { data, error } = await supabase
         .from('doctors')
         .select('*')
@@ -40,7 +43,12 @@ const Doctors = () => {
         .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching doctors:', error);
+        throw error;
+      }
+      
+      console.log('All doctors data:', data);
       setDoctors(data || []);
     } catch (error) {
       console.error('Error fetching doctors:', error);
@@ -59,8 +67,8 @@ const Doctors = () => {
         <Header />
         <div className="min-h-screen bg-secondary flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">در حال بارگذاری...</p>
+            <RefreshCw className="h-16 w-16 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-lg text-muted-foreground">در حال بارگذاری پزشکان...</p>
           </div>
         </div>
         <Footer />
@@ -90,7 +98,11 @@ const Doctors = () => {
             <div className="text-center py-16">
               <Stethoscope className="h-24 w-24 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-2xl font-semibold mb-2">هیچ پزشکی یافت نشد</h3>
-              <p className="text-muted-foreground">در حال حاضر هیچ پزشک فعالی ثبت نشده است.</p>
+              <p className="text-muted-foreground mb-4">در حال حاضر هیچ پزشک فعالی ثبت نشده است.</p>
+              <Button onClick={fetchDoctors} variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                بازخوانی
+              </Button>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -102,6 +114,10 @@ const Doctors = () => {
                         src={doctor.image_url}
                         alt={doctor.name}
                         className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
+                        onError={(e) => {
+                          console.log('Image failed to load:', doctor.image_url);
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     ) : (
                       <div className="w-32 h-32 rounded-full mx-auto mb-4 bg-primary/10 flex items-center justify-center">
@@ -136,6 +152,15 @@ const Doctors = () => {
                         <div className="text-sm">
                           <span className="font-medium">درباره دکتر:</span>
                           <p className="text-muted-foreground mt-1 line-clamp-3">{doctor.bio}</p>
+                        </div>
+                      )}
+
+                      {doctor.consultation_fee && (
+                        <div className="text-sm">
+                          <span className="font-medium">هزینه ویزیت:</span>
+                          <p className="text-primary font-medium mt-1">
+                            {doctor.consultation_fee.toLocaleString()} تومان
+                          </p>
                         </div>
                       )}
                     </div>

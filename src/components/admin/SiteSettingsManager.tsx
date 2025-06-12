@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Save, Settings } from 'lucide-react';
+import { Save, Settings, RefreshCw } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,23 +29,34 @@ const SiteSettingsManager = () => {
   }, []);
 
   const fetchSettings = async () => {
+    setIsLoading(true);
     try {
+      console.log('Fetching site settings...');
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')
         .order('key');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching settings:', error);
+        throw error;
+      }
       
+      console.log('Site settings data:', data);
       setSettings(data || []);
       
       // Initialize form data
       const initialData: Record<string, string> = {};
       data?.forEach(setting => {
-        initialData[setting.key] = typeof setting.value === 'string' 
-          ? setting.value.replace(/^"|"$/g, '') // Remove surrounding quotes
-          : String(setting.value);
+        let value = setting.value;
+        if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
+          value = value.slice(1, -1); // Remove surrounding quotes
+        } else if (typeof value !== 'string') {
+          value = JSON.stringify(value).replace(/^"|"$/g, '');
+        }
+        initialData[setting.key] = value;
       });
+      console.log('Initialized form data:', initialData);
       setFormData(initialData);
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -62,32 +73,46 @@ const SiteSettingsManager = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Update each setting
-      for (const setting of settings) {
+      console.log('Saving settings with data:', formData);
+      
+      const updatePromises = settings.map(async (setting) => {
         const newValue = JSON.stringify(formData[setting.key] || '');
+        console.log(`Updating ${setting.key} with value:`, newValue);
         
-        await supabase
+        const { error } = await supabase
           .from('site_settings')
           .update({ 
             value: newValue,
             updated_at: new Date().toISOString()
           })
           .eq('key', setting.key);
-      }
+          
+        if (error) {
+          console.error(`Error updating ${setting.key}:`, error);
+          throw error;
+        }
+      });
+
+      await Promise.all(updatePromises);
 
       // Log activity
-      await supabase.rpc('log_admin_activity', {
-        action_name: 'update_site_settings',
-        resource_type_name: 'site_settings',
-        details_data: { updated_settings: Object.keys(formData) }
-      });
+      try {
+        await supabase.rpc('log_admin_activity', {
+          action_name: 'update_site_settings',
+          resource_type_name: 'site_settings',
+          details_data: { updated_settings: Object.keys(formData) }
+        });
+      } catch (logError) {
+        console.warn('Failed to log admin activity:', logError);
+      }
 
       toast({
         title: "تنظیمات ذخیره شد",
         description: "تنظیمات سایت با موفقیت بروزرسانی شد",
       });
 
-      fetchSettings(); // Refresh to get updated data
+      // Refresh settings to confirm save
+      await fetchSettings();
     } catch (error) {
       console.error('Error saving settings:', error);
       toast({
@@ -101,6 +126,7 @@ const SiteSettingsManager = () => {
   };
 
   const handleInputChange = (key: string, value: string) => {
+    console.log(`Changing ${key} to:`, value);
     setFormData(prev => ({
       ...prev,
       [key]: value
@@ -121,7 +147,16 @@ const SiteSettingsManager = () => {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">در حال بارگذاری...</div>;
+    return (
+      <Card>
+        <CardContent className="p-8">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>در حال بارگذاری تنظیمات...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -134,33 +169,52 @@ const SiteSettingsManager = () => {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {settings.map((setting) => (
-          <div key={setting.id} className="space-y-2">
-            <label className="block text-sm font-medium">
-              {getSettingLabel(setting.key)}
-            </label>
-            {setting.description && (
-              <p className="text-xs text-muted-foreground">{setting.description}</p>
-            )}
-            {['hero_description', 'site_description'].includes(setting.key) ? (
-              <Textarea
-                value={formData[setting.key] || ''}
-                onChange={(e) => handleInputChange(setting.key, e.target.value)}
-                rows={3}
-                className="w-full"
-              />
-            ) : (
-              <Input
-                value={formData[setting.key] || ''}
-                onChange={(e) => handleInputChange(setting.key, e.target.value)}
-                className="w-full"
-              />
-            )}
+        {settings.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            هیچ تنظیماتی یافت نشد
           </div>
-        ))}
+        ) : (
+          settings.map((setting) => (
+            <div key={setting.id} className="space-y-2">
+              <label className="block text-sm font-medium">
+                {getSettingLabel(setting.key)}
+              </label>
+              {setting.description && (
+                <p className="text-xs text-muted-foreground">{setting.description}</p>
+              )}
+              {['hero_description', 'site_description'].includes(setting.key) ? (
+                <Textarea
+                  value={formData[setting.key] || ''}
+                  onChange={(e) => handleInputChange(setting.key, e.target.value)}
+                  rows={3}
+                  className="w-full"
+                  placeholder={`وارد کردن ${getSettingLabel(setting.key)}`}
+                />
+              ) : (
+                <Input
+                  value={formData[setting.key] || ''}
+                  onChange={(e) => handleInputChange(setting.key, e.target.value)}
+                  className="w-full"
+                  placeholder={`وارد کردن ${getSettingLabel(setting.key)}`}
+                />
+              )}
+            </div>
+          ))
+        )}
 
-        <div className="flex justify-end pt-4">
-          <Button onClick={handleSave} disabled={isSaving}>
+        <div className="flex justify-end gap-4 pt-4">
+          <Button 
+            onClick={fetchSettings} 
+            variant="outline"
+            disabled={isLoading || isSaving}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            بازخوانی
+          </Button>
+          <Button 
+            onClick={handleSave} 
+            disabled={isSaving || isLoading}
+          >
             <Save className="h-4 w-4 mr-2" />
             {isSaving ? 'در حال ذخیره...' : 'ذخیره تنظیمات'}
           </Button>

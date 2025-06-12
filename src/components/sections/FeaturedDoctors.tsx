@@ -1,20 +1,23 @@
 
 import { useState, useEffect } from 'react';
-import { Stethoscope, Award, Calendar, ArrowLeft } from 'lucide-react';
+import { Star, Award, Calendar, MapPin, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
-
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface Doctor {
   id: string;
   name: string;
   specialty: string;
+  bio: string | null;
+  education: string | null;
   experience_years: number;
   image_url: string | null;
-  bio: string | null;
+  is_featured: boolean;
+  is_active: boolean;
+  consultation_fee: number | null;
 }
 
 const FeaturedDoctors = () => {
@@ -22,19 +25,26 @@ const FeaturedDoctors = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchFeaturedDoctors();
+    fetchDoctors();
   }, []);
 
-  const fetchFeaturedDoctors = async () => {
+  const fetchDoctors = async () => {
     try {
+      console.log('Fetching featured doctors...');
       const { data, error } = await supabase
         .from('doctors')
-        .select('id, name, specialty, experience_years, image_url, bio')
-        .eq('is_featured', true)
+        .select('id, name, specialty, bio, education, experience_years, image_url, is_featured, is_active, consultation_fee')
         .eq('is_active', true)
+        .eq('is_featured', true)
+        .order('created_at', { ascending: false })
         .limit(3);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching doctors:', error);
+        throw error;
+      }
+      
+      console.log('Featured doctors data:', data);
       setDoctors(data || []);
     } catch (error) {
       console.error('Error fetching featured doctors:', error);
@@ -45,26 +55,29 @@ const FeaturedDoctors = () => {
 
   if (isLoading) {
     return (
-      <section className="py-20">
-        <div className="container text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">در حال بارگذاری پزشکان برجسته...</p>
+      <section className="py-16 bg-secondary">
+        <div className="container">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-muted-foreground">در حال بارگذاری پزشکان...</p>
+          </div>
         </div>
       </section>
     );
   }
 
   if (doctors.length === 0) {
-    return null; // Don't show section if no featured doctors
+    console.log('No featured doctors found');
+    return null;
   }
 
   return (
-    <section className="py-20">
+    <section className="py-16 bg-secondary">
       <div className="container">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">پزشکان برجسته ما</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            آشنایی با برخی از بهترین متخصصان چشم که با ما همکاری می‌کنند
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-eyecare-800 mb-4">پزشکان متخصص ما</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            با بهترین متخصصان چشم‌پزشکی کشور آشنا شوید
           </p>
         </div>
         
@@ -80,46 +93,56 @@ const FeaturedDoctors = () => {
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-full mx-auto mb-4 bg-primary/10 flex items-center justify-center">
-                    <Stethoscope className="h-12 w-12 text-primary" />
+                    <Star className="h-12 w-12 text-primary" />
                   </div>
                 )}
-                <Badge variant="destructive" className="w-fit mx-auto mb-2">
+                <CardTitle className="text-xl">{doctor.name}</CardTitle>
+                <p className="text-primary font-medium">{doctor.specialty}</p>
+                <Badge variant="destructive" className="w-fit mx-auto">
                   <Award className="h-3 w-3 mr-1" />
                   پزشک برجسته
                 </Badge>
-                <CardTitle className="text-xl">{doctor.name}</CardTitle>
-                <p className="text-primary font-medium">{doctor.specialty}</p>
               </CardHeader>
-              
+
               <CardContent>
-                <div className="flex items-center justify-center text-sm text-muted-foreground mb-4">
-                  <Calendar className="h-4 w-4 ml-2" />
-                  {doctor.experience_years} سال تجربه
+                <div className="space-y-3 text-sm text-gray-600">
+                  <div className="flex items-center justify-center">
+                    <Calendar className="h-4 w-4 ml-2" />
+                    {doctor.experience_years} سال تجربه
+                  </div>
+                  
+                  {doctor.education && (
+                    <p className="text-center">{doctor.education}</p>
+                  )}
+
+                  {doctor.bio && (
+                    <p className="text-center line-clamp-2">{doctor.bio}</p>
+                  )}
+
+                  {doctor.consultation_fee && (
+                    <div className="text-center font-medium text-primary">
+                      هزینه ویزیت: {doctor.consultation_fee.toLocaleString()} تومان
+                    </div>
+                  )}
                 </div>
-                
-                {doctor.bio && (
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                    {doctor.bio}
-                  </p>
-                )}
-                
-                <Button asChild variant="outline" className="w-full">
-                  <Link to={`/consultation?doctor=${doctor.id}`}>
+
+                <Link to={`/consultation?doctor=${doctor.id}`} className="block mt-4">
+                  <Button className="w-full">
+                    <Phone className="h-4 w-4 ml-2" />
                     درخواست مشاوره
-                  </Link>
-                </Button>
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
         </div>
-        
-        <div className="text-center mt-12">
-          <Button asChild variant="outline" size="lg">
-            <Link to="/doctors">
+
+        <div className="text-center mt-8">
+          <Link to="/doctors">
+            <Button size="lg" variant="outline">
               مشاهده همه پزشکان
-              <ArrowLeft className="h-4 w-4 mr-2" />
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
