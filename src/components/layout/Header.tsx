@@ -43,7 +43,6 @@ const Header = () => {
   const navigationItems = [
     { name: 'خانه', href: '/' },
     { name: 'خدمات', href: '/services' },
-    { name: 'پزشکان', href: '/doctors' },
     { name: 'مشاوره', href: '/consultation' },
     { name: 'درباره ما', href: '/about' },
     { name: 'وبلاگ', href: '/blog' },

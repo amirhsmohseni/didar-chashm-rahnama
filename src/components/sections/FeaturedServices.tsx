@@ -32,7 +32,7 @@ const FeaturedServices = () => {
         .eq('is_active', true)
         .eq('is_featured', true)
         .order('order_index', { ascending: true })
-        .limit(4);
+        .limit(6);
 
       if (error) throw error;
       setServices(data || []);
@@ -78,13 +78,13 @@ const FeaturedServices = () => {
     <section className="py-16 bg-gray-50">
       <div className="container">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-eyecare-800 mb-4">خدمات ما</h2>
+          <h2 className="text-3xl font-bold text-eyecare-800 mb-4">خدمات برجسته ما</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             ما طیف گسترده‌ای از خدمات تخصصی چشم‌پزشکی را با بالاترین کیفیت ارائه می‌دهیم
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {services.map((service) => (
             <Card key={service.id} className="group hover:shadow-lg transition-shadow duration-300">
               <CardHeader className="text-center">

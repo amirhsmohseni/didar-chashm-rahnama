@@ -5,6 +5,7 @@ import { Eye, Stethoscope, Calendar, Phone, Award, Users, Clock, Shield } from '
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FeaturedDoctors from '@/components/sections/FeaturedDoctors';
+import FeaturedServices from '@/components/sections/FeaturedServices';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -99,6 +100,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Featured Services */}
+      <FeaturedServices />
 
       {/* Featured Doctors */}
       <FeaturedDoctors />
