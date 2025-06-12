@@ -73,111 +73,115 @@ const AdminToolbox = () => {
 
   if (!user) {
     return (
-      <Alert className="mb-6 border-red-200 bg-red-50">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          لطفا ابتدا وارد حساب کاربری خود شوید.
-        </AlertDescription>
-      </Alert>
+      <div className="container mx-auto px-4 py-4">
+        <Alert className="border-red-200 bg-red-50">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            لطفا ابتدا وارد حساب کاربری خود شوید.
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
   return (
-    <Card className="mb-6 border-2 border-dashed border-blue-200 bg-blue-50/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-blue-800">
-          <Info className="h-5 w-5" />
-          وضعیت دسترسی پنل مدیریت
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div className="space-y-2">
-            <div>
-              <strong>وضعیت ورود:</strong>
-              <div className="flex items-center gap-2 mt-1">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-green-600">وارد شده</span>
+    <div className="container mx-auto px-4 py-4">
+      <Card className="border-2 border-dashed border-blue-200 bg-blue-50/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-800">
+            <Info className="h-5 w-5" />
+            وضعیت دسترسی پنل مدیریت
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="space-y-2">
+              <div>
+                <strong>وضعیت ورود:</strong>
+                <div className="flex items-center gap-2 mt-1">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-green-600">وارد شده</span>
+                </div>
+              </div>
+              
+              <div>
+                <strong>ایمیل کاربر:</strong>
+                <p className="mt-1 text-muted-foreground">{user.email}</p>
               </div>
             </div>
             
-            <div>
-              <strong>ایمیل کاربر:</strong>
-              <p className="mt-1 text-muted-foreground">{user.email}</p>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <div>
-              <strong>نقش فعلی:</strong>
-              <div className="mt-1">
-                {isAdmin ? (
-                  <Badge variant="default" className="flex items-center gap-1 w-fit">
-                    <Shield className="h-3 w-3" />
-                    مدیر سیستم
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="flex items-center gap-1 w-fit">
-                    <UserCheck className="h-3 w-3" />
-                    {userRole || 'کاربر عادی'}
-                  </Badge>
-                )}
+            <div className="space-y-2">
+              <div>
+                <strong>نقش فعلی:</strong>
+                <div className="mt-1">
+                  {isAdmin ? (
+                    <Badge variant="default" className="flex items-center gap-1 w-fit">
+                      <Shield className="h-3 w-3" />
+                      مدیر سیستم
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="flex items-center gap-1 w-fit">
+                      <UserCheck className="h-3 w-3" />
+                      {userRole || 'کاربر عادی'}
+                    </Badge>
+                  )}
+                </div>
               </div>
-            </div>
-            
-            <div>
-              <strong>دسترسی پنل:</strong>
-              <div className="mt-1">
-                {isAdmin ? (
-                  <span className="text-green-600 text-sm">✅ دارای دسترسی</span>
-                ) : (
-                  <span className="text-red-600 text-sm">❌ فاقد دسترسی</span>
-                )}
+              
+              <div>
+                <strong>دسترسی پنل:</strong>
+                <div className="mt-1">
+                  {isAdmin ? (
+                    <span className="text-green-600 text-sm">✅ دارای دسترسی</span>
+                  ) : (
+                    <span className="text-red-600 text-sm">❌ فاقد دسترسی</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {!isAdmin && (
-          <div className="border-t pt-4">
-            <Alert className="mb-4 border-yellow-200 bg-yellow-50">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>توجه:</strong> شما در حال حاضر دسترسی به پنل مدیریت ندارید. 
-                برای دسترسی، نیاز به نقش "ادمین" دارید.
-              </AlertDescription>
-            </Alert>
-            
-            <Button 
-              onClick={makeCurrentUserAdmin} 
-              disabled={isCreatingAdmin}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
-              size="lg"
-            >
-              <Shield className="h-4 w-4 mr-2" />
-              {isCreatingAdmin ? 'در حال ایجاد دسترسی...' : 'ایجاد دسترسی مدیر برای من'}
-            </Button>
-            
-            <p className="text-xs text-muted-foreground mt-2">
-              این دکمه نقش ادمین را برای حساب فعلی شما تنظیم می‌کند
-            </p>
-          </div>
-        )}
+          {!isAdmin && (
+            <div className="border-t pt-4">
+              <Alert className="mb-4 border-yellow-200 bg-yellow-50">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>توجه:</strong> شما در حال حاضر دسترسی به پنل مدیریت ندارید. 
+                  برای دسترسی، نیاز به نقش "ادمین" دارید.
+                </AlertDescription>
+              </Alert>
+              
+              <Button 
+                onClick={makeCurrentUserAdmin} 
+                disabled={isCreatingAdmin}
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+                size="lg"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                {isCreatingAdmin ? 'در حال ایجاد دسترسی...' : 'ایجاد دسترسی مدیر برای من'}
+              </Button>
+              
+              <p className="text-xs text-muted-foreground mt-2">
+                این دکمه نقش ادمین را برای حساب فعلی شما تنظیم می‌کند
+              </p>
+            </div>
+          )}
 
-        {isAdmin && (
-          <div className="border-t pt-4">
-            <Alert className="border-green-200 bg-green-50">
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>✅ شما دسترسی مدیر دارید!</strong>
-                <br />
-                می‌توانید از تمام قابلیت‌های پنل مدیریت استفاده کنید.
-              </AlertDescription>
-            </Alert>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          {isAdmin && (
+            <div className="border-t pt-4">
+              <Alert className="border-green-200 bg-green-50">
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>✅ شما دسترسی مدیر دارید!</strong>
+                  <br />
+                  می‌توانید از تمام قابلیت‌های پنل مدیریت استفاده کنید.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
