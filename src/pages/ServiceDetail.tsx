@@ -58,7 +58,17 @@ const ServiceDetail = () => {
         return;
       }
 
-      setService(data);
+      // Transform the data to match our interface
+      const transformedService = {
+        ...data,
+        gallery_images: Array.isArray(data.gallery_images) 
+          ? data.gallery_images 
+          : data.gallery_images 
+            ? JSON.parse(data.gallery_images as string)
+            : []
+      };
+
+      setService(transformedService);
     } catch (error) {
       console.error('Error fetching service:', error);
       setError('خطا در دریافت اطلاعات سرویس');
@@ -124,7 +134,7 @@ const ServiceDetail = () => {
       <SEO 
         title={service.meta_title || service.title}
         description={service.meta_description || service.description}
-        image={service.featured_image || service.image_url}
+        ogImage={service.featured_image || service.image_url}
       />
       <Header />
       

@@ -28,7 +28,7 @@ const FeaturedServices = () => {
     try {
       const { data, error } = await supabase
         .from('services')
-        .select('*')
+        .select('id, title, description, icon, image_url, is_featured, slug')
         .eq('is_active', true)
         .eq('is_featured', true)
         .order('order_index', { ascending: true })
