@@ -1,19 +1,11 @@
 
 import { useState, useEffect } from 'react';
-import { Crown, User, Stethoscope, Trash2, RefreshCw } from 'lucide-react';
+import { Users, Search } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -22,29 +14,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import UserRoleSelector from './UserRoleSelector';
 
-interface UserWithRole {
+interface User {
   id: string;
   email: string;
   full_name: string;
   phone: string | null;
   created_at: string;
-  role: string;
+  roles: Array<{
+    id: string;
+    role: string;
+  }>;
 }
 
 const UserRolesManager = () => {
-  const [users, setUsers] = useState<UserWithRole[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -52,32 +39,43 @@ const UserRolesManager = () => {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = users.filter(user => 
+        user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers(users);
+    }
+  }, [searchTerm, users]);
+
   const fetchUsers = async () => {
-    setIsLoading(true);
     try {
-      // Get profiles
+      // Get users from auth.users via profiles table
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, created_at');
+        .select('*');
 
       if (profilesError) throw profilesError;
 
       // Get user roles
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
-        .select('user_id, role');
+        .select('*');
 
       if (rolesError) throw rolesError;
 
-      const usersWithRoles = (profiles || []).map((profile) => {
-        const userRole = roles?.find(role => role.user_id === profile.id);
-        
-        return {
-          ...profile,
-          email: `user-${profile.id.slice(0, 8)}@example.com`,
-          role: userRole?.role || 'user'
-        };
-      });
+      // Combine data
+      const usersWithRoles = profiles?.map(profile => ({
+        id: profile.id,
+        email: '', // We can't access auth.users directly, so email will be empty
+        full_name: profile.full_name,
+        phone: profile.phone,
+        created_at: profile.created_at,
+        roles: roles?.filter(role => role.user_id === profile.id) || []
+      })) || [];
 
       setUsers(usersWithRoles);
     } catch (error) {
@@ -92,197 +90,64 @@ const UserRolesManager = () => {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: string) => {
-    try {
-      // Delete existing role
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId);
-
-      // Insert new role if not 'user' (which is default)
-      if (newRole !== 'user') {
-        const { error } = await supabase
-          .from('user_roles')
-          .insert({ 
-            user_id: userId, 
-            role: newRole as 'admin' | 'doctor' | 'user'
-          });
-
-        if (error) throw error;
-      }
-
-      toast({
-        title: "نقش بروزرسانی شد",
-        description: "نقش کاربر با موفقیت تغییر کرد",
-      });
-      
-      fetchUsers();
-    } catch (error) {
-      console.error('Error updating role:', error);
-      toast({
-        title: "خطا",
-        description: "خطا در بروزرسانی نقش",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const deleteUser = async (userId: string) => {
-    try {
-      // Delete user roles first
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId);
-
-      // Delete profile
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
-
-      if (error) throw error;
-
-      toast({
-        title: "کاربر حذف شد",
-        description: "کاربر با موفقیت حذف شد",
-      });
-      
-      fetchUsers();
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      toast({
-        title: "خطا",
-        description: "خطا در حذف کاربر",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return <Crown className="h-4 w-4" />;
-      case 'doctor':
-        return <Stethoscope className="h-4 w-4" />;
-      default:
-        return <User className="h-4 w-4" />;
-    }
-  };
-
-  const getRoleBadge = (role: string) => {
-    const roleMap = {
-      admin: { label: 'مدیر', variant: 'destructive' as const },
-      doctor: { label: 'پزشک', variant: 'default' as const },
-      user: { label: 'کاربر', variant: 'secondary' as const },
-    };
-    
-    const roleInfo = roleMap[role as keyof typeof roleMap] || roleMap.user;
-    return (
-      <Badge variant={roleInfo.variant} className="flex items-center gap-1">
-        {getRoleIcon(role)}
-        {roleInfo.label}
-      </Badge>
-    );
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fa-IR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center h-32">
-          <div className="text-center">در حال بارگذاری...</div>
-        </CardContent>
-      </Card>
-    );
+    return <div className="text-center py-8">در حال بارگذاری...</div>;
   }
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>مدیریت نقش‌های کاربری</CardTitle>
-        <Button onClick={fetchUsers} variant="outline" size="sm">
-          <RefreshCw className="h-4 w-4" />
-        </Button>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Users className="h-5 w-5" />
+          مدیریت کاربران و نقش‌ها
+        </CardTitle>
+        <div className="flex items-center gap-2">
+          <Search className="h-4 w-4" />
+          <Input
+            placeholder="جستجو بر اساس نام یا ایمیل..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm"
+          />
+        </div>
       </CardHeader>
+
       <CardContent>
-        {users.length === 0 ? (
+        {filteredUsers.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            هیچ کاربری ثبت نشده است
+            {searchTerm ? 'کاربری یافت نشد' : 'هیچ کاربری ثبت نشده است'}
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>نام</TableHead>
-                <TableHead>شناسه کاربر</TableHead>
-                <TableHead>نقش فعلی</TableHead>
-                <TableHead>تاریخ ثبت‌نام</TableHead>
-                <TableHead>عملیات</TableHead>
+                <TableHead>نام کامل</TableHead>
+                <TableHead>شماره تماس</TableHead>
+                <TableHead>نقش‌ها</TableHead>
+                <TableHead>تاریخ عضویت</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">
-                    <div>
-                      <div>{user.full_name}</div>
-                      {user.phone && (
-                        <div className="text-sm text-muted-foreground">{user.phone}</div>
-                      )}
-                    </div>
-                  </TableCell>
+                  <TableCell className="font-medium">{user.full_name}</TableCell>
+                  <TableCell>{user.phone || 'وارد نشده'}</TableCell>
                   <TableCell>
-                    <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                      {user.id.slice(0, 8)}...
-                    </code>
+                    <UserRoleSelector 
+                      userId={user.id}
+                      currentRoles={user.roles}
+                      onRolesChange={fetchUsers}
+                    />
                   </TableCell>
-                  <TableCell>{getRoleBadge(user.role)}</TableCell>
-                  <TableCell>
-                    {new Date(user.created_at).toLocaleDateString('fa-IR')}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Select
-                        value={user.role}
-                        onValueChange={(value) => updateUserRole(user.id, value)}
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="user">کاربر</SelectItem>
-                          <SelectItem value="doctor">پزشک</SelectItem>
-                          <SelectItem value="admin">مدیر</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>حذف کاربر</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              آیا از حذف کاربر "{user.full_name}" اطمینان دارید؟ این عمل قابل بازگشت نیست.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>لغو</AlertDialogCancel>
-                            <AlertDialogAction 
-                              onClick={() => deleteUser(user.id)}
-                              className="bg-red-600 hover:bg-red-700"
-                            >
-                              حذف
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
+                  <TableCell>{formatDate(user.created_at)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

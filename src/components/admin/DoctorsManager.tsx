@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, EyeOff, Star, Stethoscope } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Star, Stethoscope, Upload } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Doctor {
   id: string;
@@ -36,6 +37,10 @@ interface Doctor {
   education: string | null;
   experience_years: number;
   image_url: string | null;
+  profile_description: string | null;
+  consultation_fee: number | null;
+  available_days: string[] | null;
+  available_hours: string | null;
   is_active: boolean;
   is_featured: boolean;
   created_at: string;
@@ -55,9 +60,23 @@ const DoctorsManager = () => {
     education: '',
     experience_years: 0,
     image_url: '',
+    profile_description: '',
+    consultation_fee: 0,
+    available_days: [] as string[],
+    available_hours: '',
     is_active: true,
     is_featured: false,
   });
+
+  const weekDays = [
+    { value: 'saturday', label: 'شنبه' },
+    { value: 'sunday', label: 'یکشنبه' },
+    { value: 'monday', label: 'دوشنبه' },
+    { value: 'tuesday', label: 'سه‌شنبه' },
+    { value: 'wednesday', label: 'چهارشنبه' },
+    { value: 'thursday', label: 'پنج‌شنبه' },
+    { value: 'friday', label: 'جمعه' }
+  ];
 
   useEffect(() => {
     fetchDoctors();
@@ -88,24 +107,48 @@ const DoctorsManager = () => {
     e.preventDefault();
     
     try {
+      const submitData = {
+        ...formData,
+        available_days: formData.available_days.length > 0 ? formData.available_days : null,
+        consultation_fee: formData.consultation_fee || null
+      };
+
       if (editingDoctor) {
         const { error } = await supabase
           .from('doctors')
-          .update(formData)
+          .update(submitData)
           .eq('id', editingDoctor.id);
         
         if (error) throw error;
+
+        // Log activity
+        await supabase.rpc('log_admin_activity', {
+          action_name: 'update_doctor',
+          resource_type_name: 'doctors',
+          resource_id_value: editingDoctor.id,
+          details_data: submitData
+        });
         
         toast({
           title: "پزشک بروزرسانی شد",
           description: "اطلاعات پزشک با موفقیت بروزرسانی شد",
         });
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('doctors')
-          .insert([formData]);
+          .insert([submitData])
+          .select()
+          .single();
         
         if (error) throw error;
+
+        // Log activity
+        await supabase.rpc('log_admin_activity', {
+          action_name: 'create_doctor',
+          resource_type_name: 'doctors',
+          resource_id_value: data.id,
+          details_data: submitData
+        });
         
         toast({
           title: "پزشک اضافه شد",
@@ -137,6 +180,13 @@ const DoctorsManager = () => {
         .eq('id', id);
       
       if (error) throw error;
+
+      // Log activity
+      await supabase.rpc('log_admin_activity', {
+        action_name: 'delete_doctor',
+        resource_type_name: 'doctors',
+        resource_id_value: id
+      });
       
       toast({
         title: "پزشک حذف شد",
@@ -162,6 +212,14 @@ const DoctorsManager = () => {
         .eq('id', id);
       
       if (error) throw error;
+
+      // Log activity
+      await supabase.rpc('log_admin_activity', {
+        action_name: `toggle_doctor_${field}`,
+        resource_type_name: 'doctors',
+        resource_id_value: id,
+        details_data: { [field]: !currentValue }
+      });
       
       toast({
         title: "وضعیت بروزرسانی شد",
@@ -188,6 +246,10 @@ const DoctorsManager = () => {
       education: doctor.education || '',
       experience_years: doctor.experience_years,
       image_url: doctor.image_url || '',
+      profile_description: doctor.profile_description || '',
+      consultation_fee: doctor.consultation_fee || 0,
+      available_days: doctor.available_days || [],
+      available_hours: doctor.available_hours || '',
       is_active: doctor.is_active,
       is_featured: doctor.is_featured,
     });
@@ -202,10 +264,23 @@ const DoctorsManager = () => {
       education: '',
       experience_years: 0,
       image_url: '',
+      profile_description: '',
+      consultation_fee: 0,
+      available_days: [],
+      available_hours: '',
       is_active: true,
       is_featured: false,
     });
     setEditingDoctor(null);
+  };
+
+  const handleDayToggle = (day: string) => {
+    setFormData(prev => ({
+      ...prev,
+      available_days: prev.available_days.includes(day)
+        ? prev.available_days.filter(d => d !== day)
+        : [...prev.available_days, day]
+    }));
   };
 
   const formatDate = (dateString: string) => {
@@ -235,41 +310,56 @@ const DoctorsManager = () => {
                 افزودن پزشک
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingDoctor ? 'ویرایش پزشک' : 'افزودن پزشک جدید'}
                 </DialogTitle>
                 <DialogDescription>
-                  اطلاعات پزشک را وارد کنید
+                  اطلاعات کامل پزشک را وارد کنید
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">نام پزشک</label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">نام پزشک</label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">تخصص</label>
+                    <Input
+                      value={formData.specialty}
+                      onChange={(e) => setFormData({...formData, specialty: e.target.value})}
+                      required
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">تخصص</label>
-                  <Input
-                    value={formData.specialty}
-                    onChange={(e) => setFormData({...formData, specialty: e.target.value})}
-                    required
-                  />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">سابقه (سال)</label>
+                    <Input
+                      type="number"
+                      value={formData.experience_years}
+                      onChange={(e) => setFormData({...formData, experience_years: parseInt(e.target.value) || 0})}
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">هزینه ویزیت (تومان)</label>
+                    <Input
+                      type="number"
+                      value={formData.consultation_fee}
+                      onChange={(e) => setFormData({...formData, consultation_fee: parseInt(e.target.value) || 0})}
+                      min="0"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">سابقه (سال)</label>
-                  <Input
-                    type="number"
-                    value={formData.experience_years}
-                    onChange={(e) => setFormData({...formData, experience_years: parseInt(e.target.value) || 0})}
-                    min="0"
-                  />
-                </div>
+
                 <div>
                   <label className="block text-sm font-medium mb-1">تحصیلات</label>
                   <Input
@@ -277,36 +367,86 @@ const DoctorsManager = () => {
                     onChange={(e) => setFormData({...formData, education: e.target.value})}
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium mb-1">لینک تصویر</label>
+                  <label className="block text-sm font-medium mb-1">لینک تصویر پروفایل</label>
                   <Input
                     value={formData.image_url}
                     onChange={(e) => setFormData({...formData, image_url: e.target.value})}
                     placeholder="https://example.com/image.jpg"
                   />
+                  {formData.image_url && (
+                    <div className="mt-2">
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={formData.image_url} alt="Preview" />
+                        <AvatarFallback>{formData.name.slice(0, 2)}</AvatarFallback>
+                      </Avatar>
+                    </div>
+                  )}
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium mb-1">بیوگرافی</label>
+                  <label className="block text-sm font-medium mb-1">بیوگرافی کوتاه</label>
                   <Textarea
                     value={formData.bio}
                     onChange={(e) => setFormData({...formData, bio: e.target.value})}
                     rows={3}
                   />
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">توضیحات پروفایل</label>
+                  <Textarea
+                    value={formData.profile_description}
+                    onChange={(e) => setFormData({...formData, profile_description: e.target.value})}
+                    rows={4}
+                    placeholder="توضیحات تکمیلی درباره پزشک، تجربیات، نظرات بیماران و ..."
                   />
-                  <label className="text-sm">فعال</label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={formData.is_featured}
-                    onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">روزهای در دسترس</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {weekDays.map((day) => (
+                      <label key={day.value} className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.available_days.includes(day.value)}
+                          onChange={() => handleDayToggle(day.value)}
+                          className="rounded"
+                        />
+                        <span className="text-sm">{day.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">ساعات کاری</label>
+                  <Input
+                    value={formData.available_hours}
+                    onChange={(e) => setFormData({...formData, available_hours: e.target.value})}
+                    placeholder="مثال: 9:00-17:00"
                   />
-                  <label className="text-sm">ویژه</label>
                 </div>
+
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={formData.is_active}
+                      onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
+                    />
+                    <label className="text-sm">فعال</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={formData.is_featured}
+                      onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                    />
+                    <label className="text-sm">ویژه</label>
+                  </div>
+                </div>
+
                 <DialogFooter>
                   <Button type="submit">
                     {editingDoctor ? 'بروزرسانی' : 'افزودن'}
@@ -327,11 +467,12 @@ const DoctorsManager = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>تصویر</TableHead>
                 <TableHead>نام</TableHead>
                 <TableHead>تخصص</TableHead>
                 <TableHead>سابقه</TableHead>
+                <TableHead>هزینه ویزیت</TableHead>
                 <TableHead>وضعیت</TableHead>
-                <TableHead>ویژه</TableHead>
                 <TableHead>تاریخ ثبت</TableHead>
                 <TableHead>عملیات</TableHead>
               </TableRow>
@@ -339,31 +480,35 @@ const DoctorsManager = () => {
             <TableBody>
               {doctors.map((doctor) => (
                 <TableRow key={doctor.id}>
+                  <TableCell>
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={doctor.image_url || ''} alt={doctor.name} />
+                      <AvatarFallback>{doctor.name.slice(0, 2)}</AvatarFallback>
+                    </Avatar>
+                  </TableCell>
                   <TableCell className="font-medium">{doctor.name}</TableCell>
                   <TableCell>{doctor.specialty}</TableCell>
                   <TableCell>{doctor.experience_years} سال</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      {doctor.is_active ? (
-                        <Badge variant="default" className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
-                          فعال
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          <EyeOff className="h-3 w-3" />
-                          غیرفعال
+                    {doctor.consultation_fee ? `${doctor.consultation_fee.toLocaleString()} تومان` : 'مشخص نشده'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1">
+                      <Switch
+                        checked={doctor.is_active}
+                        onCheckedChange={() => toggleStatus(doctor.id, 'is_active', doctor.is_active)}
+                        size="sm"
+                      />
+                      <span className="text-xs">
+                        {doctor.is_active ? 'فعال' : 'غیرفعال'}
+                      </span>
+                      {doctor.is_featured && (
+                        <Badge variant="destructive" className="flex items-center gap-1 w-fit text-xs">
+                          <Star className="h-3 w-3" />
+                          ویژه
                         </Badge>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    {doctor.is_featured && (
-                      <Badge variant="destructive" className="flex items-center gap-1">
-                        <Star className="h-3 w-3" />
-                        ویژه
-                      </Badge>
-                    )}
                   </TableCell>
                   <TableCell>{formatDate(doctor.created_at)}</TableCell>
                   <TableCell>
@@ -378,14 +523,8 @@ const DoctorsManager = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => toggleStatus(doctor.id, 'is_active', doctor.is_active)}
-                      >
-                        {doctor.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
                         onClick={() => toggleStatus(doctor.id, 'is_featured', doctor.is_featured)}
+                        title={doctor.is_featured ? 'حذف از ویژه' : 'افزودن به ویژه'}
                       >
                         <Star className="h-4 w-4" />
                       </Button>

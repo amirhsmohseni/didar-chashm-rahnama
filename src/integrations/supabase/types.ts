@@ -13,6 +13,8 @@ export type Database = {
         Row: {
           action: string
           admin_id: string
+          after_data: Json | null
+          before_data: Json | null
           created_at: string | null
           details: Json | null
           id: string
@@ -24,6 +26,8 @@ export type Database = {
         Insert: {
           action: string
           admin_id: string
+          after_data?: Json | null
+          before_data?: Json | null
           created_at?: string | null
           details?: Json | null
           id?: string
@@ -35,6 +39,8 @@ export type Database = {
         Update: {
           action?: string
           admin_id?: string
+          after_data?: Json | null
+          before_data?: Json | null
           created_at?: string | null
           details?: Json | null
           id?: string
@@ -300,7 +306,10 @@ export type Database = {
       }
       doctors: {
         Row: {
+          available_days: string[] | null
+          available_hours: string | null
           bio: string | null
+          consultation_fee: number | null
           created_at: string
           education: string | null
           experience_years: number | null
@@ -309,12 +318,16 @@ export type Database = {
           is_active: boolean | null
           is_featured: boolean | null
           name: string
+          profile_description: string | null
           specialty: string
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          available_days?: string[] | null
+          available_hours?: string | null
           bio?: string | null
+          consultation_fee?: number | null
           created_at?: string
           education?: string | null
           experience_years?: number | null
@@ -323,12 +336,16 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           name: string
+          profile_description?: string | null
           specialty: string
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          available_days?: string[] | null
+          available_hours?: string | null
           bio?: string | null
+          consultation_fee?: number | null
           created_at?: string
           education?: string | null
           experience_years?: number | null
@@ -337,6 +354,7 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           name?: string
+          profile_description?: string | null
           specialty?: string
           updated_at?: string
           user_id?: string | null
@@ -421,6 +439,53 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_reviews: {
+        Row: {
+          created_at: string | null
+          doctor_id: string | null
+          id: string
+          is_approved: boolean | null
+          is_featured: boolean | null
+          patient_email: string | null
+          patient_name: string
+          rating: number | null
+          review_text: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          doctor_id?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          patient_email?: string | null
+          patient_name: string
+          rating?: number | null
+          review_text: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          doctor_id?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          patient_email?: string | null
+          patient_name?: string
+          rating?: number | null
+          review_text?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_reviews_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -472,6 +537,75 @@ export type Database = {
           id?: string
           last_updated?: string
           sell_price?: number
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string | null
+          description: string
+          icon: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          order_index: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          order_index?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          order_index?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: Json
         }
         Relationships: []
       }
@@ -590,6 +724,17 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      log_admin_activity: {
+        Args: {
+          action_name: string
+          resource_type_name: string
+          resource_id_value?: string
+          details_data?: Json
+          before_data_value?: Json
+          after_data_value?: Json
+        }
+        Returns: string
       }
     }
     Enums: {

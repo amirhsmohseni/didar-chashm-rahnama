@@ -11,8 +11,11 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import NewAdminDashboard from '@/components/admin/NewAdminDashboard';
 import UserRolesManager from '@/components/admin/UserRolesManager';
 import DoctorsManager from '@/components/admin/DoctorsManager';
+import ServicesManager from '@/components/admin/ServicesManager';
 import ConsultationRequestsManager from '@/components/admin/ConsultationRequestsManager';
+import PatientReviewsManager from '@/components/admin/PatientReviewsManager';
 import BlogManager from '@/components/admin/BlogManager';
+import SiteSettingsManager from '@/components/admin/SiteSettingsManager';
 import AdminSettings from '@/components/admin/AdminSettings';
 
 const Admin = () => {
@@ -27,10 +30,16 @@ const Admin = () => {
         return <UserRolesManager />;
       case 'doctors':
         return <DoctorsManager />;
+      case 'services':
+        return <ServicesManager />;
       case 'consultations':
         return <ConsultationRequestsManager />;
+      case 'reviews':
+        return <PatientReviewsManager />;
       case 'blog':
         return <BlogManager />;
+      case 'site-settings':
+        return <SiteSettingsManager />;
       case 'settings':
         return <AdminSettings />;
       default:
