@@ -406,6 +406,90 @@ export type Database = {
         }
         Relationships: []
       }
+      faqs: {
+        Row: {
+          answer: string
+          category: string | null
+          created_at: string | null
+          id: string
+          is_published: boolean | null
+          order_index: number | null
+          question: string
+          updated_at: string | null
+        }
+        Insert: {
+          answer: string
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          order_index?: number | null
+          question: string
+          updated_at?: string | null
+        }
+        Update: {
+          answer?: string
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          order_index?: number | null
+          question?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      media_items: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          duration: string | null
+          file_url: string
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          order_index: number | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: string | null
+          file_url: string
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          order_index?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: string | null
+          file_url?: string
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          order_index?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -436,6 +520,51 @@ export type Database = {
           title?: string
           type?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      pages: {
+        Row: {
+          content: string
+          created_at: string | null
+          excerpt: string | null
+          featured_image: string | null
+          id: string
+          is_published: boolean | null
+          meta_description: string | null
+          meta_title: string | null
+          slug: string
+          template: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          slug: string
+          template?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          slug?: string
+          template?: string | null
+          title?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -544,38 +673,62 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string
+          detailed_content: string | null
+          featured_image: string | null
+          gallery_images: Json | null
           icon: string | null
           id: string
           image_url: string | null
           is_active: boolean | null
           is_featured: boolean | null
+          meta_description: string | null
+          meta_title: string | null
           order_index: number | null
+          reading_time: number | null
+          slug: string | null
           title: string
           updated_at: string | null
+          video_url: string | null
         }
         Insert: {
           created_at?: string | null
           description: string
+          detailed_content?: string | null
+          featured_image?: string | null
+          gallery_images?: Json | null
           icon?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
           order_index?: number | null
+          reading_time?: number | null
+          slug?: string | null
           title: string
           updated_at?: string | null
+          video_url?: string | null
         }
         Update: {
           created_at?: string | null
           description?: string
+          detailed_content?: string | null
+          featured_image?: string | null
+          gallery_images?: Json | null
           icon?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
           order_index?: number | null
+          reading_time?: number | null
+          slug?: string | null
           title?: string
           updated_at?: string | null
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -606,6 +759,54 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
           value?: Json
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          after_image: string | null
+          before_image: string | null
+          created_at: string | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          order_index: number | null
+          patient_image: string | null
+          patient_name: string
+          procedure_type: string
+          rating: number | null
+          testimonial_text: string
+          updated_at: string | null
+        }
+        Insert: {
+          after_image?: string | null
+          before_image?: string | null
+          created_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          order_index?: number | null
+          patient_image?: string | null
+          patient_name: string
+          procedure_type: string
+          rating?: number | null
+          testimonial_text: string
+          updated_at?: string | null
+        }
+        Update: {
+          after_image?: string | null
+          before_image?: string | null
+          created_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          order_index?: number | null
+          patient_image?: string | null
+          patient_name?: string
+          procedure_type?: string
+          rating?: number | null
+          testimonial_text?: string
+          updated_at?: string | null
         }
         Relationships: []
       }

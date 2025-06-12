@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Eye, Heart, Stethoscope, User } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ interface Service {
   icon: string | null;
   image_url: string | null;
   is_featured: boolean;
+  slug: string | null;
 }
 
 const FeaturedServices = () => {
@@ -94,22 +96,34 @@ const FeaturedServices = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-center text-gray-600 leading-relaxed">
+                <CardDescription className="text-center text-gray-600 leading-relaxed mb-4">
                   {service.description}
                 </CardDescription>
+                {service.slug && (
+                  <div className="text-center">
+                    <Link to={`/services/${service.slug}`}>
+                      <Button variant="outline" size="sm" className="group-hover:bg-primary group-hover:text-white transition-colors">
+                        اطلاعات بیشتر
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
         </div>
 
         <div className="text-center">
-          <Button 
-            size="lg" 
-            className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-300"
-          >
-            مشاهده تمام خدمات
-            <ArrowLeft className="mr-2 h-5 w-5" />
-          </Button>
+          <Link to="/services">
+            <Button 
+              size="lg" 
+              className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-300"
+            >
+              مشاهده تمام خدمات
+              <ArrowLeft className="mr-2 h-5 w-5" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

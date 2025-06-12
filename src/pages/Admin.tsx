@@ -11,9 +11,12 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import NewAdminDashboard from '@/components/admin/NewAdminDashboard';
 import UserRolesManager from '@/components/admin/UserRolesManager';
 import DoctorsManager from '@/components/admin/DoctorsManager';
-import ServicesManager from '@/components/admin/ServicesManager';
+import EnhancedServicesManager from '@/components/admin/EnhancedServicesManager';
 import ConsultationRequestsManager from '@/components/admin/ConsultationRequestsManager';
 import PatientReviewsManager from '@/components/admin/PatientReviewsManager';
+import FaqManager from '@/components/admin/FaqManager';
+import MediaCenterManager from '@/components/admin/MediaCenterManager';
+import PagesManager from '@/components/admin/PagesManager';
 import BlogManager from '@/components/admin/BlogManager';
 import SiteSettingsManager from '@/components/admin/SiteSettingsManager';
 import AdminSettings from '@/components/admin/AdminSettings';
@@ -31,11 +34,17 @@ const Admin = () => {
       case 'doctors':
         return <DoctorsManager />;
       case 'services':
-        return <ServicesManager />;
+        return <EnhancedServicesManager />;
       case 'consultations':
         return <ConsultationRequestsManager />;
       case 'reviews':
         return <PatientReviewsManager />;
+      case 'faq':
+        return <FaqManager />;
+      case 'media':
+        return <MediaCenterManager />;
+      case 'pages':
+        return <PagesManager />;
       case 'blog':
         return <BlogManager />;
       case 'site-settings':
