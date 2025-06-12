@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, EyeOff, FileText } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +25,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
+import RichTextEditor from './RichTextEditor';
+import './rich-text-editor.css';
 
 interface BlogPost {
   id: string;
@@ -247,7 +247,7 @@ const BlogManager = () => {
                 افزودن مقاله
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingPost ? 'ویرایش مقاله' : 'افزودن مقاله جدید'}
@@ -256,48 +256,54 @@ const BlogManager = () => {
                   اطلاعات مقاله را وارد کنید
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">عنوان مقاله</label>
-                  <Input
-                    value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    required
-                  />
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">عنوان مقاله</label>
+                    <Input
+                      value={formData.title}
+                      onChange={(e) => setFormData({...formData, title: e.target.value})}
+                      required
+                      placeholder="عنوان مقاله را وارد کنید"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">لینک مقاله (اختیاری)</label>
+                    <Input
+                      value={formData.slug}
+                      onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                      placeholder="article-url"
+                    />
+                  </div>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium mb-1">خلاصه</label>
-                  <Textarea
-                    value={formData.excerpt}
-                    onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">لینک مقاله (اختیاری)</label>
-                  <Input
-                    value={formData.slug}
-                    onChange={(e) => setFormData({...formData, slug: e.target.value})}
-                    placeholder="article-url"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">لینک تصویر</label>
+                  <label className="block text-sm font-medium mb-2">لینک تصویر شاخص</label>
                   <Input
                     value={formData.image_url}
                     onChange={(e) => setFormData({...formData, image_url: e.target.value})}
                     placeholder="https://example.com/image.jpg"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium mb-1">محتوای مقاله</label>
-                  <Textarea
-                    value={formData.content}
-                    onChange={(e) => setFormData({...formData, content: e.target.value})}
-                    rows={10}
-                    required
+                  <label className="block text-sm font-medium mb-2">خلاصه مقاله</label>
+                  <Input
+                    value={formData.excerpt}
+                    onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
+                    placeholder="خلاصه‌ای از محتوای مقاله"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">محتوای مقاله</label>
+                  <RichTextEditor
+                    value={formData.content}
+                    onChange={(content) => setFormData({...formData, content})}
+                    placeholder="محتوای کامل مقاله را اینجا بنویسید..."
+                  />
+                </div>
+
                 <div className="flex items-center space-x-2">
                   <Switch
                     checked={formData.is_published}
@@ -305,9 +311,13 @@ const BlogManager = () => {
                   />
                   <label className="text-sm">منتشر شده</label>
                 </div>
+
                 <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    انصراف
+                  </Button>
                   <Button type="submit">
-                    {editingPost ? 'بروزرسانی' : 'افزودن'}
+                    {editingPost ? 'بروزرسانی' : 'ایجاد مقاله'}
                   </Button>
                 </DialogFooter>
               </form>

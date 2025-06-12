@@ -55,9 +55,16 @@ const Blog = () => {
     });
   };
 
+  const stripHtml = (html: string) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
+
   const truncateContent = (content: string, limit: number = 150) => {
-    if (content.length <= limit) return content;
-    return content.substring(0, limit) + '...';
+    const text = stripHtml(content);
+    if (text.length <= limit) return text;
+    return text.substring(0, limit) + '...';
   };
 
   if (isLoading) {
@@ -135,7 +142,7 @@ const Blog = () => {
                       </p>
                     ) : (
                       <p className="text-muted-foreground line-clamp-3">
-                        {truncateContent(post.content.replace(/<[^>]*>/g, ''))}
+                        {truncateContent(post.content)}
                       </p>
                     )}
                   </CardHeader>
