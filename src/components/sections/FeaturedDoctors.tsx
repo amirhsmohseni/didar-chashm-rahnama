@@ -165,7 +165,7 @@ const FeaturedDoctors = () => {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <Button asChild variant="outline" size="lg">
+          <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white" size="lg">
             <Link to="/doctors">
               مشاهده همه پزشکان
               <ChevronLeft className="h-4 w-4 mr-2" />

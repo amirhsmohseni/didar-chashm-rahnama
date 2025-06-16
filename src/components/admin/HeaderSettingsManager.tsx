@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Save, Edit, Type } from 'lucide-react';
+import { Save, Edit, Type, Upload, X } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,6 +17,8 @@ interface HeaderSettings {
   hero_description: string;
   cta_primary_text: string;
   cta_secondary_text: string;
+  site_logo: string;
+  hero_background_image: string;
 }
 
 const HeaderSettingsManager = () => {
@@ -26,7 +28,9 @@ const HeaderSettingsManager = () => {
     hero_title: 'دیدار چشم رهنما',
     hero_description: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران',
     cta_primary_text: 'درخواست مشاوره رایگان',
-    cta_secondary_text: 'مشاهده پزشکان'
+    cta_secondary_text: 'مشاهده پزشکان',
+    site_logo: '',
+    hero_background_image: ''
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -48,7 +52,9 @@ const HeaderSettingsManager = () => {
           'hero_title',
           'hero_description',
           'cta_primary_text',
-          'cta_secondary_text'
+          'cta_secondary_text',
+          'site_logo',
+          'hero_background_image'
         ]);
 
       if (error) throw error;
@@ -104,7 +110,9 @@ const HeaderSettingsManager = () => {
         hero_title: settings.hero_title,
         hero_description: settings.hero_description,
         cta_primary_text: settings.cta_primary_text,
-        cta_secondary_text: settings.cta_secondary_text
+        cta_secondary_text: settings.cta_secondary_text,
+        site_logo: settings.site_logo,
+        hero_background_image: settings.hero_background_image
       };
 
       await supabase.rpc('log_admin_activity', {
@@ -136,7 +144,9 @@ const HeaderSettingsManager = () => {
       hero_title: 'عنوان بخش اصلی',
       hero_description: 'توضیحات بخش اصلی',
       cta_primary_text: 'متن دکمه اصلی',
-      cta_secondary_text: 'متن دکمه ثانویه'
+      cta_secondary_text: 'متن دکمه ثانویه',
+      site_logo: 'لوگوی سایت',
+      hero_background_image: 'تصویر پس‌زمینه بخش اصلی'
     };
     return descriptions[key] || key;
   };
@@ -146,6 +156,43 @@ const HeaderSettingsManager = () => {
       ...prev,
       [key]: value
     }));
+  };
+
+  const handleImageUpload = async (key: keyof HeaderSettings, file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "خطا",
+        description: "لطفاً یک فایل تصویری انتخاب کنید",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "خطا",
+        description: "حجم فایل نباید بیشتر از 5 مگابایت باشد",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          handleChange(key, e.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('خطا در آپلود:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در آپلود تصویر",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -188,6 +235,47 @@ const HeaderSettingsManager = () => {
               />
             </div>
           </div>
+
+          {/* لوگو سایت */}
+          <div>
+            <label className="block text-sm font-medium mb-2">لوگوی سایت</label>
+            <div className="flex items-center gap-4">
+              {settings.site_logo && (
+                <img src={settings.site_logo} alt="Site Logo" className="h-12 w-auto object-contain" />
+              )}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('site-logo-upload')?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  انتخاب لوگو
+                </Button>
+                {settings.site_logo && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleChange('site_logo', '')}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    حذف
+                  </Button>
+                )}
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImageUpload('site_logo', file);
+                }}
+                className="hidden"
+                id="site-logo-upload"
+              />
+            </div>
+          </div>
         </div>
 
         <Separator />
@@ -213,6 +301,47 @@ const HeaderSettingsManager = () => {
               placeholder="مشاوره تخصصی و رایگان..."
               rows={3}
             />
+          </div>
+
+          {/* تصویر پس‌زمینه */}
+          <div>
+            <label className="block text-sm font-medium mb-2">تصویر پس‌زمینه بخش اصلی</label>
+            <div className="flex items-center gap-4">
+              {settings.hero_background_image && (
+                <img src={settings.hero_background_image} alt="Hero Background" className="h-20 w-32 object-cover rounded" />
+              )}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('hero-bg-upload')?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  انتخاب تصویر
+                </Button>
+                {settings.hero_background_image && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleChange('hero_background_image', '')}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    حذف
+                  </Button>
+                )}
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImageUpload('hero_background_image', file);
+                }}
+                className="hidden"
+                id="hero-bg-upload"
+              />
+            </div>
           </div>
         </div>
 
