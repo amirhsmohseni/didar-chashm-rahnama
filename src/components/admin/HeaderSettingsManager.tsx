@@ -97,11 +97,12 @@ const HeaderSettingsManager = () => {
         if (error) throw error;
       }
 
-      // Log activity
+      // Log activity - convert settings to a plain object for JSON compatibility
+      const settingsForLog = Object.fromEntries(Object.entries(settings));
       await supabase.rpc('log_admin_activity', {
         action_name: 'update_header_settings',
         resource_type_name: 'site_settings',
-        details_data: settings
+        details_data: settingsForLog
       });
 
       toast({
