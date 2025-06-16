@@ -97,8 +97,16 @@ const HeaderSettingsManager = () => {
         if (error) throw error;
       }
 
-      // Log activity - convert settings to a plain object for JSON compatibility
-      const settingsForLog = Object.fromEntries(Object.entries(settings));
+      // Log activity - properly convert settings to JSON compatible format
+      const settingsForLog: Record<string, string> = {
+        site_title: settings.site_title,
+        site_tagline: settings.site_tagline,
+        hero_title: settings.hero_title,
+        hero_description: settings.hero_description,
+        cta_primary_text: settings.cta_primary_text,
+        cta_secondary_text: settings.cta_secondary_text
+      };
+
       await supabase.rpc('log_admin_activity', {
         action_name: 'update_header_settings',
         resource_type_name: 'site_settings',
