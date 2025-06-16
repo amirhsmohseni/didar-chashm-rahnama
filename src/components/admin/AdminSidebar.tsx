@@ -1,5 +1,5 @@
 
-import { Home, Users, UserCheck, MessageSquare, FileText, Settings, Cog, Star, Briefcase } from 'lucide-react';
+import { Home, Users, UserCheck, MessageSquare, FileText, Settings, Cog, Star, Briefcase, Type } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +20,7 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
     { id: 'media', label: 'مرکز رسانه', icon: FileText },
     { id: 'pages', label: 'مدیریت صفحات', icon: FileText },
     { id: 'blog', label: 'مدیریت بلاگ', icon: FileText },
+    { id: 'header-settings', label: 'تنظیمات هدر', icon: Type },
     { id: 'site-settings', label: 'تنظیمات سایت', icon: Settings },
     { id: 'settings', label: 'تنظیمات سیستم', icon: Cog },
   ];

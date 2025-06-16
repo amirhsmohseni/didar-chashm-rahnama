@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, EyeOff, Star, Stethoscope, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Star, Stethoscope } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import DoctorImageUpload from './DoctorImageUpload';
 
 interface Doctor {
   id: string;
@@ -120,7 +121,6 @@ const DoctorsManager = () => {
         
         if (error) throw error;
 
-        // Log activity
         await supabase.rpc('log_admin_activity', {
           action_name: 'update_doctor',
           resource_type_name: 'doctors',
@@ -141,7 +141,6 @@ const DoctorsManager = () => {
         
         if (error) throw error;
 
-        // Log activity
         await supabase.rpc('log_admin_activity', {
           action_name: 'create_doctor',
           resource_type_name: 'doctors',
@@ -180,7 +179,6 @@ const DoctorsManager = () => {
       
       if (error) throw error;
 
-      // Log activity
       await supabase.rpc('log_admin_activity', {
         action_name: 'delete_doctor',
         resource_type_name: 'doctors',
@@ -212,7 +210,6 @@ const DoctorsManager = () => {
       
       if (error) throw error;
 
-      // Log activity
       await supabase.rpc('log_admin_activity', {
         action_name: `toggle_doctor_${field}`,
         resource_type_name: 'doctors',
@@ -309,7 +306,7 @@ const DoctorsManager = () => {
                 افزودن پزشک
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingDoctor ? 'ویرایش پزشک' : 'افزودن پزشک جدید'}
@@ -318,70 +315,68 @@ const DoctorsManager = () => {
                   اطلاعات کامل پزشک را وارد کنید
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">نام پزشک</label>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      required
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* بخش آپلود تصویر */}
+                  <div className="lg:col-span-1">
+                    <DoctorImageUpload
+                      currentImage={formData.image_url}
+                      onImageChange={(imageUrl) => setFormData({...formData, image_url: imageUrl})}
+                      doctorName={formData.name}
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">تخصص</label>
-                    <Input
-                      value={formData.specialty}
-                      onChange={(e) => setFormData({...formData, specialty: e.target.value})}
-                      required
-                    />
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">سابقه (سال)</label>
-                    <Input
-                      type="number"
-                      value={formData.experience_years}
-                      onChange={(e) => setFormData({...formData, experience_years: parseInt(e.target.value) || 0})}
-                      min="0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">هزینه ویزیت (تومان)</label>
-                    <Input
-                      type="number"
-                      value={formData.consultation_fee}
-                      onChange={(e) => setFormData({...formData, consultation_fee: parseInt(e.target.value) || 0})}
-                      min="0"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">تحصیلات</label>
-                  <Input
-                    value={formData.education}
-                    onChange={(e) => setFormData({...formData, education: e.target.value})}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">لینک تصویر پروفایل</label>
-                  <Input
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-                    placeholder="https://example.com/image.jpg"
-                  />
-                  {formData.image_url && (
-                    <div className="mt-2">
-                      <Avatar className="h-16 w-16">
-                        <AvatarImage src={formData.image_url} alt="Preview" />
-                        <AvatarFallback>{formData.name.slice(0, 2)}</AvatarFallback>
-                      </Avatar>
+                  {/* بخش اطلاعات */}
+                  <div className="lg:col-span-2 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">نام پزشک</label>
+                        <Input
+                          value={formData.name}
+                          onChange={(e) => setFormData({...formData, name: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">تخصص</label>
+                        <Input
+                          value={formData.specialty}
+                          onChange={(e) => setFormData({...formData, specialty: e.target.value})}
+                          required
+                        />
+                      </div>
                     </div>
-                  )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">سابقه (سال)</label>
+                        <Input
+                          type="number"
+                          value={formData.experience_years}
+                          onChange={(e) => setFormData({...formData, experience_years: parseInt(e.target.value) || 0})}
+                          min="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">هزینه ویزیت (تومان)</label>
+                        <Input
+                          type="number"
+                          value={formData.consultation_fee}
+                          onChange={(e) => setFormData({...formData, consultation_fee: parseInt(e.target.value) || 0})}
+                          min="0"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">تحصیلات</label>
+                      <Input
+                        value={formData.education}
+                        onChange={(e) => setFormData({...formData, education: e.target.value})}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div>

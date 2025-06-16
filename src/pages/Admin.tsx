@@ -18,6 +18,7 @@ import FaqManager from '@/components/admin/FaqManager';
 import MediaCenterManager from '@/components/admin/MediaCenterManager';
 import PagesManager from '@/components/admin/PagesManager';
 import BlogManager from '@/components/admin/BlogManager';
+import HeaderSettingsManager from '@/components/admin/HeaderSettingsManager';
 import SiteSettingsManager from '@/components/admin/SiteSettingsManager';
 import AdminSettings from '@/components/admin/AdminSettings';
 
@@ -47,6 +48,8 @@ const Admin = () => {
         return <PagesManager />;
       case 'blog':
         return <BlogManager />;
+      case 'header-settings':
+        return <HeaderSettingsManager />;
       case 'site-settings':
         return <SiteSettingsManager />;
       case 'settings':
@@ -62,7 +65,6 @@ const Admin = () => {
       
       <div className="bg-gray-50 min-h-screen">
         <AdminProtectedRoute>
-          {/* همیشه AdminToolbox را نمایش می‌دهیم - حتی برای کاربران غیر ادمین */}
           <AdminToolbox />
           
           {isAdmin ? (
