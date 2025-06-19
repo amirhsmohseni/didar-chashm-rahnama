@@ -1,499 +1,287 @@
 
 import { useState, useEffect } from 'react';
-import { Save, Edit, Type, Upload, X, Eye, EyeOff } from 'lucide-react';
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-
+import { Save, RotateCcw, Settings, Image as ImageIcon, Type, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import ImageUploader from './ImageUploader';
 
 interface HeaderSettings {
-  site_title: string;
-  site_tagline: string;
-  hero_title: string;
-  hero_description: string;
-  cta_primary_text: string;
-  cta_secondary_text: string;
-  site_logo: string;
-  hero_background_image: string;
+  siteName: string;
+  tagline: string;
+  heroTitle: string;
+  heroDescription: string;
+  logoUrl: string | null;
+  backgroundImageUrl: string | null;
+  primaryColor: string;
+  secondaryColor: string;
 }
 
 const HeaderSettingsManager = () => {
   const [settings, setSettings] = useState<HeaderSettings>({
-    site_title: 'دیدار چشم رهنما',
-    site_tagline: 'چشم پزشکی',
-    hero_title: 'دیدار چشم رهنما',
-    hero_description: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران',
-    cta_primary_text: 'درخواست مشاوره رایگان',
-    cta_secondary_text: 'مشاهده پزشکان',
-    site_logo: '',
-    hero_background_image: ''
+    siteName: 'دیدار چشم رهنما',
+    tagline: 'مشاوره تخصصی چشم',
+    heroTitle: 'دیدار چشم رهنما',
+    heroDescription: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران',
+    logoUrl: null,
+    backgroundImageUrl: null,
+    primaryColor: '#0ea5e9',
+    secondaryColor: '#f1f5f9'
   });
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    fetchSettings();
+    loadSettings();
   }, []);
 
-  const fetchSettings = async () => {
+  const loadSettings = async () => {
     try {
-      console.log('Fetching header settings...');
-      const { data, error } = await supabase
-        .from('site_settings')
-        .select('key, value')
-        .in('key', [
-          'site_title',
-          'site_tagline', 
-          'hero_title',
-          'hero_description',
-          'cta_primary_text',
-          'cta_secondary_text',
-          'site_logo',
-          'hero_background_image'
-        ]);
-
-      if (error) {
-        console.error('Error fetching settings:', error);
-        throw error;
-      }
-
-      console.log('Raw settings data:', data);
-
-      if (data && data.length > 0) {
-        const settingsObj: any = {};
-        data.forEach(setting => {
-          let value = setting.value;
-          // Handle JSON parsing for stored values
-          if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
-            value = value.slice(1, -1);
-          } else if (typeof value !== 'string') {
-            try {
-              value = JSON.parse(JSON.stringify(value)).replace(/^"|"$/g, '');
-            } catch (e) {
-              console.warn('Could not parse value for', setting.key, value);
-            }
-          }
-          settingsObj[setting.key] = value;
-        });
-        
-        console.log('Parsed settings:', settingsObj);
-        setSettings(prev => ({ ...prev, ...settingsObj }));
+      // Load settings from localStorage for demo
+      const savedSettings = localStorage.getItem('headerSettings');
+      if (savedSettings) {
+        setSettings(JSON.parse(savedSettings));
       }
     } catch (error) {
-      console.error('Error fetching settings:', error);
-      toast({
-        title: "خطا",
-        description: "خطا در دریافت تنظیمات هدر",
-        variant: "destructive",
-      });
+      console.error('Error loading settings:', error);
+      toast.error('خطا در بارگذاری تنظیمات');
+    }
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      // Save to localStorage for demo
+      localStorage.setItem('headerSettings', JSON.stringify(settings));
+      
+      // Apply settings to CSS variables
+      document.documentElement.style.setProperty('--primary-color', settings.primaryColor);
+      document.documentElement.style.setProperty('--secondary-color', settings.secondaryColor);
+      
+      setHasChanges(false);
+      toast.success('تنظیمات با موفقیت ذخیره شد');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error('خطا در ذخیره تنظیمات');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    
-    try {
-      console.log('Saving settings:', settings);
-      
-      const settingsArray = Object.entries(settings).map(([key, value]) => ({
-        key,
-        value: JSON.stringify(value),
-        description: getSettingDescription(key)
-      }));
-
-      for (const setting of settingsArray) {
-        console.log(`Upserting setting: ${setting.key} = ${setting.value}`);
-        
-        const { error } = await supabase
-          .from('site_settings')
-          .upsert({
-            key: setting.key,
-            value: setting.value,
-            description: setting.description,
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'key'
-          });
-
-        if (error) {
-          console.error(`Error saving ${setting.key}:`, error);
-          throw error;
-        }
-      }
-
-      // Log activity
-      const settingsForLog: Record<string, string> = {};
-      Object.entries(settings).forEach(([key, value]) => {
-        settingsForLog[key] = String(value);
-      });
-
-      await supabase.rpc('log_admin_activity', {
-        action_name: 'update_header_settings',
-        resource_type_name: 'site_settings',
-        details_data: settingsForLog
-      });
-
-      toast({
-        title: "✅ تنظیمات ذخیره شد",
-        description: "تنظیمات هدر با موفقیت بروزرسانی شد",
-      });
-
-      // Refresh to confirm save
-      await fetchSettings();
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      toast({
-        title: "❌ خطا",
-        description: "خطا در ذخیره تنظیمات",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const getSettingDescription = (key: string): string => {
-    const descriptions: Record<string, string> = {
-      site_title: 'عنوان اصلی سایت',
-      site_tagline: 'شعار سایت', 
-      hero_title: 'عنوان بخش اصلی',
-      hero_description: 'توضیحات بخش اصلی',
-      cta_primary_text: 'متن دکمه اصلی',
-      cta_secondary_text: 'متن دکمه ثانویه',
-      site_logo: 'لوگوی سایت',
-      hero_background_image: 'تصویر پس‌زمینه بخش اصلی'
+  const handleReset = () => {
+    const defaultSettings: HeaderSettings = {
+      siteName: 'دیدار چشم رهنما',
+      tagline: 'مشاوره تخصصی چشم',
+      heroTitle: 'دیدار چشم رهنما',
+      heroDescription: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران',
+      logoUrl: null,
+      backgroundImageUrl: null,
+      primaryColor: '#0ea5e9',
+      secondaryColor: '#f1f5f9'
     };
-    return descriptions[key] || key;
+    
+    setSettings(defaultSettings);
+    setHasChanges(true);
+    toast.success('تنظیمات به حالت پیش‌فرض برگردانده شد');
   };
 
-  const handleChange = (key: keyof HeaderSettings, value: string) => {
-    console.log(`Updating ${key} to:`, value);
-    setSettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
+  const updateSetting = (key: keyof HeaderSettings, value: string | null) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+    setHasChanges(true);
   };
-
-  const handleImageUpload = async (key: keyof HeaderSettings, file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "خطا",
-        description: "لطفاً یک فایل تصویری انتخاب کنید",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "خطا",
-        description: "حجم فایل نباید بیشتر از 5 مگابایت باشد",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          handleChange(key, e.target.result as string);
-          toast({
-            title: "✅ تصویر آپلود شد",
-            description: "تصویر با موفقیت آپلود شد. فراموش نکنید تغییرات را ذخیره کنید.",
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error('خطا در آپلود:', error);
-      toast({
-        title: "خطا",
-        description: "خطا در آپلود تصویر",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <span className="mr-3">در حال بارگذاری...</span>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-6">
-      {/* Header Actions */}
+    <div className="space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Type className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">تنظیمات هدر و متون</h1>
-          <Badge variant="secondary">مدیریت محتوا</Badge>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPreviewMode(!previewMode)}
-          >
-            {previewMode ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-            {previewMode ? 'حالت ویرایش' : 'پیش‌نمایش'}
-          </Button>
-          
-          <Button 
-            onClick={handleSave} 
-            disabled={isSaving}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Site Information */}
-        <Card className="shadow-sm border-l-4 border-l-blue-500">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-transparent">
-            <CardTitle className="flex items-center gap-2 text-blue-700">
-              <Edit className="h-5 w-5" />
-              اطلاعات کلی سایت
-            </CardTitle>
-          </CardHeader>
-          
-          <CardContent className="space-y-4 pt-6">
-            <div className="space-y-2">
-              <Label htmlFor="site_title" className="text-sm font-medium">عنوان سایت</Label>
-              <Input
-                id="site_title"
-                value={settings.site_title}
-                onChange={(e) => handleChange('site_title', e.target.value)}
-                placeholder="دیدار چشم رهنما"
-                className="focus:ring-2 focus:ring-blue-200"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="site_tagline" className="text-sm font-medium">شعار سایت</Label>
-              <Input
-                id="site_tagline"
-                value={settings.site_tagline}
-                onChange={(e) => handleChange('site_tagline', e.target.value)}
-                placeholder="چشم پزشکی"
-                className="focus:ring-2 focus:ring-blue-200"
-              />
-            </div>
-
-            {/* Site Logo */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">لوگوی سایت</Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center space-y-3">
-                {settings.site_logo && (
-                  <div className="flex justify-center">
-                    <img src={settings.site_logo} alt="Site Logo" className="h-16 w-auto object-contain rounded" />
-                  </div>
-                )}
-                <div className="flex justify-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => document.getElementById('site-logo-upload')?.click()}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    انتخاب لوگو
-                  </Button>
-                  {settings.site_logo && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleChange('site_logo', '')}
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      حذف
-                    </Button>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleImageUpload('site_logo', file);
-                  }}
-                  className="hidden"
-                  id="site-logo-upload"
-                />
-                <p className="text-xs text-gray-500">JPG, PNG یا GIF تا 5MB</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Hero Section */}
-        <Card className="shadow-sm border-l-4 border-l-green-500">
-          <CardHeader className="bg-gradient-to-r from-green-50 to-transparent">
-            <CardTitle className="flex items-center gap-2 text-green-700">
-              <Type className="h-5 w-5" />
-              بخش اصلی صفحه (Hero)
-            </CardTitle>
-          </CardHeader>
-          
-          <CardContent className="space-y-4 pt-6">
-            <div className="space-y-2">
-              <Label htmlFor="hero_title" className="text-sm font-medium">عنوان اصلی</Label>
-              <Input
-                id="hero_title"
-                value={settings.hero_title}
-                onChange={(e) => handleChange('hero_title', e.target.value)}
-                placeholder="دیدار چشم رهنما"
-                className="focus:ring-2 focus:ring-green-200"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="hero_description" className="text-sm font-medium">توضیحات</Label>
-              <Textarea
-                id="hero_description"
-                value={settings.hero_description}
-                onChange={(e) => handleChange('hero_description', e.target.value)}
-                placeholder="مشاوره تخصصی و رایگان..."
-                rows={3}
-                className="focus:ring-2 focus:ring-green-200"
-              />
-            </div>
-
-            {/* Hero Background Image */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">تصویر پس‌زمینه</Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center space-y-3">
-                {settings.hero_background_image && (
-                  <div className="flex justify-center">
-                    <img src={settings.hero_background_image} alt="Hero Background" className="h-20 w-32 object-cover rounded" />
-                  </div>
-                )}
-                <div className="flex justify-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => document.getElementById('hero-bg-upload')?.click()}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    انتخاب تصویر
-                  </Button>
-                  {settings.hero_background_image && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleChange('hero_background_image', '')}
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      حذف
-                    </Button>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleImageUpload('hero_background_image', file);
-                  }}
-                  className="hidden"
-                  id="hero-bg-upload"
-                />
-                <p className="text-xs text-gray-500">JPG, PNG یا GIF تا 5MB</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Call to Action Buttons */}
-      <Card className="shadow-sm border-l-4 border-l-purple-500">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-transparent">
-          <CardTitle className="flex items-center gap-2 text-purple-700">
-            <Edit className="h-5 w-5" />
-            متن دکمه‌های عملیات
-          </CardTitle>
-        </CardHeader>
-        
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="cta_primary_text" className="text-sm font-medium">دکمه اصلی</Label>
-              <Input
-                id="cta_primary_text"
-                value={settings.cta_primary_text}
-                onChange={(e) => handleChange('cta_primary_text', e.target.value)}
-                placeholder="درخواست مشاوره رایگان"
-                className="focus:ring-2 focus:ring-purple-200"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="cta_secondary_text" className="text-sm font-medium">دکمه ثانویه</Label>
-              <Input
-                id="cta_secondary_text"
-                value={settings.cta_secondary_text}
-                onChange={(e) => handleChange('cta_secondary_text', e.target.value)}
-                placeholder="مشاهده پزشکان"
-                className="focus:ring-2 focus:ring-purple-200"
-              />
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+            <Settings className="h-6 w-6 text-white" />
           </div>
-        </CardContent>
-      </Card>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">تنظیمات هدر</h2>
+            <p className="text-gray-600">مدیریت نمایش و محتوای بخش بالای سایت</p>
+          </div>
+        </div>
+        
+        {hasChanges && (
+          <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">
+            تغییرات ذخیره نشده
+          </Badge>
+        )}
+      </div>
 
-      {/* Preview Section */}
-      {previewMode && (
-        <Card className="shadow-sm border-l-4 border-l-orange-500">
-          <CardHeader className="bg-gradient-to-r from-orange-50 to-transparent">
-            <CardTitle className="flex items-center gap-2 text-orange-700">
-              <Eye className="h-5 w-5" />
-              پیش‌نمایش تغییرات
-            </CardTitle>
-          </CardHeader>
-          
-          <CardContent className="pt-6">
-            <div className="bg-gradient-to-b from-primary to-primary/80 text-white p-8 rounded-lg">
-              <div className="text-center space-y-4">
-                {settings.site_logo && (
-                  <img src={settings.site_logo} alt="Logo" className="h-12 w-auto mx-auto" />
-                )}
-                <h1 className="text-3xl font-bold">{settings.hero_title}</h1>
-                <p className="text-lg opacity-90">{settings.hero_description}</p>
-                <div className="flex gap-4 justify-center">
-                  <Button variant="secondary" className="text-primary">
-                    {settings.cta_primary_text}
-                  </Button>
-                  <Button variant="outline" className="border-white text-white">
-                    {settings.cta_secondary_text}
-                  </Button>
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Settings Form */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Site Identity */}
+          <Card>
+            <CardHeader className="flex flex-row items-center gap-2">
+              <Type className="h-5 w-5 text-blue-600" />
+              <CardTitle>هویت سایت</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="siteName">نام سایت</Label>
+                  <Input
+                    id="siteName"
+                    value={settings.siteName}
+                    onChange={(e) => updateSetting('siteName', e.target.value)}
+                    placeholder="نام سایت..."
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="tagline">شعار</Label>
+                  <Input
+                    id="tagline"
+                    value={settings.tagline}
+                    onChange={(e) => updateSetting('tagline', e.target.value)}
+                    placeholder="شعار سایت..."
+                  />
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+
+          {/* Hero Section */}
+          <Card>
+            <CardHeader className="flex flex-row items-center gap-2">
+              <ImageIcon className="h-5 w-5 text-green-600" />
+              <CardTitle>بخش اصلی (Hero)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="heroTitle">عنوان اصلی</Label>
+                <Input
+                  id="heroTitle"
+                  value={settings.heroTitle}
+                  onChange={(e) => updateSetting('heroTitle', e.target.value)}
+                  placeholder="عنوان اصلی..."
+                />
+              </div>
+              <div>
+                <Label htmlFor="heroDescription">توضیحات</Label>
+                <Textarea
+                  id="heroDescription"
+                  value={settings.heroDescription}
+                  onChange={(e) => updateSetting('heroDescription', e.target.value)}
+                  placeholder="توضیحات بخش اصلی..."
+                  rows={3}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Colors */}
+          <Card>
+            <CardHeader className="flex flex-row items-center gap-2">
+              <Palette className="h-5 w-5 text-purple-600" />
+              <CardTitle>رنگ‌بندی</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="primaryColor">رنگ اصلی</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="primaryColor"
+                      type="color"
+                      value={settings.primaryColor}
+                      onChange={(e) => updateSetting('primaryColor', e.target.value)}
+                      className="w-16 h-10 p-1 rounded-md"
+                    />
+                    <Input
+                      value={settings.primaryColor}
+                      onChange={(e) => updateSetting('primaryColor', e.target.value)}
+                      placeholder="#0ea5e9"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="secondaryColor">رنگ فرعی</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="secondaryColor"
+                      type="color"
+                      value={settings.secondaryColor}
+                      onChange={(e) => updateSetting('secondaryColor', e.target.value)}
+                      className="w-16 h-10 p-1 rounded-md"
+                    />
+                    <Input
+                      value={settings.secondaryColor}
+                      onChange={(e) => updateSetting('secondaryColor', e.target.value)}
+                      placeholder="#f1f5f9"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Images Section */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ImageIcon className="h-5 w-5 text-indigo-600" />
+                تصاویر
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <ImageUploader
+                label="لوگوی سایت"
+                currentImage={settings.logoUrl}
+                onImageChange={(url) => updateSetting('logoUrl', url)}
+                aspectRatio="1/1"
+                maxSize={2}
+              />
+              
+              <Separator />
+              
+              <ImageUploader
+                label="تصویر پس‌زمینه بخش اصلی"
+                currentImage={settings.backgroundImageUrl}
+                onImageChange={(url) => updateSetting('backgroundImageUrl', url)}
+                aspectRatio="16/9"
+                maxSize={5}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Action Buttons */}
+          <div className="space-y-3">
+            <Button
+              onClick={handleSave}
+              disabled={isLoading || !hasChanges}
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              size="lg"
+            >
+              <Save className="h-5 w-5 ml-2" />
+              {isLoading ? 'در حال ذخیره...' : 'ذخیره تنظیمات'}
+            </Button>
+            
+            <Button
+              onClick={handleReset}
+              variant="outline"
+              className="w-full"
+              size="lg"
+            >
+              <RotateCcw className="h-5 w-5 ml-2" />
+              بازگشت به پیش‌فرض
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

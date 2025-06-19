@@ -5,6 +5,7 @@ import { Eye, Stethoscope, Calendar, Phone, Award, Users, Clock, Shield } from '
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FeaturedServices from '@/components/sections/FeaturedServices';
+import FeaturedDoctors from '@/components/sections/FeaturedDoctors';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -22,15 +23,15 @@ const Index = () => {
             مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" variant="secondary" className="text-primary">
+            <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 font-bold text-lg px-8 py-4 h-auto shadow-lg">
               <Link to="/consultation">
-                <Calendar className="h-5 w-5 ml-2" />
+                <Calendar className="h-6 w-6 ml-2" />
                 درخواست مشاوره رایگان
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+            <Button asChild size="lg" className="bg-green-600 text-white hover:bg-green-700 font-bold text-lg px-8 py-4 h-auto shadow-lg border-2 border-white">
               <Link to="/doctors">
-                <Stethoscope className="h-5 w-5 ml-2" />
+                <Stethoscope className="h-6 w-6 ml-2" />
                 مشاهده پزشکان
               </Link>
             </Button>
@@ -103,6 +104,9 @@ const Index = () => {
       {/* Featured Services */}
       <FeaturedServices />
 
+      {/* Featured Doctors */}
+      <FeaturedDoctors />
+
       {/* Why Choose Us */}
       <section className="py-20 bg-primary text-white">
         <div className="container">
@@ -148,9 +152,9 @@ const Index = () => {
           <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
             همین حالا درخواست مشاوره رایگان خود را ارسال کنید و از تجربه بهترین متخصصان بهره‌مند شوید
           </p>
-          <Button asChild size="lg">
+          <Button asChild size="lg" className="bg-primary text-white hover:bg-primary/90 font-bold text-lg px-8 py-4 h-auto shadow-lg">
             <Link to="/consultation">
-              <Calendar className="h-5 w-5 ml-2" />
+              <Calendar className="h-6 w-6 ml-2" />
               شروع مشاوره رایگان
             </Link>
           </Button>
