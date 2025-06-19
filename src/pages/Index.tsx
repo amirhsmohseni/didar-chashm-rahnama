@@ -17,7 +17,7 @@ const Index = () => {
       {/* Enhanced Hero Section with better gradients and animations */}
       <section className="relative bg-gradient-to-br from-indigo-600 via-blue-700 to-purple-800 text-white py-20 lg:py-28 overflow-hidden">
         {/* Animated Background Pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.08"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20 animate-pulse"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.08\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20 animate-pulse"></div>
         
         <div className="container relative">
           <div className="text-center max-w-5xl mx-auto">
@@ -35,11 +35,11 @@ const Index = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-6 lg:gap-8 justify-center items-center animate-fade-in">
-              <Button asChild size="lg" className="bg-gradient-to-r from-white to-blue-50 text-blue-800 hover:from-blue-50 hover:to-white font-bold text-lg lg:text-xl px-8 lg:px-12 py-4 lg:py-6 h-auto shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 border-2 border-white/30 hover:border-white/60 group transform hover:scale-105">
+              <Button asChild size="lg" className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 hover:from-yellow-500 hover:to-orange-600 font-bold text-lg lg:text-xl px-8 lg:px-12 py-4 lg:py-6 h-auto shadow-2xl hover:shadow-yellow-500/25 transition-all duration-300 border-2 border-yellow-300/50 hover:border-yellow-300 group transform hover:scale-105">
                 <Link to="/consultation" className="flex items-center gap-3">
-                  <Calendar className="h-6 w-6 lg:h-7 lg:w-7 group-hover:scale-110 transition-transform text-blue-600" />
+                  <Calendar className="h-6 w-6 lg:h-7 lg:w-7 group-hover:scale-110 transition-transform text-gray-800" />
                   درخواست مشاوره رایگان
-                  <ArrowLeft className="h-5 w-5 lg:h-6 lg:w-6 group-hover:translate-x-1 transition-transform text-blue-600" />
+                  <ArrowLeft className="h-5 w-5 lg:h-6 lg:w-6 group-hover:translate-x-1 transition-transform text-gray-800" />
                 </Link>
               </Button>
               <Button asChild size="lg" className="bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:from-emerald-600 hover:to-green-700 font-bold text-lg lg:text-xl px-8 lg:px-12 py-4 lg:py-6 h-auto shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 border-2 border-white/20 hover:border-white/40 group transform hover:scale-105">
@@ -54,7 +54,7 @@ const Index = () => {
       </section>
 
       {/* Enhanced Trust Indicators */}
-      <section className="py-16 lg:py-20 bg-gradient-to-br from-white to-gray-50 border-b border-gray-100">
+      <section className="py-16 lg:py-20 bg-gradient-to-br from-white via-gray-50 to-blue-50 border-b border-gray-100">
         <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
             <div className="text-center group hover:scale-105 transition-transform duration-300">
@@ -100,7 +100,7 @@ const Index = () => {
           </div>
           
           <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8 lg:gap-10">
-            <Card className="text-center hover:shadow-2xl transition-all duration-500 border-0 shadow-lg hover:-translate-y-3 bg-white/90 backdrop-blur-sm group">
+            <Card className="text-center hover:shadow-2xl transition-all duration-500 border-0 shadow-xl hover:-translate-y-3 bg-white/90 backdrop-blur-sm group">
               <CardHeader className="pb-6">
                 <div className="bg-gradient-to-br from-blue-500 to-blue-600 w-20 h-20 lg:w-24 lg:h-24 rounded-3xl flex items-center justify-center mx-auto mb-6 lg:mb-8 shadow-xl group-hover:scale-110 transition-transform duration-300">
                   <Stethoscope className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
@@ -114,7 +114,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="text-center hover:shadow-2xl transition-all duration-500 border-0 shadow-lg hover:-translate-y-3 bg-white/90 backdrop-blur-sm group">
+            <Card className="text-center hover:shadow-2xl transition-all duration-500 border-0 shadow-xl hover:-translate-y-3 bg-white/90 backdrop-blur-sm group">
               <CardHeader className="pb-6">
                 <div className="bg-gradient-to-br from-emerald-500 to-green-600 w-20 h-20 lg:w-24 lg:h-24 rounded-3xl flex items-center justify-center mx-auto mb-6 lg:mb-8 shadow-xl group-hover:scale-110 transition-transform duration-300">
                   <Users className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
@@ -128,7 +128,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="text-center hover:shadow-2xl transition-all duration-500 border-0 shadow-lg hover:-translate-y-3 bg-white/90 backdrop-blur-sm group">
+            <Card className="text-center hover:shadow-2xl transition-all duration-500 border-0 shadow-xl hover:-translate-y-3 bg-white/90 backdrop-blur-sm group">
               <CardHeader className="pb-6">
                 <div className="bg-gradient-to-br from-purple-500 to-purple-600 w-20 h-20 lg:w-24 lg:h-24 rounded-3xl flex items-center justify-center mx-auto mb-6 lg:mb-8 shadow-xl group-hover:scale-110 transition-transform duration-300">
                   <Clock className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
@@ -142,7 +142,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="text-center hover:shadow-2xl transition-all duration-500 border-0 shadow-lg hover:-translate-y-3 bg-white/90 backdrop-blur-sm group">
+            <Card className="text-center hover:shadow-2xl transition-all duration-500 border-0 shadow-xl hover:-translate-y-3 bg-white/90 backdrop-blur-sm group">
               <CardHeader className="pb-6">
                 <div className="bg-gradient-to-br from-orange-500 to-orange-600 w-20 h-20 lg:w-24 lg:h-24 rounded-3xl flex items-center justify-center mx-auto mb-6 lg:mb-8 shadow-xl group-hover:scale-110 transition-transform duration-300">
                   <Shield className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
@@ -167,7 +167,7 @@ const Index = () => {
 
       {/* Enhanced Why Choose Us */}
       <section className="py-20 lg:py-28 bg-gradient-to-br from-indigo-600 via-blue-700 to-purple-800 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="0.08"%3E%3Cpath d="M20 20c0 11.046-8.954 20-20 20v20h40V20H20z"/%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"40\" height=\"40\" viewBox=\"0 0 40 40\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.08\"%3E%3Cpath d=\"M20 20c0 11.046-8.954 20-20 20v20h40V20H20z\"/%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
         
         <div className="container relative">
           <div className="text-center mb-16 lg:mb-20">
