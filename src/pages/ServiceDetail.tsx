@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Clock, Eye, Share2, ArrowLeft } from 'lucide-react';
@@ -74,12 +75,14 @@ const ServiceDetail = () => {
       try {
         if (data.gallery_images) {
           if (Array.isArray(data.gallery_images)) {
-            // Ensure all elements are strings
-            galleryImages = data.gallery_images.filter((img): img is string => typeof img === 'string');
+            // Filter and ensure all elements are strings
+            galleryImages = data.gallery_images
+              .filter((img): img is string => typeof img === 'string' && img.length > 0);
           } else if (typeof data.gallery_images === 'string') {
             const parsed = JSON.parse(data.gallery_images);
             if (Array.isArray(parsed)) {
-              galleryImages = parsed.filter((img): img is string => typeof img === 'string');
+              galleryImages = parsed
+                .filter((img): img is string => typeof img === 'string' && img.length > 0);
             }
           }
         }
@@ -89,8 +92,21 @@ const ServiceDetail = () => {
       }
 
       const transformedService: Service = {
-        ...data,
-        gallery_images: galleryImages
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        detailed_content: data.detailed_content,
+        icon: data.icon,
+        image_url: data.image_url,
+        featured_image: data.featured_image,
+        gallery_images: galleryImages,
+        video_url: data.video_url,
+        meta_title: data.meta_title,
+        meta_description: data.meta_description,
+        slug: data.slug,
+        reading_time: data.reading_time,
+        is_active: data.is_active,
+        is_featured: data.is_featured
       };
 
       setService(transformedService);
