@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Index = () => {
   return (
-    <>
+    <div>
       <Header />
       
       {/* Enhanced Hero Section with better gradients and animations */}
@@ -48,42 +48,6 @@ const Index = () => {
                   مشاهده پزشکان متخصص
                 </Link>
               </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Enhanced Trust Indicators */}
-      <section className="py-16 lg:py-20 bg-gradient-to-br from-white via-gray-50 to-blue-50 border-b border-gray-100">
-        <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
-            <div className="text-center group hover:scale-105 transition-transform duration-300">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
-                <Users className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
-              </div>
-              <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">۵۰۰+</div>
-              <div className="text-base lg:text-lg text-gray-600 font-medium">مشاوره موفق</div>
-            </div>
-            <div className="text-center group hover:scale-105 transition-transform duration-300">
-              <div className="bg-gradient-to-br from-emerald-500 to-green-600 w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
-                <Award className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
-              </div>
-              <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">۲۵+</div>
-              <div className="text-base lg:text-lg text-gray-600 font-medium">پزشک متخصص</div>
-            </div>
-            <div className="text-center group hover:scale-105 transition-transform duration-300">
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
-                <Star className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
-              </div>
-              <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">۴.۹</div>
-              <div className="text-base lg:text-lg text-gray-600 font-medium">امتیاز رضایت</div>
-            </div>
-            <div className="text-center group hover:scale-105 transition-transform duration-300">
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
-                <Clock className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
-              </div>
-              <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">۲۴/۷</div>
-              <div className="text-base lg:text-lg text-gray-600 font-medium">پشتیبانی</div>
             </div>
           </div>
         </div>
@@ -153,7 +117,7 @@ const Index = () => {
                 <p className="text-gray-600 text-base lg:text-lg leading-relaxed">
                   همکاری با معتبرترین پزشکان و مراکز درمانی کشور
                 </p>
-              </CardContent>
+              </Car dContent>
             </Card>
           </div>
         </div>
@@ -246,8 +210,44 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Enhanced Trust Indicators - Moved to bottom */}
+      <section className="py-16 lg:py-20 bg-gradient-to-br from-white via-gray-50 to-blue-50 border-b border-gray-100">
+        <div className="container">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
+            <div className="text-center group hover:scale-105 transition-transform duration-300">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
+                <Users className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
+              </div>
+              <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">۵۰۰+</div>
+              <div className="text-base lg:text-lg text-gray-600 font-medium">مشاوره موفق</div>
+            </div>
+            <div className="text-center group hover:scale-105 transition-transform duration-300">
+              <div className="bg-gradient-to-br from-emerald-500 to-green-600 w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
+                <Award className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
+              </div>
+              <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">۲۵+</div>
+              <div className="text-base lg:text-lg text-gray-600 font-medium">پزشک متخصص</div>
+            </div>
+            <div className="text-center group hover:scale-105 transition-transform duration-300">
+              <div className="bg-gradient-to-br from-purple-500 to-purple-600 w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
+                <Star className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
+              </div>
+              <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">۴.۹</div>
+              <div className="text-base lg:text-lg text-gray-600 font-medium">امتیاز رضایت</div>
+            </div>
+            <div className="text-center group hover:scale-105 transition-transform duration-300">
+              <div className="bg-gradient-to-br from-orange-500 to-orange-600 w-20 h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center mx-auto mb-4 lg:mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
+                <Clock className="h-10 w-10 lg:h-12 lg:w-12 text-white" />
+              </div>
+              <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">۲۴/۷</div>
+              <div className="text-base lg:text-lg text-gray-600 font-medium">پشتیبانی</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <Footer />
-    </>
+    </div>
   );
 };
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Clock, Eye, Share2, ArrowLeft } from 'lucide-react';
@@ -70,14 +69,18 @@ const ServiceDetail = () => {
         return;
       }
 
-      // Transform the data safely
+      // Transform the data safely with proper typing
       let galleryImages: string[] = [];
       try {
         if (data.gallery_images) {
           if (Array.isArray(data.gallery_images)) {
-            galleryImages = data.gallery_images;
+            // Ensure all elements are strings
+            galleryImages = data.gallery_images.filter((img): img is string => typeof img === 'string');
           } else if (typeof data.gallery_images === 'string') {
-            galleryImages = JSON.parse(data.gallery_images);
+            const parsed = JSON.parse(data.gallery_images);
+            if (Array.isArray(parsed)) {
+              galleryImages = parsed.filter((img): img is string => typeof img === 'string');
+            }
           }
         }
       } catch (parseError) {

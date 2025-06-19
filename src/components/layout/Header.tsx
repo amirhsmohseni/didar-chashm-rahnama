@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Menu, X, Shield, LogOut, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -54,15 +55,17 @@ const Header = () => {
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">چ</span>
-            </div>
-            <span className="font-bold text-xl text-primary mr-2">چشم پزشکی</span>
-          </Link>
+          {/* Mobile menu button - moved to right */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="lg:hidden"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - moved to left after logo */}
           <nav className="hidden lg:flex items-center space-x-8 space-x-reverse">
             {navigationItems.map((item) => (
               <Link
@@ -86,7 +89,15 @@ const Header = () => {
             )}
           </nav>
 
-          {/* Auth Section */}
+          {/* Logo - moved to center-right */}
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">چ</span>
+            </div>
+            <span className="font-bold text-xl text-primary mr-2">چشم پزشکی</span>
+          </Link>
+
+          {/* Auth Section - stays on the right */}
           <div className="flex items-center gap-4">
             {user ? (
               <DropdownMenu>
@@ -129,16 +140,6 @@ const Header = () => {
                 <Button variant="default">ورود / ثبت نام</Button>
               </Link>
             )}
-
-            {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
           </div>
         </div>
 
