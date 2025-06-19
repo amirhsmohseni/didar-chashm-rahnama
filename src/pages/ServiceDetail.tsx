@@ -37,11 +37,17 @@ const ServiceDetail = () => {
   useEffect(() => {
     if (slug) {
       fetchService();
+    } else {
+      setError('شناسه سرویس مشخص نشده است');
+      setIsLoading(false);
     }
   }, [slug]);
 
   const fetchService = async () => {
     try {
+      setIsLoading(true);
+      setError(null);
+      
       const { data, error } = await supabase
         .from('services')
         .select('*')
@@ -50,22 +56,38 @@ const ServiceDetail = () => {
         .single();
 
       if (error) {
+        console.error('Supabase error:', error);
         if (error.code === 'PGRST116') {
           setError('سرویس مورد نظر یافت نشد');
         } else {
-          throw error;
+          setError('خطا در دریافت اطلاعات سرویس');
         }
         return;
       }
 
-      // Transform the data to match our interface
-      const transformedService = {
+      if (!data) {
+        setError('سرویس مورد نظر یافت نشد');
+        return;
+      }
+
+      // Transform the data safely
+      let galleryImages: string[] = [];
+      try {
+        if (data.gallery_images) {
+          if (Array.isArray(data.gallery_images)) {
+            galleryImages = data.gallery_images;
+          } else if (typeof data.gallery_images === 'string') {
+            galleryImages = JSON.parse(data.gallery_images);
+          }
+        }
+      } catch (parseError) {
+        console.warn('Error parsing gallery images:', parseError);
+        galleryImages = [];
+      }
+
+      const transformedService: Service = {
         ...data,
-        gallery_images: Array.isArray(data.gallery_images) 
-          ? data.gallery_images 
-          : data.gallery_images 
-            ? JSON.parse(data.gallery_images as string)
-            : []
+        gallery_images: galleryImages
       };
 
       setService(transformedService);
@@ -78,19 +100,29 @@ const ServiceDetail = () => {
   };
 
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
+    try {
+      if (navigator.share && service) {
         await navigator.share({
-          title: service?.title,
-          text: service?.description,
+          title: service.title,
+          text: service.description,
           url: window.location.href,
         });
-      } catch (error) {
-        console.log('Error sharing:', error);
+      } else {
+        // Fallback: copy to clipboard
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(window.location.href);
+        }
       }
+    } catch (error) {
+      console.log('Error sharing:', error);
+    }
+  };
+
+  const handleBackClick = () => {
+    if (window.history.length > 1) {
+      window.history.back();
     } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
+      window.location.href = '/services';
     }
   };
 
@@ -118,7 +150,7 @@ const ServiceDetail = () => {
             <h1 className="text-2xl font-bold text-gray-800 mb-4">
               {error || 'سرویس یافت نشد'}
             </h1>
-            <Button onClick={() => window.history.back()}>
+            <Button onClick={handleBackClick}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               بازگشت
             </Button>
