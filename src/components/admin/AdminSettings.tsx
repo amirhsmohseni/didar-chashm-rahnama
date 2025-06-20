@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Save, Upload, Download, Trash2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminSettings = () => {
   const [settings, setSettings] = useState({
@@ -22,14 +23,91 @@ const AdminSettings = () => {
     smsNotifications: false,
   });
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const handleSave = () => {
-    // در اینجا می‌توانید تنظیمات را در دیتابیس ذخیره کنید
-    toast({
-      title: "تنظیمات ذخیره شد",
-      description: "تغییرات با موفقیت اعمال شد",
-    });
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('key, value');
+
+      if (error) {
+        console.error('Error loading settings:', error);
+        return;
+      }
+
+      if (data) {
+        const settingsMap: Record<string, any> = {};
+        data.forEach(setting => {
+          let value = setting.value;
+          if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
+            value = value.slice(1, -1);
+          }
+          settingsMap[setting.key] = value;
+        });
+
+        setSettings(prev => ({
+          ...prev,
+          siteName: settingsMap.site_title || prev.siteName,
+          siteDescription: settingsMap.site_description || prev.siteDescription,
+          contactEmail: settingsMap.contact_email || prev.contactEmail,
+          contactPhone: settingsMap.contact_phone || prev.contactPhone,
+          address: settingsMap.contact_address || prev.address,
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // Update site_settings table
+      const updates = [
+        { key: 'site_title', value: JSON.stringify(settings.siteName) },
+        { key: 'site_description', value: JSON.stringify(settings.siteDescription) },
+        { key: 'contact_email', value: JSON.stringify(settings.contactEmail) },
+        { key: 'contact_phone', value: JSON.stringify(settings.contactPhone) },
+        { key: 'contact_address', value: JSON.stringify(settings.address) },
+      ];
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('site_settings')
+          .update({ 
+            value: update.value,
+            updated_at: new Date().toISOString()
+          })
+          .eq('key', update.key);
+
+        if (error) {
+          throw error;
+        }
+      }
+
+      toast({
+        title: "تنظیمات ذخیره شد",
+        description: "تغییرات با موفقیت اعمال شد",
+      });
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در ذخیره تنظیمات",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleExportData = () => {
@@ -52,6 +130,17 @@ const AdminSettings = () => {
       description: "کش سیستم با موفقیت پاک شد",
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>در حال بارگذاری تنظیمات...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -170,9 +259,9 @@ const AdminSettings = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Button onClick={handleSave} className="w-full">
+              <Button onClick={handleSave} className="w-full" disabled={isSaving}>
                 <Save className="h-4 w-4 mr-2" />
-                ذخیره تنظیمات
+                {isSaving ? 'در حال ذخیره...' : 'ذخیره تنظیمات'}
               </Button>
               <Button onClick={handleExportData} variant="outline" className="w-full">
                 <Download className="h-4 w-4 mr-2" />

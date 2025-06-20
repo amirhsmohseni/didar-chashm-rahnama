@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Save, Settings, RefreshCw, Upload, X, Eye } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";

@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from 'react';
-import { Calendar, Phone, User, MessageSquare, CheckCircle } from 'lucide-react';
+import { Phone, User, MessageSquare, CheckCircle } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 
 import Header from '@/components/layout/Header';
@@ -10,13 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface Doctor {
   id: string;
@@ -32,20 +26,13 @@ const Consultation = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     phone: '',
-    age: '',
-    gender: '',
     medical_condition: '',
-    doctor_id: searchParams.get('doctor') || '',
-    preferred_date: '',
-    preferred_time: '',
     notes: '',
   });
 
@@ -78,7 +65,6 @@ const Consultation = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Only require name and phone
     if (!formData.name || !formData.phone) {
       toast({
         title: "خطا",
@@ -92,15 +78,16 @@ const Consultation = () => {
 
     try {
       const submitData = {
-        ...formData,
-        age: formData.age ? parseInt(formData.age) : null,
-        doctor_id: formData.doctor_id || null,
-        preferred_date: formData.preferred_date || null,
-        preferred_time: formData.preferred_time || null,
-        notes: formData.notes || null,
-        email: formData.email || null,
-        gender: formData.gender || null,
+        name: formData.name,
+        phone: formData.phone,
         medical_condition: formData.medical_condition || null,
+        notes: formData.notes || null,
+        email: null,
+        gender: null,
+        age: null,
+        doctor_id: null,
+        preferred_date: null,
+        preferred_time: null,
       };
 
       const { error } = await supabase
@@ -173,14 +160,8 @@ const Consultation = () => {
                       setIsSuccess(false);
                       setFormData({
                         name: '',
-                        email: '',
                         phone: '',
-                        age: '',
-                        gender: '',
                         medical_condition: '',
-                        doctor_id: '',
-                        preferred_date: '',
-                        preferred_time: '',
                         notes: '',
                       });
                     }}
@@ -215,139 +196,47 @@ const Consultation = () => {
 
         {/* Form Section */}
         <div className="container py-16">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle>اطلاعات درخواست مشاوره</CardTitle>
+                <CardTitle>درخواست مشاوره رایگان</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Personal Information */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <User className="h-5 w-5" />
-                      اطلاعات شخصی
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          نام و نام خانوادگی <span className="text-red-500">*</span>
-                        </label>
-                        <Input
-                          value={formData.name}
-                          onChange={(e) => setFormData({...formData, name: e.target.value})}
-                          placeholder="نام کامل خود را وارد کنید"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          شماره تماس <span className="text-red-500">*</span>
-                        </label>
-                        <Input
-                          value={formData.phone}
-                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                          placeholder="09xxxxxxxxx"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">ایمیل</label>
-                      <Input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        placeholder="example@email.com"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">سن</label>
-                        <Input
-                          type="number"
-                          value={formData.age}
-                          onChange={(e) => setFormData({...formData, age: e.target.value})}
-                          placeholder="سن شما"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">جنسیت</label>
-                        <Select value={formData.gender} onValueChange={(value) => setFormData({...formData, gender: value})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="انتخاب کنید" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="مرد">مرد</SelectItem>
-                            <SelectItem value="زن">زن</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      نام و نام خانوادگی <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      placeholder="نام کامل خود را وارد کنید"
+                      required
+                    />
                   </div>
 
-                  {/* Medical Information */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">اطلاعات پزشکی</h3>
-                    
-                    <div>
-                      <label className="block text-sm font-medium mb-1">شرح مشکل پزشکی</label>
-                      <Textarea
-                        value={formData.medical_condition}
-                        onChange={(e) => setFormData({...formData, medical_condition: e.target.value})}
-                        placeholder="لطفاً مشکل چشمی خود را به تفصیل شرح دهید..."
-                        rows={4}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">انتخاب پزشک</label>
-                      <Select value={formData.doctor_id} onValueChange={(value) => setFormData({...formData, doctor_id: value})}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="پزشک مورد نظر را انتخاب کنید (اختیاری)" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {doctors.map((doctor) => (
-                            <SelectItem key={doctor.id} value={doctor.id}>
-                              {doctor.name} - {doctor.specialty}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      شماره تماس <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      value={formData.phone}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      placeholder="09xxxxxxxxx"
+                      required
+                    />
                   </div>
 
-                  {/* Appointment Preferences */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <Calendar className="h-5 w-5" />
-                      ترجیحات زمان ملاقات
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">تاریخ مورد نظر</label>
-                        <Input
-                          type="date"
-                          value={formData.preferred_date}
-                          onChange={(e) => setFormData({...formData, preferred_date: e.target.value})}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">ساعت مورد نظر</label>
-                        <Input
-                          type="time"
-                          value={formData.preferred_time}
-                          onChange={(e) => setFormData({...formData, preferred_time: e.target.value})}
-                        />
-                      </div>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">شرح مشکل پزشکی</label>
+                    <Textarea
+                      value={formData.medical_condition}
+                      onChange={(e) => setFormData({...formData, medical_condition: e.target.value})}
+                      placeholder="لطفاً مشکل چشمی خود را به تفصیل شرح دهید..."
+                      rows={4}
+                    />
                   </div>
 
-                  {/* Additional Notes */}
                   <div>
                     <label className="block text-sm font-medium mb-1">توضیحات اضافی</label>
                     <Textarea
