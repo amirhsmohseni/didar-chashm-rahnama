@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { supabase } from "@/integrations/supabase/client";
 import ImageUploader from './ImageUploader';
 
 interface HeaderSettings {
@@ -43,10 +44,39 @@ const HeaderSettingsManager = () => {
 
   const loadSettings = async () => {
     try {
-      // Load settings from localStorage for demo
-      const savedSettings = localStorage.getItem('headerSettings');
-      if (savedSettings) {
-        setSettings(JSON.parse(savedSettings));
+      console.log('Loading header settings from database...');
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('key, value');
+
+      if (error) {
+        console.error('Error loading settings:', error);
+        toast.error('خطا در بارگذاری تنظیمات');
+        return;
+      }
+
+      if (data) {
+        const settingsMap = data.reduce((acc, item) => {
+          let value = item.value;
+          if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
+            value = value.slice(1, -1);
+          } else if (typeof value !== 'string') {
+            value = JSON.stringify(value).replace(/^"|"$/g, '');
+          }
+          acc[item.key] = value;
+          return acc;
+        }, {} as Record<string, string>);
+
+        setSettings(prev => ({
+          ...prev,
+          siteName: settingsMap.site_title || prev.siteName,
+          heroTitle: settingsMap.hero_title || prev.heroTitle,
+          heroDescription: settingsMap.hero_description || prev.heroDescription,
+          logoUrl: settingsMap.site_logo || null,
+          backgroundImageUrl: settingsMap.site_background || null,
+        }));
+        
+        console.log('Loaded settings:', settingsMap);
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -57,10 +87,44 @@ const HeaderSettingsManager = () => {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      // Save to localStorage for demo
-      localStorage.setItem('headerSettings', JSON.stringify(settings));
+      console.log('Saving header settings to database...');
       
-      // Apply settings to CSS variables
+      // Update site settings in database
+      const updates = [
+        { key: 'site_title', value: settings.siteName },
+        { key: 'hero_title', value: settings.heroTitle },
+        { key: 'hero_description', value: settings.heroDescription },
+        { key: 'site_logo', value: settings.logoUrl || '' },
+        { key: 'site_background', value: settings.backgroundImageUrl || '' }
+      ];
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('site_settings')
+          .update({ 
+            value: update.value,
+            updated_at: new Date().toISOString()
+          })
+          .eq('key', update.key);
+
+        if (error) {
+          console.error(`Error updating ${update.key}:`, error);
+          throw error;
+        }
+      }
+
+      // Log admin activity
+      try {
+        await supabase.rpc('log_admin_activity', {
+          action_name: 'update_header_settings',
+          resource_type_name: 'site_settings',
+          details_data: { updated_keys: updates.map(u => u.key) }
+        });
+      } catch (logError) {
+        console.warn('Failed to log admin activity:', logError);
+      }
+      
+      // Apply settings to CSS variables for immediate effect
       document.documentElement.style.setProperty('--primary-color', settings.primaryColor);
       document.documentElement.style.setProperty('--secondary-color', settings.secondaryColor);
       
@@ -74,7 +138,7 @@ const HeaderSettingsManager = () => {
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     const defaultSettings: HeaderSettings = {
       siteName: 'دیدار چشم رهنما',
       tagline: 'مشاوره تخصصی چشم',

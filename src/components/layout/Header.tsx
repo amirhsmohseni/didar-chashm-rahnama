@@ -1,61 +1,116 @@
 
 import { useState } from 'react';
-import { Menu, X, Shield, LogOut, User } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, Phone, Mail, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, isAdmin } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const location = useLocation();
+  const { settings, isLoading } = useSiteSettings();
 
-  console.log('Header: User data:', { user: user?.email, isAdmin });
+  const isActive = (path: string) => location.pathname === path;
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast({
-        title: "خروج موفق",
-        description: "شما با موفقیت خارج شدید",
-      });
-      navigate('/');
-    } catch (error) {
-      toast({
-        title: "خطا",
-        description: "خطا در خروج از حساب",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const navigationItems = [
-    { name: 'خانه', href: '/' },
-    { name: 'خدمات', href: '/services' },
-    { name: 'پزشکان', href: '/doctors' },
-    { name: 'مشاوره', href: '/consultation' },
-    { name: 'درباره ما', href: '/about' },
-    { name: 'وبلاگ', href: '/blog' },
-    { name: 'سوالات متداول', href: '/faq' },
-    { name: 'رسانه', href: '/media' },
+  const navItems = [
+    { name: 'صفحه اصلی', path: '/' },
+    { name: 'خدمات', path: '/services' },
+    { name: 'پزشکان', path: '/doctors' },
+    { name: 'درباره ما', path: '/about' },
+    { name: 'مرکز رسانه', path: '/media' },
+    { name: 'وبلاگ', path: '/blog' },
+    { name: 'سوالات متداول', path: '/faq' },
   ];
 
+  if (isLoading) {
+    return (
+      <header className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center h-16">
+            <div className="animate-pulse bg-gray-200 h-8 w-32 rounded"></div>
+            <div className="animate-pulse bg-gray-200 h-8 w-48 rounded"></div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+    <header className="bg-white shadow-sm sticky top-0 z-50">
+      {/* Top bar with contact info */}
+      <div className="bg-primary text-white py-2 hidden md:block">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center space-x-4 space-x-reverse">
+              {settings.contact_phone && (
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  <span>{settings.contact_phone}</span>
+                </div>
+              )}
+              {settings.contact_email && (
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  <span>{settings.contact_email}</span>
+                </div>
+              )}
+              {settings.contact_address && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>{settings.contact_address}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main header */}
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Mobile menu button - moved to right */}
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2 space-x-reverse">
+            {settings.site_logo ? (
+              <img 
+                src={settings.site_logo} 
+                alt={settings.site_title}
+                className="h-10 w-auto"
+              />
+            ) : (
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">د</span>
+              </div>
+            )}
+            <span className="text-xl font-bold text-gray-900">
+              {settings.site_title}
+            </span>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-8 space-x-reverse">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`transition-colors duration-200 ${
+                  isActive(item.path)
+                    ? 'text-primary font-medium'
+                    : 'text-gray-700 hover:text-primary'
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
+
+          {/* CTA Button */}
+          <div className="hidden lg:flex items-center space-x-4 space-x-reverse">
+            <Button asChild>
+              <Link to="/consultation">درخواست مشاوره</Link>
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
           <Button
             variant="ghost"
             size="sm"
@@ -64,109 +119,31 @@ const Header = () => {
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
-
-          {/* Desktop Navigation - moved to left after logo */}
-          <nav className="hidden lg:flex items-center space-x-8 space-x-reverse">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium"
-              >
-                {item.name}
-              </Link>
-            ))}
-            
-            {/* Admin Link - prominently displayed for admins */}
-            {user && isAdmin && (
-              <Link
-                to="/admin"
-                className="flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
-              >
-                <Shield className="h-4 w-4" />
-                پنل مدیریت
-              </Link>
-            )}
-          </nav>
-
-          {/* Logo - moved to center-right */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">چ</span>
-            </div>
-            <span className="font-bold text-xl text-primary mr-2">چشم پزشکی</span>
-          </Link>
-
-          {/* Auth Section - stays on the right */}
-          <div className="flex items-center gap-4">
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span className="hidden sm:inline">حساب کاربری</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="p-2">
-                    <p className="text-sm font-medium">{user.email}</p>
-                    {isAdmin && (
-                      <p className="text-xs text-blue-600 flex items-center gap-1 mt-1">
-                        <Shield className="h-3 w-3" />
-                        مدیر سیستم
-                      </p>
-                    )}
-                  </div>
-                  <DropdownMenuSeparator />
-                  {isAdmin && (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin" className="flex items-center gap-2">
-                          <Shield className="h-4 w-4" />
-                          پنل مدیریت
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2">
-                    <LogOut className="h-4 w-4" />
-                    خروج
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link to="/auth">
-                <Button variant="default">ورود / ثبت نام</Button>
-              </Link>
-            )}
-          </div>
         </div>
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="lg:hidden border-t bg-white py-4">
+          <div className="lg:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col space-y-4">
-              {navigationItems.map((item) => (
+              {navItems.map((item) => (
                 <Link
-                  key={item.name}
-                  to={item.href}
-                  className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium px-4 py-2"
+                  key={item.path}
+                  to={item.path}
                   onClick={() => setIsMenuOpen(false)}
+                  className={`transition-colors duration-200 ${
+                    isActive(item.path)
+                      ? 'text-primary font-medium'
+                      : 'text-gray-700 hover:text-primary'
+                  }`}
                 >
                   {item.name}
                 </Link>
               ))}
-              {user && isAdmin && (
-                <Link
-                  to="/admin"
-                  className="text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium px-4 py-2 flex items-center gap-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Shield className="h-4 w-4" />
-                  پنل مدیریت
+              <Button asChild className="w-full mt-4">
+                <Link to="/consultation" onClick={() => setIsMenuOpen(false)}>
+                  درخواست مشاوره
                 </Link>
-              )}
+              </Button>
             </nav>
           </div>
         )}
