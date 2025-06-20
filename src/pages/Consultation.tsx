@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Calendar, Phone, User, MessageSquare, CheckCircle } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
@@ -79,10 +78,11 @@ const Consultation = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.phone || !formData.medical_condition) {
+    // Only require name and phone
+    if (!formData.name || !formData.phone) {
       toast({
         title: "خطا",
-        description: "لطفاً تمام فیلدهای ضروری را پر کنید",
+        description: "لطفاً نام و شماره تماس را وارد کنید",
         variant: "destructive",
       });
       return;
@@ -98,6 +98,9 @@ const Consultation = () => {
         preferred_date: formData.preferred_date || null,
         preferred_time: formData.preferred_time || null,
         notes: formData.notes || null,
+        email: formData.email || null,
+        gender: formData.gender || null,
+        medical_condition: formData.medical_condition || null,
       };
 
       const { error } = await supabase
@@ -228,7 +231,9 @@ const Consultation = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-1">نام و نام خانوادگی *</label>
+                        <label className="block text-sm font-medium mb-1">
+                          نام و نام خانوادگی <span className="text-red-500">*</span>
+                        </label>
                         <Input
                           value={formData.name}
                           onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -237,7 +242,9 @@ const Consultation = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-1">شماره تماس *</label>
+                        <label className="block text-sm font-medium mb-1">
+                          شماره تماس <span className="text-red-500">*</span>
+                        </label>
                         <Input
                           value={formData.phone}
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -248,13 +255,12 @@ const Consultation = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1">ایمیل *</label>
+                      <label className="block text-sm font-medium mb-1">ایمیل</label>
                       <Input
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                         placeholder="example@email.com"
-                        required
                       />
                     </div>
 
@@ -288,13 +294,12 @@ const Consultation = () => {
                     <h3 className="text-lg font-semibold">اطلاعات پزشکی</h3>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-1">شرح مشکل پزشکی *</label>
+                      <label className="block text-sm font-medium mb-1">شرح مشکل پزشکی</label>
                       <Textarea
                         value={formData.medical_condition}
                         onChange={(e) => setFormData({...formData, medical_condition: e.target.value})}
                         placeholder="لطفاً مشکل چشمی خود را به تفصیل شرح دهید..."
                         rows={4}
-                        required
                       />
                     </div>
 
