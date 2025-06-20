@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Calendar, Phone, User, MessageSquare, CheckCircle } from 'lucide-react';
+import { Calendar, Phone, User, MessageSqu, CheckCircle, Sparkles, Heart, Shield } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -127,10 +127,13 @@ const Consultation = () => {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-secondary flex items-center justify-center">
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">در حال بارگذاری...</p>
+            <div className="relative">
+              <div className="animate-spin rounded-full h-32 w-32 border-b-4 border-emerald-400 mx-auto"></div>
+              <div className="absolute inset-0 rounded-full bg-emerald-400/20 blur-xl animate-pulse"></div>
+            </div>
+            <p className="mt-8 text-emerald-200 text-xl">در حال بارگذاری...</p>
           </div>
         </div>
         <Footer />
@@ -142,29 +145,29 @@ const Consultation = () => {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-secondary flex items-center justify-center">
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 flex items-center justify-center">
           <div className="container max-w-md text-center">
-            <Card>
-              <CardHeader>
-                <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                  <CheckCircle className="h-8 w-8 text-green-600" />
+            <Card className="glass-effect border-emerald-400/30 shadow-2xl">
+              <CardHeader className="text-center pb-4">
+                <div className="mx-auto w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mb-6 shadow-lg glow-animation">
+                  <CheckCircle className="h-10 w-10 text-white" />
                 </div>
-                <CardTitle className="text-2xl">درخواست ارسال شد</CardTitle>
+                <CardTitle className="text-3xl text-white">درخواست ارسال شد</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
+              <CardContent className="space-y-6">
+                <p className="text-emerald-200 text-lg leading-relaxed">
                   درخواست مشاوره شما با موفقیت ثبت شد. ما در اسرع وقت با شما تماس خواهیم گرفت.
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Button 
-                    className="w-full" 
+                    className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white py-3 rounded-xl text-lg"
                     onClick={() => navigate('/')}
                   >
                     بازگشت به صفحه اصلی
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="w-full"
+                    className="w-full border-emerald-400 text-emerald-400 hover:bg-emerald-400 hover:text-slate-900 py-3 rounded-xl"
                     onClick={() => {
                       setIsSuccess(false);
                       setFormData({
@@ -192,70 +195,90 @@ const Consultation = () => {
     <>
       <Header />
       
-      <div className="bg-secondary min-h-screen">
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 min-h-screen">
         {/* Hero Section */}
-        <div className="bg-gradient-to-b from-primary to-primary/80 text-white py-16">
-          <div className="container text-center">
-            <MessageSquare className="h-16 w-16 mx-auto mb-6" />
-            <h1 className="text-4xl font-bold mb-4">درخواست مشاوره</h1>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              برای دریافت مشاوره تخصصی، فرم زیر را تکمیل کنید
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/90 via-teal-600/90 to-cyan-600/90"></div>
+          <div className="absolute inset-0">
+            <div className="absolute top-10 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-10 right-1/4 w-80 h-80 bg-emerald-300/20 rounded-full blur-3xl animate-pulse delay-500"></div>
+          </div>
+          
+          <div className="relative container py-20 text-center">
+            <div className="mb-6 inline-flex items-center gap-2 px-6 py-3 rounded-full glass-effect text-emerald-200">
+              <Sparkles className="h-5 w-5" />
+              <span className="font-medium">مشاوره رایگان و تخصصی</span>
+            </div>
+            
+            <MessageSquare className="h-20 w-20 mx-auto mb-8 text-white float-animation" />
+            <h1 className="text-5xl font-bold mb-6 text-white">درخواست مشاوره</h1>
+            <p className="text-xl text-emerald-100 max-w-2xl mx-auto leading-relaxed">
+              برای دریافت مشاوره تخصصی و رایگان، فرم زیر را تکمیل کنید
             </p>
           </div>
         </div>
 
         {/* Form Section */}
-        <div className="container py-16">
-          <div className="max-w-lg mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle>درخواست مشاوره رایگان</CardTitle>
+        <div className="container py-20">
+          <div className="max-w-2xl mx-auto">
+            <Card className="glass-effect border-emerald-400/30 shadow-2xl">
+              <CardHeader className="text-center">
+                <div className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/20 text-emerald-300">
+                  <Heart className="h-4 w-4" />
+                  <span className="text-sm font-medium">مشاوره رایگان</span>
+                </div>
+                <CardTitle className="text-3xl text-white">درخواست مشاوره رایگان</CardTitle>
               </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      نام و نام خانوادگی <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      placeholder="نام کامل خود را وارد کنید"
-                      required
-                    />
+              <CardContent className="p-8">
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-emerald-300 font-medium mb-3 text-lg">
+                        نام و نام خانوادگی <span className="text-red-400">*</span>
+                      </label>
+                      <Input
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        placeholder="نام کامل خود را وارد کنید"
+                        className="bg-slate-800/50 border-emerald-400/30 text-white placeholder:text-gray-400 h-12 rounded-xl focus:border-emerald-400"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-emerald-300 font-medium mb-3 text-lg">
+                        شماره تماس <span className="text-red-400">*</span>
+                      </label>
+                      <Input
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        placeholder="09xxxxxxxxx"
+                        className="bg-slate-800/50 border-emerald-400/30 text-white placeholder:text-gray-400 h-12 rounded-xl focus:border-emerald-400"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1">
-                      شماره تماس <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      placeholder="09xxxxxxxxx"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">شرح مشکل (اختیاری)</label>
+                    <label className="block text-emerald-300 font-medium mb-3 text-lg">شرح مشکل (اختیاری)</label>
                     <Textarea
                       value={formData.medical_condition}
                       onChange={(e) => setFormData({...formData, medical_condition: e.target.value})}
                       placeholder="لطفاً مشکل چشمی خود را به طور خلاصه شرح دهید..."
-                      rows={3}
+                      className="bg-slate-800/50 border-emerald-400/30 text-white placeholder:text-gray-400 min-h-24 rounded-xl focus:border-emerald-400"
+                      rows={4}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1">انتخاب پزشک (اختیاری)</label>
+                    <label className="block text-emerald-300 font-medium mb-3 text-lg">انتخاب پزشک (اختیاری)</label>
                     <Select value={formData.doctor_id} onValueChange={(value) => setFormData({...formData, doctor_id: value})}>
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-slate-800/50 border-emerald-400/30 text-white h-12 rounded-xl focus:border-emerald-400">
                         <SelectValue placeholder="پزشک مورد نظر را انتخاب کنید" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-slate-800 border-emerald-400/30">
                         {doctors.map((doctor) => (
-                          <SelectItem key={doctor.id} value={doctor.id}>
+                          <SelectItem key={doctor.id} value={doctor.id} className="text-white hover:bg-emerald-500/20">
                             {doctor.name} - {doctor.specialty}
                           </SelectItem>
                         ))}
@@ -264,22 +287,33 @@ const Consultation = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1">توضیحات اضافی (اختیاری)</label>
+                    <label className="block text-emerald-300 font-medium mb-3 text-lg">توضیحات اضافی (اختیاری)</label>
                     <Textarea
                       value={formData.notes}
                       onChange={(e) => setFormData({...formData, notes: e.target.value})}
                       placeholder="هر توضیح اضافی که نیاز دارید..."
-                      rows={2}
+                      className="bg-slate-800/50 border-emerald-400/30 text-white placeholder:text-gray-400 rounded-xl focus:border-emerald-400"
+                      rows={3}
                     />
                   </div>
 
                   <Button 
                     type="submit" 
-                    className="w-full" 
+                    className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white py-4 text-xl rounded-xl shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 transform hover:scale-105"
                     size="lg"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? 'در حال ارسال...' : 'ارسال درخواست مشاوره'}
+                    {isSubmitting ? (
+                      <div className="flex items-center gap-3">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        در حال ارسال...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <Shield className="h-6 w-6" />
+                        ارسال درخواست مشاوره
+                      </div>
+                    )}
                   </Button>
                 </form>
               </CardContent>
