@@ -155,7 +155,7 @@ const SiteSettingsManager = () => {
       console.log('Saving settings with data:', formData);
       
       const updatePromises = settings.map(async (setting) => {
-        const newValue = formData[setting.key] || '';
+        const newValue = JSON.stringify(formData[setting.key] || '');
         console.log(`Updating ${setting.key} with value:`, newValue);
         
         const { error } = await supabase
@@ -183,14 +183,6 @@ const SiteSettingsManager = () => {
         });
       } catch (logError) {
         console.warn('Failed to log admin activity:', logError);
-      }
-
-      // Apply changes to document root for immediate visual feedback
-      if (formData.site_logo) {
-        document.documentElement.style.setProperty('--site-logo', `url(${formData.site_logo})`);
-      }
-      if (formData.site_background) {
-        document.documentElement.style.setProperty('--site-background', `url(${formData.site_background})`);
       }
 
       toast({
