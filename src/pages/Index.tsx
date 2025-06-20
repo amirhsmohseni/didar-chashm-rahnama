@@ -117,7 +117,7 @@ const Index = () => {
                 <p className="text-gray-600 text-base lg:text-lg leading-relaxed">
                   همکاری با معتبرترین پزشکان و مراکز درمانی کشور
                 </p>
-              </Car dContent>
+              </CardContent>
             </Card>
           </div>
         </div>
