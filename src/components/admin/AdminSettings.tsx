@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Save, Upload, Download, Trash2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 const AdminSettings = () => {
   const [settings, setSettings] = useState({
@@ -23,106 +22,14 @@ const AdminSettings = () => {
     smsNotifications: false,
   });
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('site_settings')
-        .select('*');
-
-      if (error) {
-        console.error('Error loading settings:', error);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        const settingsMap: Record<string, any> = {};
-        data.forEach(setting => {
-          let value = setting.value;
-          if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
-            value = value.slice(1, -1);
-          } else if (typeof value !== 'string') {
-            value = JSON.stringify(value).replace(/^"|"$/g, '');
-          }
-          settingsMap[setting.key] = value;
-        });
-
-        setSettings(prev => ({
-          ...prev,
-          siteName: settingsMap.site_title || prev.siteName,
-          siteDescription: settingsMap.site_description || prev.siteDescription,
-          contactEmail: settingsMap.contact_email || prev.contactEmail,
-          contactPhone: settingsMap.contact_phone || prev.contactPhone,
-          address: settingsMap.contact_address || prev.address,
-        }));
-      }
-    } catch (error) {
-      console.error('Error loading settings:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      // ذخیره تنظیمات در Supabase
-      const settingsToSave = [
-        { key: 'site_title', value: JSON.stringify(settings.siteName) },
-        { key: 'site_description', value: JSON.stringify(settings.siteDescription) },
-        { key: 'contact_email', value: JSON.stringify(settings.contactEmail) },
-        { key: 'contact_phone', value: JSON.stringify(settings.contactPhone) },
-        { key: 'contact_address', value: JSON.stringify(settings.address) },
-      ];
-
-      for (const setting of settingsToSave) {
-        const { error } = await supabase
-          .from('site_settings')
-          .upsert({
-            key: setting.key,
-            value: setting.value,
-            updated_at: new Date().toISOString()
-          });
-
-        if (error) {
-          console.error(`Error saving ${setting.key}:`, error);
-          throw error;
-        }
-      }
-
-      // Log activity
-      try {
-        await supabase.rpc('log_admin_activity', {
-          action_name: 'update_admin_settings',
-          resource_type_name: 'site_settings',
-          details_data: { updated_settings: Object.keys(settings) }
-        });
-      } catch (logError) {
-        console.warn('Failed to log admin activity:', logError);
-      }
-
-      toast({
-        title: "تنظیمات ذخیره شد",
-        description: "تغییرات با موفقیت اعمال شد",
-      });
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      toast({
-        title: "خطا",
-        description: "خطا در ذخیره تنظیمات",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSave = () => {
+    // در اینجا می‌توانید تنظیمات را در دیتابیس ذخیره کنید
+    toast({
+      title: "تنظیمات ذخیره شد",
+      description: "تغییرات با موفقیت اعمال شد",
+    });
   };
 
   const handleExportData = () => {
@@ -140,8 +47,6 @@ const AdminSettings = () => {
   };
 
   const handleClearCache = () => {
-    localStorage.clear();
-    sessionStorage.clear();
     toast({
       title: "کش پاک شد",
       description: "کش سیستم با موفقیت پاک شد",
@@ -265,13 +170,9 @@ const AdminSettings = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Button 
-                onClick={handleSave} 
-                className="w-full bg-green-600 hover:bg-green-700"
-                disabled={isSaving}
-              >
+              <Button onClick={handleSave} className="w-full">
                 <Save className="h-4 w-4 mr-2" />
-                {isSaving ? 'در حال ذخیره...' : 'ذخیره تنظیمات'}
+                ذخیره تنظیمات
               </Button>
               <Button onClick={handleExportData} variant="outline" className="w-full">
                 <Download className="h-4 w-4 mr-2" />

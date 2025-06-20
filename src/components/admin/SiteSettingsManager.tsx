@@ -56,12 +56,13 @@ const SiteSettingsManager = () => {
       data?.forEach(setting => {
         let value = setting.value;
         if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
-          value = value.slice(1, -1);
+          value = value.slice(1, -1); // Remove surrounding quotes
         } else if (typeof value !== 'string') {
           value = JSON.stringify(value).replace(/^"|"$/g, '');
         }
         initialData[setting.key] = value;
         
+        // Set image states
         if (setting.key === 'site_logo') {
           setLogoImage(value || null);
         }
@@ -106,6 +107,7 @@ const SiteSettingsManager = () => {
     setUploading(true);
     
     try {
+      // Create a temporary URL for the uploaded image
       const imageUrl = URL.createObjectURL(file);
       
       if (type === 'logo') {
@@ -152,20 +154,20 @@ const SiteSettingsManager = () => {
     try {
       console.log('Saving settings with data:', formData);
       
-      // ذخیره هر تنظیم به صورت جداگانه
-      const updatePromises = Object.entries(formData).map(async ([key, value]) => {
-        console.log(`Updating ${key} with value:`, value);
+      const updatePromises = settings.map(async (setting) => {
+        const newValue = JSON.stringify(formData[setting.key] || '');
+        console.log(`Updating ${setting.key} with value:`, newValue);
         
         const { error } = await supabase
           .from('site_settings')
-          .upsert({ 
-            key: key,
-            value: JSON.stringify(value || ''),
+          .update({ 
+            value: newValue,
             updated_at: new Date().toISOString()
-          });
+          })
+          .eq('key', setting.key);
           
         if (error) {
-          console.error(`Error updating ${key}:`, error);
+          console.error(`Error updating ${setting.key}:`, error);
           throw error;
         }
       });
@@ -185,14 +187,11 @@ const SiteSettingsManager = () => {
 
       toast({
         title: "تنظیمات ذخیره شد",
-        description: "تنظیمات سایت با موفقیت بروزرسانی شد و در چند ثانیه اعمال خواهد شد",
+        description: "تنظیمات سایت با موفقیت بروزرسانی شد",
       });
 
-      // رفرش صفحه بعد از 2 ثانیه تا تغییرات اعمال شود
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-
+      // Refresh settings to confirm save
+      await fetchSettings();
     } catch (error) {
       console.error('Error saving settings:', error);
       toast({
@@ -429,10 +428,9 @@ const SiteSettingsManager = () => {
             <Button 
               onClick={handleSave} 
               disabled={isSaving || isLoading}
-              className="bg-green-600 hover:bg-green-700"
             >
               <Save className="h-4 w-4 mr-2" />
-              {isSaving ? 'در حال ذخیره...' : 'ذخیره و اعمال تنظیمات'}
+              {isSaving ? 'در حال ذخیره...' : 'ذخیره تنظیمات'}
             </Button>
           </div>
         </CardContent>
