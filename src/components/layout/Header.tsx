@@ -3,12 +3,10 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Phone, Mail, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { settings, isLoading } = useSiteSettings();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -22,19 +20,6 @@ const Header = () => {
     { name: 'سوالات متداول', path: '/faq' },
   ];
 
-  if (isLoading) {
-    return (
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center h-16">
-            <div className="animate-pulse bg-gray-200 h-8 w-32 rounded"></div>
-            <div className="animate-pulse bg-gray-200 h-8 w-48 rounded"></div>
-          </div>
-        </div>
-      </header>
-    );
-  }
-
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       {/* Top bar with contact info */}
@@ -42,24 +27,18 @@ const Header = () => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center text-sm">
             <div className="flex items-center space-x-4 space-x-reverse">
-              {settings.contact_phone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  <span>{settings.contact_phone}</span>
-                </div>
-              )}
-              {settings.contact_email && (
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  <span>{settings.contact_email}</span>
-                </div>
-              )}
-              {settings.contact_address && (
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>{settings.contact_address}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                <span>021-12345678</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                <span>info@clinic.com</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                <span>تهران، خیابان ولیعصر</span>
+              </div>
             </div>
           </div>
         </div>
@@ -70,19 +49,11 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 space-x-reverse">
-            {settings.site_logo ? (
-              <img 
-                src={settings.site_logo} 
-                alt={settings.site_title}
-                className="h-10 w-auto"
-              />
-            ) : (
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">د</span>
-              </div>
-            )}
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">د</span>
+            </div>
             <span className="text-xl font-bold text-gray-900">
-              {settings.site_title}
+              دیدار چشم رهنما
             </span>
           </Link>
 

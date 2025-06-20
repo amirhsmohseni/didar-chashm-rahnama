@@ -1,5 +1,4 @@
 
-import { useSiteSettings } from '@/hooks/useSiteSettings';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FeaturedServices from '@/components/sections/FeaturedServices';
@@ -10,40 +9,18 @@ import { ArrowLeft, Eye, Users, Award, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Index = () => {
-  const { settings, isLoading } = useSiteSettings();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-secondary">
-        <Header />
-        <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-secondary">
       <Header />
       
       {/* Hero Section */}
-      <section 
-        className="relative bg-gradient-to-b from-primary to-primary/80 text-white py-24"
-        style={{
-          backgroundImage: settings.site_background ? `linear-gradient(rgba(14, 165, 233, 0.8), rgba(14, 165, 233, 0.6)), url(${settings.site_background})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
+      <section className="bg-gradient-to-b from-primary to-primary/80 text-white py-24">
         <div className="container text-center">
           <h1 className="text-5xl font-bold mb-6 leading-tight">
-            {settings.hero_title}
+            دیدار چشم رهنما
           </h1>
           <p className="text-xl mb-8 text-white/90 max-w-3xl mx-auto leading-relaxed">
-            {settings.hero_description}
+            مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
