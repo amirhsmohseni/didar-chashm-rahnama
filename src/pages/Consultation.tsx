@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Calendar, Phone, User, MessageSqu, CheckCircle, Sparkles, Heart, Shield } from 'lucide-react';
+import { Calendar, Phone, User, MessageSquare, CheckCircle, Sparkles, Heart, Shield } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
