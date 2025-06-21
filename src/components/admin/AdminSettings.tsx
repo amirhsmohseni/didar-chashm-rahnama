@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from 'sonner';
 import { supabase } from "@/integrations/supabase/client";
 
 const AdminSettings = () => {
@@ -25,7 +25,6 @@ const AdminSettings = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     loadSettings();
@@ -34,12 +33,14 @@ const AdminSettings = () => {
   const loadSettings = async () => {
     setIsLoading(true);
     try {
+      console.log('Loading admin settings...');
       const { data, error } = await supabase
         .from('site_settings')
         .select('*');
 
       if (error) {
         console.error('Error loading settings:', error);
+        toast.error('خطا در بارگذاری تنظیمات');
         return;
       }
 
@@ -63,9 +64,11 @@ const AdminSettings = () => {
           contactPhone: settingsMap.contact_phone || prev.contactPhone,
           address: settingsMap.contact_address || prev.address,
         }));
+        console.log('Settings loaded successfully');
       }
     } catch (error) {
       console.error('Error loading settings:', error);
+      toast.error('خطا در بارگذاری تنظیمات');
     } finally {
       setIsLoading(false);
     }
@@ -74,31 +77,35 @@ const AdminSettings = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // ذخیره تنظیمات در Supabase
+      console.log('Saving admin settings...', settings);
+      
       const settingsToSave = [
-        { key: 'site_title', value: JSON.stringify(settings.siteName) },
-        { key: 'site_description', value: JSON.stringify(settings.siteDescription) },
-        { key: 'contact_email', value: JSON.stringify(settings.contactEmail) },
-        { key: 'contact_phone', value: JSON.stringify(settings.contactPhone) },
-        { key: 'contact_address', value: JSON.stringify(settings.address) },
+        { key: 'site_title', value: settings.siteName },
+        { key: 'site_description', value: settings.siteDescription },
+        { key: 'contact_email', value: settings.contactEmail },
+        { key: 'contact_phone', value: settings.contactPhone },
+        { key: 'contact_address', value: settings.address },
       ];
 
+      // Save each setting individually
       for (const setting of settingsToSave) {
-        const { error } = await supabase
+        console.log(`Saving ${setting.key}:`, setting.value);
+        
+        const { error: upsertError } = await supabase
           .from('site_settings')
           .upsert({
             key: setting.key,
-            value: setting.value,
+            value: JSON.stringify(setting.value),
             updated_at: new Date().toISOString()
           });
 
-        if (error) {
-          console.error(`Error saving ${setting.key}:`, error);
-          throw error;
+        if (upsertError) {
+          console.error(`Error saving ${setting.key}:`, upsertError);
+          throw upsertError;
         }
       }
 
-      // Log activity
+      // Try to log activity, but don't fail if it doesn't work
       try {
         await supabase.rpc('log_admin_activity', {
           action_name: 'update_admin_settings',
@@ -109,44 +116,38 @@ const AdminSettings = () => {
         console.warn('Failed to log admin activity:', logError);
       }
 
-      toast({
-        title: "تنظیمات ذخیره شد",
-        description: "تغییرات با موفقیت اعمال شد",
-      });
+      toast.success('تنظیمات با موفقیت ذخیره شد');
+      console.log('Settings saved successfully');
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast({
-        title: "خطا",
-        description: "خطا در ذخیره تنظیمات",
-        variant: "destructive",
-      });
+      toast.error('خطا در ذخیره تنظیمات: ' + (error as Error).message);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleExportData = () => {
-    toast({
-      title: "خروجی داده‌ها",
-      description: "داده‌ها در حال آماده‌سازی هستند",
-    });
+    toast.success('خروجی داده‌ها در حال آماده‌سازی');
   };
 
   const handleImportData = () => {
-    toast({
-      title: "وارد کردن داده‌ها",
-      description: "لطفا فایل را انتخاب کنید",
-    });
+    toast.info('لطفا فایل را انتخاب کنید');
   };
 
   const handleClearCache = () => {
     localStorage.clear();
     sessionStorage.clear();
-    toast({
-      title: "کش پاک شد",
-      description: "کش سیستم با موفقیت پاک شد",
-    });
+    toast.success('کش سیستم با موفقیت پاک شد');
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <RefreshCw className="h-8 w-8 animate-spin" />
+        <span className="ml-2">در حال بارگذاری تنظیمات...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

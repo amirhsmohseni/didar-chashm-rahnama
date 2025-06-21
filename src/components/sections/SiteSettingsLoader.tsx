@@ -9,6 +9,7 @@ const SiteSettingsLoader = () => {
 
   const loadAndApplySettings = async () => {
     try {
+      console.log('Loading site settings for application...');
       const { data, error } = await supabase
         .from('site_settings')
         .select('*');
@@ -30,22 +31,28 @@ const SiteSettingsLoader = () => {
           settingsMap[setting.key] = value;
         });
 
-        // اعمال تنظیمات به عنوان سایت
+        // Apply site title
         if (settingsMap.site_title) {
           document.title = settingsMap.site_title;
         }
 
-        // اعمال رنگ‌های سفارشی اگر موجود باشد
+        // Apply custom colors if available
         const savedSettings = localStorage.getItem('headerSettings');
         if (savedSettings) {
-          const headerSettings = JSON.parse(savedSettings);
-          if (headerSettings.primaryColor) {
-            document.documentElement.style.setProperty('--primary-color', headerSettings.primaryColor);
-          }
-          if (headerSettings.secondaryColor) {
-            document.documentElement.style.setProperty('--secondary-color', headerSettings.secondaryColor);
+          try {
+            const headerSettings = JSON.parse(savedSettings);
+            if (headerSettings.primaryColor) {
+              document.documentElement.style.setProperty('--primary-color', headerSettings.primaryColor);
+            }
+            if (headerSettings.secondaryColor) {
+              document.documentElement.style.setProperty('--secondary-color', headerSettings.secondaryColor);
+            }
+          } catch (parseError) {
+            console.warn('Failed to parse header settings from localStorage:', parseError);
           }
         }
+        
+        console.log('Site settings applied successfully');
       }
     } catch (error) {
       console.error('Error applying site settings:', error);

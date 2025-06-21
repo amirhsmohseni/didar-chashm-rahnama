@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { Save, Settings, RefreshCw, Upload, X, Eye } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +23,6 @@ const SiteSettingsManager = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingBackground, setIsUploadingBackground] = useState(false);
-  const { toast } = useToast();
 
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [logoImage, setLogoImage] = useState<string | null>(null);
@@ -45,6 +43,7 @@ const SiteSettingsManager = () => {
 
       if (error) {
         console.error('Error fetching settings:', error);
+        toast.error('خطا در دریافت تنظیمات');
         throw error;
       }
       
@@ -73,11 +72,7 @@ const SiteSettingsManager = () => {
       setFormData(initialData);
     } catch (error) {
       console.error('Error fetching settings:', error);
-      toast({
-        title: "خطا",
-        description: "خطا در دریافت تنظیمات",
-        variant: "destructive",
-      });
+      toast.error('خطا در دریافت تنظیمات');
     } finally {
       setIsLoading(false);
     }
@@ -85,20 +80,12 @@ const SiteSettingsManager = () => {
 
   const handleImageUpload = async (file: File, type: 'logo' | 'background') => {
     if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "خطا",
-        description: "فایل نباید بیشتر از 5 مگابایت باشد",
-        variant: "destructive",
-      });
+      toast.error('فایل نباید بیشتر از 5 مگابایت باشد');
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      toast({
-        title: "خطا",
-        description: "لطفاً فقط فایل تصویری انتخاب کنید",
-        variant: "destructive",
-      });
+      toast.error('لطفاً فقط فایل تصویری انتخاب کنید');
       return;
     }
 
@@ -116,17 +103,10 @@ const SiteSettingsManager = () => {
         setFormData(prev => ({ ...prev, site_background: imageUrl }));
       }
       
-      toast({
-        title: "موفق",
-        description: `${type === 'logo' ? 'لوگو' : 'تصویر پس‌زمینه'} با موفقیت آپلود شد`,
-      });
+      toast.success(`${type === 'logo' ? 'لوگو' : 'تصویر پس‌زمینه'} با موفقیت آپلود شد`);
     } catch (error) {
       console.error('Error uploading image:', error);
-      toast({
-        title: "خطا",
-        description: "خطا در آپلود تصویر",
-        variant: "destructive",
-      });
+      toast.error('خطا در آپلود تصویر');
     } finally {
       setUploading(false);
     }
@@ -141,10 +121,7 @@ const SiteSettingsManager = () => {
       setFormData(prev => ({ ...prev, site_background: '' }));
     }
     
-    toast({
-      title: "موفق",
-      description: `${type === 'logo' ? 'لوگو' : 'تصویر پس‌زمینه'} حذف شد`,
-    });
+    toast.success(`${type === 'logo' ? 'لوگو' : 'تصویر پس‌زمینه'} حذف شد`);
   };
 
   const handleSave = async () => {
@@ -152,7 +129,7 @@ const SiteSettingsManager = () => {
     try {
       console.log('Saving settings with data:', formData);
       
-      // ذخیره هر تنظیم به صورت جداگانه
+      // Save each setting individually
       const updatePromises = Object.entries(formData).map(async ([key, value]) => {
         console.log(`Updating ${key} with value:`, value);
         
@@ -172,7 +149,7 @@ const SiteSettingsManager = () => {
 
       await Promise.all(updatePromises);
 
-      // Log activity
+      // Try to log activity
       try {
         await supabase.rpc('log_admin_activity', {
           action_name: 'update_site_settings',
@@ -183,23 +160,17 @@ const SiteSettingsManager = () => {
         console.warn('Failed to log admin activity:', logError);
       }
 
-      toast({
-        title: "تنظیمات ذخیره شد",
-        description: "تنظیمات سایت با موفقیت بروزرسانی شد و در چند ثانیه اعمال خواهد شد",
-      });
+      toast.success('تنظیمات سایت با موفقیت بروزرسانی شد');
+      console.log('Settings saved successfully');
 
-      // رفرش صفحه بعد از 2 ثانیه تا تغییرات اعمال شود
+      // Refresh page after 2 seconds to apply changes
       setTimeout(() => {
         window.location.reload();
       }, 2000);
 
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast({
-        title: "خطا",
-        description: "خطا در ذخیره تنظیمات",
-        variant: "destructive",
-      });
+      toast.error('خطا در ذخیره تنظیمات: ' + (error as Error).message);
     } finally {
       setIsSaving(false);
     }
@@ -395,7 +366,7 @@ const SiteSettingsManager = () => {
                       {setting.description && (
                         <p className="text-xs text-muted-foreground">{setting.description}</p>
                       )}
-                      {['hero_description', 'site_description'].includes(setting.key) ? (
+                      {['hero_description', 'site_description', 'contact_address'].includes(setting.key) ? (
                         <Textarea
                           value={formData[setting.key] || ''}
                           onChange={(e) => handleInputChange(setting.key, e.target.value)}
