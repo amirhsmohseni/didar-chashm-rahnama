@@ -23,7 +23,7 @@ const AdminSettings = () => {
     smsNotifications: false,
   });
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
@@ -32,22 +32,25 @@ const AdminSettings = () => {
   }, []);
 
   const loadSettings = async () => {
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('site_settings')
-        .select('key, value');
+        .select('*');
 
       if (error) {
         console.error('Error loading settings:', error);
         return;
       }
 
-      if (data) {
+      if (data && data.length > 0) {
         const settingsMap: Record<string, any> = {};
         data.forEach(setting => {
           let value = setting.value;
           if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
             value = value.slice(1, -1);
+          } else if (typeof value !== 'string') {
+            value = JSON.stringify(value).replace(/^"|"$/g, '');
           }
           settingsMap[setting.key] = value;
         });
@@ -71,8 +74,8 @@ const AdminSettings = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Update site_settings table
-      const updates = [
+      // ذخیره تنظیمات در Supabase
+      const settingsToSave = [
         { key: 'site_title', value: JSON.stringify(settings.siteName) },
         { key: 'site_description', value: JSON.stringify(settings.siteDescription) },
         { key: 'contact_email', value: JSON.stringify(settings.contactEmail) },
@@ -80,18 +83,30 @@ const AdminSettings = () => {
         { key: 'contact_address', value: JSON.stringify(settings.address) },
       ];
 
-      for (const update of updates) {
+      for (const setting of settingsToSave) {
         const { error } = await supabase
           .from('site_settings')
-          .update({ 
-            value: update.value,
+          .upsert({
+            key: setting.key,
+            value: setting.value,
             updated_at: new Date().toISOString()
-          })
-          .eq('key', update.key);
+          });
 
         if (error) {
+          console.error(`Error saving ${setting.key}:`, error);
           throw error;
         }
+      }
+
+      // Log activity
+      try {
+        await supabase.rpc('log_admin_activity', {
+          action_name: 'update_admin_settings',
+          resource_type_name: 'site_settings',
+          details_data: { updated_settings: Object.keys(settings) }
+        });
+      } catch (logError) {
+        console.warn('Failed to log admin activity:', logError);
       }
 
       toast({
@@ -125,22 +140,13 @@ const AdminSettings = () => {
   };
 
   const handleClearCache = () => {
+    localStorage.clear();
+    sessionStorage.clear();
     toast({
       title: "کش پاک شد",
       description: "کش سیستم با موفقیت پاک شد",
     });
   };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>در حال بارگذاری تنظیمات...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -259,7 +265,11 @@ const AdminSettings = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Button onClick={handleSave} className="w-full" disabled={isSaving}>
+              <Button 
+                onClick={handleSave} 
+                className="w-full bg-green-600 hover:bg-green-700"
+                disabled={isSaving}
+              >
                 <Save className="h-4 w-4 mr-2" />
                 {isSaving ? 'در حال ذخیره...' : 'ذخیره تنظیمات'}
               </Button>

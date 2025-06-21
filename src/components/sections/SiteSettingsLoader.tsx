@@ -1,76 +1,58 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 
-interface SiteSettings {
-  site_title: string;
-  site_description: string;
-  hero_title: string;
-  hero_description: string;
-  contact_phone: string;
-  contact_email: string;
-  contact_address: string;
-  site_logo: string;
-  site_background: string;
-}
-
-interface SiteSettingsLoaderProps {
-  onSettingsLoad: (settings: SiteSettings) => void;
-}
-
-const SiteSettingsLoader = ({ onSettingsLoad }: SiteSettingsLoaderProps) => {
-  const [isLoading, setIsLoading] = useState(true);
-
+const SiteSettingsLoader = () => {
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('site_settings')
-          .select('key, value');
+    loadAndApplySettings();
+  }, []);
 
-        if (error) {
-          console.error('Error loading site settings:', error);
-          return;
-        }
+  const loadAndApplySettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('*');
 
-        // Convert array to object
-        const settingsObj: any = {};
-        data?.forEach(setting => {
+      if (error) {
+        console.error('Error loading site settings:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const settingsMap: Record<string, any> = {};
+        data.forEach(setting => {
           let value = setting.value;
           if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
-            value = value.slice(1, -1); // Remove surrounding quotes
+            value = value.slice(1, -1);
           } else if (typeof value !== 'string') {
             value = JSON.stringify(value).replace(/^"|"$/g, '');
           }
-          settingsObj[setting.key] = value;
+          settingsMap[setting.key] = value;
         });
 
-        // Set default values if not found
-        const defaultSettings: SiteSettings = {
-          site_title: 'دیدار چشم رهنما',
-          site_description: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم',
-          hero_title: 'دیدار چشم رهنما',
-          hero_description: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران',
-          contact_phone: '021-12345678',
-          contact_email: 'info@clinic.com',
-          contact_address: 'تهران، خیابان ولیعصر',
-          site_logo: '',
-          site_background: ''
-        };
+        // اعمال تنظیمات به عنوان سایت
+        if (settingsMap.site_title) {
+          document.title = settingsMap.site_title;
+        }
 
-        const finalSettings = { ...defaultSettings, ...settingsObj };
-        onSettingsLoad(finalSettings);
-      } catch (error) {
-        console.error('Error loading settings:', error);
-      } finally {
-        setIsLoading(false);
+        // اعمال رنگ‌های سفارشی اگر موجود باشد
+        const savedSettings = localStorage.getItem('headerSettings');
+        if (savedSettings) {
+          const headerSettings = JSON.parse(savedSettings);
+          if (headerSettings.primaryColor) {
+            document.documentElement.style.setProperty('--primary-color', headerSettings.primaryColor);
+          }
+          if (headerSettings.secondaryColor) {
+            document.documentElement.style.setProperty('--secondary-color', headerSettings.secondaryColor);
+          }
+        }
       }
-    };
+    } catch (error) {
+      console.error('Error applying site settings:', error);
+    }
+  };
 
-    loadSettings();
-  }, [onSettingsLoad]);
-
-  return null; // This component doesn't render anything
+  return null;
 };
 
 export default SiteSettingsLoader;

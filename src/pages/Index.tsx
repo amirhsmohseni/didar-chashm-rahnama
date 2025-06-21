@@ -1,191 +1,262 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Eye, Shield, Clock, Star, ChevronDown, Play, ArrowLeft, CheckCircle, Users, Award, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { supabase } from "@/integrations/supabase/client";
+
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import FeaturedServices from '@/components/sections/FeaturedServices';
-import FeaturedDoctors from '@/components/sections/FeaturedDoctors';
 import SiteSettingsLoader from '@/components/sections/SiteSettingsLoader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useNavigate } from 'react-router-dom';
-import { Phone, MessageCircle, Clock, Shield, Award, Users } from 'lucide-react';
-import SEO from '@/components/SEO';
 
 interface SiteSettings {
-  site_title: string;
-  site_description: string;
-  hero_title: string;
-  hero_description: string;
-  contact_phone: string;
-  contact_email: string;
-  contact_address: string;
-  site_logo: string;
-  site_background: string;
+  hero_title?: string;
+  hero_description?: string;
+  site_logo?: string;
+  site_background?: string;
 }
 
 const Index = () => {
-  const navigate = useNavigate();
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>({
-    site_title: 'دیدار چشم رهنما',
-    site_description: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم',
-    hero_title: '‫دیدار چشم رهنما',
-    hero_description: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران',
-    contact_phone: '021-12345678',
-    contact_email: 'info@clinic.com',
-    contact_address: 'تهران، خیابان ولیعصر',
-    site_logo: '',
-    site_background: ''
-  });
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({});
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSettingsLoad = (settings: SiteSettings) => {
-    setSiteSettings(settings);
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('*');
+
+      if (error) {
+        console.error('Error loading settings:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const settingsMap: Record<string, any> = {};
+        data.forEach(setting => {
+          let value = setting.value;
+          if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
+            value = value.slice(1, -1);
+          } else if (typeof value !== 'string') {
+            value = JSON.stringify(value).replace(/^"|"$/g, '');
+          }
+          settingsMap[setting.key] = value;
+        });
+
+        setSiteSettings(settingsMap);
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <>
-      <SEO 
-        title={siteSettings.site_title}
-        description={siteSettings.site_description}
-      />
-      
-      <SiteSettingsLoader onSettingsLoad={handleSettingsLoad} />
-      
+      <SiteSettingsLoader />
       <Header />
       
       {/* Hero Section */}
-      <section 
-        className="relative bg-gradient-to-b from-primary to-primary/80 text-white py-20 overflow-hidden"
-        style={{
-          backgroundImage: siteSettings.site_background ? `url(${siteSettings.site_background})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundBlendMode: siteSettings.site_background ? 'overlay' : undefined
-        }}
-      >
-        <div className="absolute inset-0 bg-primary/70"></div>
-        <div className="container relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              {siteSettings.hero_title}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background with Glass Effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800">
+          {siteSettings.site_background && (
+            <div 
+              className="absolute inset-0 bg-cover bg-center opacity-30"
+              style={{ backgroundImage: `url(${siteSettings.site_background})` }}
+            />
+          )}
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+        </div>
+        
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+        </div>
+
+        {/* Content */}
+        <div className="container relative z-10 text-center text-white">
+          <div className="max-w-4xl mx-auto">
+            {/* Logo */}
+            {siteSettings.site_logo && (
+              <div className="mb-8 flex justify-center">
+                <img 
+                  src={siteSettings.site_logo} 
+                  alt="لوگو"
+                  className="h-24 w-auto drop-shadow-2xl animate-fade-in"
+                />
+              </div>
+            )}
+            
+            {/* Main Heading */}
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent animate-fade-in">
+              {isLoading ? 'دیدار چشم رهنما' : (siteSettings.hero_title || 'دیدار چشم رهنما')}
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-white/90 leading-relaxed">
-              {siteSettings.hero_description}
+            
+            {/* Subtitle */}
+            <p className="text-xl md:text-2xl mb-8 text-white/90 leading-relaxed animate-fade-in delay-200">
+              {isLoading ? 'مشاوره تخ...' : (siteSettings.hero_description || 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران')}
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Button 
-                size="lg" 
-                className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6"
-                onClick={() => navigate('/consultation')}
-              >
-                <MessageCircle className="ml-2 h-6 w-6" />
-                مشاوره رایگان
-              </Button>
-              
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-6"
-                onClick={() => window.open(`tel:${siteSettings.contact_phone}`, '_self')}
-              >
-                <Phone className="ml-2 h-6 w-6" />
-                {siteSettings.contact_phone}
-              </Button>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-fade-in delay-300">
+              <Link to="/consultation">
+                <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold px-8 py-4 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300">
+                  <Eye className="ml-2 h-5 w-5" />
+                  دریافت مشاوره رایگان
+                </Button>
+              </Link>
+              <Link to="/doctors">
+                <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10 font-semibold px-8 py-4 rounded-2xl backdrop-blur-sm transform hover:scale-105 transition-all duration-300">
+                  <Users className="ml-2 h-5 w-5" />
+                  مشاهده پزشکان
+                </Button>
+              </Link>
             </div>
 
-            {/* Trust Indicators */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-              <div className="flex items-center justify-center gap-3 text-white/90">
-                <Clock className="h-8 w-8" />
-                <span className="text-lg">مشاوره 24 ساعته</span>
-              </div>
-              <div className="flex items-center justify-center gap-3 text-white/90">
-                <Shield className="h-8 w-8" />
-                <span className="text-lg">مشاوره رایگان</span>
-              </div>
-              <div className="flex items-center justify-center gap-3 text-white/90">
-                <Award className="h-8 w-8" />
-                <span className="text-lg">متخصصان برتر</span>
-              </div>
+            {/* Features Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate-fade-in delay-500">
+              <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
+                <CardContent className="p-6 text-center">
+                  <Shield className="h-12 w-12 mx-auto mb-4 text-green-400" />
+                  <h3 className="text-lg font-semibold mb-2">مشاوره تخصصی</h3>
+                  <p className="text-white/80">مشاوره رایگان با بهترین متخصصان چشم</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
+                <CardContent className="p-6 text-center">
+                  <Award className="h-12 w-12 mx-auto mb-4 text-yellow-400" />
+                  <h3 className="text-lg font-semibold mb-2">پزشکان مجرب</h3>
+                  <p className="text-white/80">دسترسی به بهترین متخصصان کشور</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
+                <CardContent className="p-6 text-center">
+                  <Heart className="h-12 w-12 mx-auto mb-4 text-red-400" />
+                  <h3 className="text-lg font-semibold mb-2">مراقبت کامل</h3>
+                  <p className="text-white/80">پیگیری و مراقبت در تمام مراحل</p>
+                </CardContent>
+              </Card>
             </div>
           </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <ChevronDown className="h-8 w-8 text-white/60" />
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white">
+      <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <Card className="text-center border-0 shadow-lg">
-              <CardContent className="p-8">
-                <div className="text-4xl font-bold text-primary mb-2">۱۰۰۰+</div>
-                <div className="text-muted-foreground">مشاوره موفق</div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+            <div className="transform hover:scale-105 transition-all duration-300">
+              <div className="text-4xl font-bold text-primary mb-2">1000+</div>
+              <div className="text-gray-600">مشاوره موفق</div>
+            </div>
+            <div className="transform hover:scale-105 transition-all duration-300">
+              <div className="text-4xl font-bold text-primary mb-2">50+</div>
+              <div className="text-gray-600">پزشک متخصص</div>
+            </div>
+            <div className="transform hover:scale-105 transition-all duration-300">
+              <div className="text-4xl font-bold text-primary mb-2">98%</div>
+              <div className="text-gray-600">رضایت بیماران</div>
+            </div>
+            <div className="transform hover:scale-105 transition-all duration-300">
+              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
+              <div className="text-gray-600">پشتیبانی</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Preview */}
+      <section className="py-20 bg-white">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">خدمات ما</h2>
+            <p className="text-xl text-gray-600">طیف وسیعی از خدمات چشم‌پزشکی</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 bg-gradient-to-br from-blue-50 to-white">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Eye className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4">جراحی لیزیک</h3>
+                <p className="text-gray-600 mb-6">تصحیح عیوب انکساری چشم با آخرین تکنولوژی</p>
+                <Link to="/services">
+                  <Button variant="outline" className="group">
+                    اطلاعات بیشتر
+                    <ArrowLeft className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
-            
-            <Card className="text-center border-0 shadow-lg">
-              <CardContent className="p-8">
-                <div className="text-4xl font-bold text-primary mb-2">۵۰+</div>
-                <div className="text-muted-foreground">پزشک متخصص</div>
+
+            <Card className="hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 bg-gradient-to-br from-purple-50 to-white">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Shield className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4">جراحی آب مروارید</h3>
+                <p className="text-gray-600 mb-6">درمان آب مروارید با تکنیک‌های پیشرفته</p>
+                <Link to="/services">
+                  <Button variant="outline" className="group">
+                    اطلاعات بیشتر
+                    <ArrowLeft className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
-            
-            <Card className="text-center border-0 shadow-lg">
-              <CardContent className="p-8">
-                <div className="text-4xl font-bold text-primary mb-2">۱۵+</div>
-                <div className="text-muted-foreground">سال تجربه</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="text-center border-0 shadow-lg">
-              <CardContent className="p-8">
-                <div className="text-4xl font-bold text-primary mb-2">۹۸%</div>
-                <div className="text-muted-foreground">رضایت بیماران</div>
+
+            <Card className="hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 bg-gradient-to-br from-green-50 to-white">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Star className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4">معاینات تخصصی</h3>
+                <p className="text-gray-600 mb-6">بررسی جامع وضعیت سلامت چشمان</p>
+                <Link to="/services">
+                  <Button variant="outline" className="group">
+                    اطلاعات بیشتر
+                    <ArrowLeft className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Featured Services */}
-      <FeaturedServices />
-
-      {/* Featured Doctors */}
-      <FeaturedDoctors />
-
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-primary/80 text-white">
-        <div className="container text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              آماده برای شروع مشاوره هستید؟
-            </h2>
-            <p className="text-xl mb-8 text-white/90 leading-relaxed">
-              با متخصصان ما در ارتباط باشید و بهترین تصمیم را برای سلامت چشمان خود بگیرید
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6"
-                onClick={() => navigate('/consultation')}
-              >
-                <MessageCircle className="ml-2 h-6 w-6" />
-                شروع مشاوره رایگان
-              </Button>
-              
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-6"
-                onClick={() => navigate('/doctors')}
-              >
-                <Users className="ml-2 h-6 w-6" />
-                مشاهده پزشکان
-              </Button>
-            </div>
-          </div>
+      <section className="py-20 bg-gradient-to-r from-primary to-primary-600 text-white relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-10 right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container relative z-10 text-center">
+          <h2 className="text-4xl font-bold mb-6">آماده شروع هستید؟</h2>
+          <p className="text-xl mb-8 text-white/90">همین امروز مشاوره رایگان خود را دریافت کنید</p>
+          <Link to="/consultation">
+            <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold px-8 py-4 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300">
+              <Eye className="ml-2 h-5 w-5" />
+              شروع مشاوره
+            </Button>
+          </Link>
         </div>
       </section>
 

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { supabase } from "@/integrations/supabase/client";
 import ImageUploader from './ImageUploader';
 
 interface HeaderSettings {
@@ -43,29 +44,83 @@ const HeaderSettingsManager = () => {
 
   const loadSettings = async () => {
     try {
-      // Load settings from localStorage for demo
-      const savedSettings = localStorage.getItem('headerSettings');
-      if (savedSettings) {
-        setSettings(JSON.parse(savedSettings));
+      // بارگذاری تنظیمات از Supabase
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('*');
+
+      if (error) {
+        console.error('Error loading settings:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const settingsMap: Record<string, any> = {};
+        data.forEach(setting => {
+          let value = setting.value;
+          if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
+            value = value.slice(1, -1);
+          } else if (typeof value !== 'string') {
+            value = JSON.stringify(value).replace(/^"|"$/g, '');
+          }
+          settingsMap[setting.key] = value;
+        });
+
+        setSettings(prev => ({
+          ...prev,
+          siteName: settingsMap.site_title || prev.siteName,
+          heroTitle: settingsMap.hero_title || prev.heroTitle,
+          heroDescription: settingsMap.hero_description || prev.heroDescription,
+          logoUrl: settingsMap.site_logo || prev.logoUrl,
+          backgroundImageUrl: settingsMap.site_background || prev.backgroundImageUrl,
+        }));
       }
     } catch (error) {
       console.error('Error loading settings:', error);
-      toast.error('خطا در بارگذاری تنظیمات');
     }
   };
 
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      // Save to localStorage for demo
+      // ذخیره در Supabase
+      const settingsToSave = [
+        { key: 'site_title', value: JSON.stringify(settings.siteName) },
+        { key: 'hero_title', value: JSON.stringify(settings.heroTitle) },
+        { key: 'hero_description', value: JSON.stringify(settings.heroDescription) },
+        { key: 'site_logo', value: JSON.stringify(settings.logoUrl || '') },
+        { key: 'site_background', value: JSON.stringify(settings.backgroundImageUrl || '') },
+      ];
+
+      for (const setting of settingsToSave) {
+        const { error } = await supabase
+          .from('site_settings')
+          .upsert({
+            key: setting.key,
+            value: setting.value,
+            updated_at: new Date().toISOString()
+          });
+
+        if (error) {
+          console.error(`Error saving ${setting.key}:`, error);
+          throw error;
+        }
+      }
+
+      // ذخیره در localStorage نیز برای بک آپ
       localStorage.setItem('headerSettings', JSON.stringify(settings));
       
-      // Apply settings to CSS variables
+      // اعمال رنگ‌ها به CSS
       document.documentElement.style.setProperty('--primary-color', settings.primaryColor);
       document.documentElement.style.setProperty('--secondary-color', settings.secondaryColor);
       
+      // رفرش صفحه برای اعمال تغییرات
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+      
       setHasChanges(false);
-      toast.success('تنظیمات با موفقیت ذخیره شد');
+      toast.success('تنظیمات با موفقیت ذخیره شد و اعمال خواهد شد');
     } catch (error) {
       console.error('Error saving settings:', error);
       toast.error('خطا در ذخیره تنظیمات');
