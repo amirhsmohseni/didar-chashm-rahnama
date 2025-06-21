@@ -27,7 +27,7 @@ const SEO = ({
   nofollow = false,
 }: SEOProps) => {
   const fullTitle = title.includes('کلینیک چشم‌پزشکی') ? title : `${title} | کلینیک چشم‌پزشکی`;
-  const currentUrl = canonicalUrl || window.location.href;
+  const currentUrl = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '');
 
   return (
     <Helmet>
@@ -43,14 +43,14 @@ const SEO = ({
       />
       
       {/* Canonical URL */}
-      <link rel="canonical" href={currentUrl} />
+      {currentUrl && <link rel="canonical" href={currentUrl} />}
       
       {/* Open Graph Meta Tags */}
       <meta property="og:title" content={ogTitle || title} />
       <meta property="og:description" content={ogDescription || description} />
       <meta property="og:image" content={ogImage} />
       <meta property="og:type" content={ogType} />
-      <meta property="og:url" content={currentUrl} />
+      {currentUrl && <meta property="og:url" content={currentUrl} />}
       <meta property="og:site_name" content="کلینیک چشم‌پزشکی" />
       <meta property="og:locale" content="fa_IR" />
       
@@ -73,7 +73,7 @@ const SEO = ({
           "@type": "MedicalOrganization",
           "name": "کلینیک چشم‌پزشکی",
           "description": description,
-          "url": currentUrl,
+          ...(currentUrl && { "url": currentUrl }),
           "logo": ogImage,
           "contactPoint": {
             "@type": "ContactPoint",
