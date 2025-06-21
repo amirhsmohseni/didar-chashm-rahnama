@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FeaturedServices from '@/components/sections/FeaturedServices';
@@ -7,6 +7,7 @@ import FeaturedDoctors from '@/components/sections/FeaturedDoctors';
 import SiteSettingsLoader from '@/components/sections/SiteSettingsLoader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { Phone, MessageCircle, Clock, Shield, Award, Users } from 'lucide-react';
 import SEO from '@/components/SEO';
@@ -25,28 +26,21 @@ interface SiteSettings {
 
 const Index = () => {
   const navigate = useNavigate();
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
-  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({
+    site_title: 'دیدار چشم رهنما',
+    site_description: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم',
+    hero_title: '‫دیدار چشم رهنما',
+    hero_description: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران',
+    contact_phone: '021-12345678',
+    contact_email: 'info@clinic.com',
+    contact_address: 'تهران، خیابان ولیعصر',
+    site_logo: '',
+    site_background: ''
+  });
 
   const handleSettingsLoad = (settings: SiteSettings) => {
-    console.log('Settings loaded in Index:', settings);
-    if (settings && typeof settings === 'object') {
-      setSiteSettings(settings);
-      setSettingsLoaded(true);
-    }
+    setSiteSettings(settings);
   };
-
-  // Don't render anything until settings are loaded
-  if (!settingsLoaded || !siteSettings) {
-    return (
-      <>
-        <SiteSettingsLoader onSettingsLoad={handleSettingsLoad} />
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </>
-    );
-  }
 
   return (
     <>
@@ -54,6 +48,8 @@ const Index = () => {
         title={siteSettings.site_title}
         description={siteSettings.site_description}
       />
+      
+      <SiteSettingsLoader onSettingsLoad={handleSettingsLoad} />
       
       <Header />
       
