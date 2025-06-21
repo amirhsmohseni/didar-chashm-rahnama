@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
@@ -15,6 +14,9 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockTimeRemaining, setBlockTimeRemaining] = useState(0);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -30,9 +32,70 @@ const Auth = () => {
   // Validation
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
+  // Security: Block mechanism for failed login attempts
+  useEffect(() => {
+    const storedAttempts = localStorage.getItem('loginAttempts');
+    const lastAttemptTime = localStorage.getItem('lastLoginAttempt');
+    
+    if (storedAttempts && lastAttemptTime) {
+      const attempts = parseInt(storedAttempts);
+      const lastTime = parseInt(lastAttemptTime);
+      const now = Date.now();
+      const timeDiff = now - lastTime;
+      
+      // Block for 15 minutes after 5 failed attempts
+      if (attempts >= 5 && timeDiff < 15 * 60 * 1000) {
+        setIsBlocked(true);
+        setLoginAttempts(attempts);
+        setBlockTimeRemaining(Math.ceil((15 * 60 * 1000 - timeDiff) / 1000));
+        
+        const timer = setInterval(() => {
+          setBlockTimeRemaining(prev => {
+            if (prev <= 1) {
+              setIsBlocked(false);
+              setLoginAttempts(0);
+              localStorage.removeItem('loginAttempts');
+              localStorage.removeItem('lastLoginAttempt');
+              clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        
+        return () => clearInterval(timer);
+      } else if (timeDiff >= 15 * 60 * 1000) {
+        // Reset after 15 minutes
+        localStorage.removeItem('loginAttempts');
+        localStorage.removeItem('lastLoginAttempt');
+        setLoginAttempts(0);
+      } else {
+        setLoginAttempts(attempts);
+      }
+    }
+  }, []);
+
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string) => {
+    // Enhanced password validation
+    const minLength = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    return {
+      isValid: minLength && (hasUpperCase || hasLowerCase) && (hasNumbers || hasSpecial),
+      minLength,
+      hasUpperCase,
+      hasLowerCase,
+      hasNumbers,
+      hasSpecial
+    };
   };
 
   const validateForm = (isLoginForm: boolean) => {
@@ -52,15 +115,52 @@ const Auth = () => {
       else if (!validateEmail(signupEmail)) newErrors.email = 'ایمیل معتبر نیست';
       
       if (!signupPassword) newErrors.password = 'رمز عبور الزامی است';
-      else if (signupPassword.length < 6) newErrors.password = 'رمز عبور باید حداقل 6 حرف باشد';
+      else {
+        const passwordValidation = validatePassword(signupPassword);
+        if (!passwordValidation.isValid) {
+          newErrors.password = 'رمز عبور باید حداقل 8 حرف و شامل حروف و اعداد باشد';
+        }
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleFailedLogin = () => {
+    const newAttempts = loginAttempts + 1;
+    setLoginAttempts(newAttempts);
+    localStorage.setItem('loginAttempts', newAttempts.toString());
+    localStorage.setItem('lastLoginAttempt', Date.now().toString());
+    
+    if (newAttempts >= 5) {
+      setIsBlocked(true);
+      setBlockTimeRemaining(15 * 60); // 15 minutes
+      toast({
+        title: "حساب مسدود شد",
+        description: "به دلیل تلاش‌های مکرر ناموفق، حساب شما برای 15 دقیقه مسدود شد",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "ورود ناموفق",
+        description: `تلاش ${newAttempts} از 5. پس از 5 تلاش ناموفق حساب شما مسدود می‌شود.`,
+        variant: "destructive",
+      });
+    }
+  };
+
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isBlocked) {
+      toast({
+        title: "حساب مسدود",
+        description: `لطفا ${Math.ceil(blockTimeRemaining / 60)} دقیقه صبر کنید`,
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!validateForm(true)) return;
     
@@ -72,6 +172,9 @@ const Auth = () => {
       });
 
       if (error) {
+        console.error('Login error:', error);
+        handleFailedLogin();
+        
         if (error.message.includes('Invalid login credentials')) {
           toast({
             title: "خطا در ورود",
@@ -86,6 +189,11 @@ const Auth = () => {
           });
         }
       } else {
+        // Reset login attempts on successful login
+        localStorage.removeItem('loginAttempts');
+        localStorage.removeItem('lastLoginAttempt');
+        setLoginAttempts(0);
+        
         toast({
           title: "ورود موفق",
           description: "با موفقیت وارد شدید",
@@ -93,6 +201,8 @@ const Auth = () => {
         navigate('/');
       }
     } catch (error) {
+      console.error('Login exception:', error);
+      handleFailedLogin();
       toast({
         title: "خطا",
         description: "مشکلی پیش آمده، لطفا دوباره تلاش کنید",
@@ -124,6 +234,7 @@ const Auth = () => {
       });
 
       if (error) {
+        console.error('Signup error:', error);
         if (error.message.includes('User already registered')) {
           toast({
             title: "خطا در ثبت نام",
@@ -145,6 +256,7 @@ const Auth = () => {
         navigate('/');
       }
     } catch (error) {
+      console.error('Signup exception:', error);
       toast({
         title: "خطا",
         description: "مشکلی پیش آمده، لطفا دوباره تلاش کنید",
@@ -173,6 +285,17 @@ const Auth = () => {
                     : 'برای ساخت حساب کاربری، فرم زیر را تکمیل کنید'
                   }
                 </CardDescription>
+                
+                {/* Security Status Display */}
+                {loginAttempts > 0 && (
+                  <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                    {isBlocked ? (
+                      <p>حساب مسدود - {Math.ceil(blockTimeRemaining / 60)} دقیقه تا آزادسازی</p>
+                    ) : (
+                      <p>تلاش‌های ناموفق: {loginAttempts}/5</p>
+                    )}
+                  </div>
+                )}
               </CardHeader>
               
               <CardContent>
@@ -191,6 +314,7 @@ const Auth = () => {
                           className="pr-9"
                           value={loginEmail}
                           onChange={(e) => setLoginEmail(e.target.value)}
+                          disabled={isBlocked}
                         />
                       </div>
                       {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
@@ -209,11 +333,13 @@ const Auth = () => {
                           className="pr-9 pl-9"
                           value={loginPassword}
                           onChange={(e) => setLoginPassword(e.target.value)}
+                          disabled={isBlocked}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute left-3 top-3 text-muted-foreground hover:text-foreground"
+                          disabled={isBlocked}
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -221,8 +347,8 @@ const Auth = () => {
                       {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
                     </div>
 
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? 'در حال ورود...' : 'ورود'}
+                    <Button type="submit" className="w-full" disabled={isLoading || isBlocked}>
+                      {isLoading ? 'در حال ورود...' : isBlocked ? `مسدود شده (${Math.ceil(blockTimeRemaining / 60)} دقیقه)` : 'ورود'}
                     </Button>
                   </form>
                 ) : (
@@ -286,6 +412,21 @@ const Auth = () => {
                         </button>
                       </div>
                       {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                      
+                      {/* Password strength indicator */}
+                      {signupPassword && (
+                        <div className="mt-2 text-xs text-gray-600">
+                          <p>رمز عبور باید شامل:</p>
+                          <ul className="list-disc list-inside mt-1 space-y-1">
+                            <li className={validatePassword(signupPassword).minLength ? 'text-green-600' : 'text-red-600'}>
+                              حداقل 8 حرف
+                            </li>
+                            <li className={validatePassword(signupPassword).hasNumbers || validatePassword(signupPassword).hasSpecial ? 'text-green-600' : 'text-red-600'}>
+                              حروف و اعداد یا نمادها
+                            </li>
+                          </ul>
+                        </div>
+                      )}
                     </div>
 
                     <Button type="submit" className="w-full" disabled={isLoading}>
@@ -298,6 +439,7 @@ const Auth = () => {
                   <button
                     onClick={() => setIsLogin(!isLogin)}
                     className="text-sm text-primary hover:underline"
+                    disabled={isBlocked}
                   >
                     {isLogin 
                       ? 'حساب کاربری ندارید؟ ثبت نام کنید'

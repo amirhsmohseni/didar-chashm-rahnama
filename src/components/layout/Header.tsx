@@ -55,17 +55,15 @@ const Header = () => {
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Mobile menu button - moved to right */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="lg:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </Button>
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">چ</span>
+            </div>
+            <span className="font-bold text-xl text-primary mr-2">چشم پزشکی</span>
+          </Link>
 
-          {/* Desktop Navigation - moved to left after logo */}
+          {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8 space-x-reverse">
             {navigationItems.map((item) => (
               <Link
@@ -76,71 +74,74 @@ const Header = () => {
                 {item.name}
               </Link>
             ))}
-            
-            {/* Admin Link - prominently displayed for admins */}
-            {user && isAdmin && (
-              <Link
-                to="/admin"
-                className="flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
-              >
-                <Shield className="h-4 w-4" />
-                پنل مدیریت
-              </Link>
-            )}
           </nav>
 
-          {/* Logo - moved to center-right */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">چ</span>
-            </div>
-            <span className="font-bold text-xl text-primary mr-2">چشم پزشکی</span>
-          </Link>
-
-          {/* Auth Section - stays on the right */}
+          {/* Auth Section */}
           <div className="flex items-center gap-4">
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span className="hidden sm:inline">حساب کاربری</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="p-2">
-                    <p className="text-sm font-medium">{user.email}</p>
+              <div className="flex items-center gap-2">
+                {/* Admin Panel Button - Always visible for authenticated users */}
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="outline" className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 border-blue-600">
+                      <Shield className="h-4 w-4" />
+                      <span className="hidden sm:inline">پنل مدیریت</span>
+                    </Button>
+                  </Link>
+                )}
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span className="hidden sm:inline">حساب کاربری</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="p-2">
+                      <p className="text-sm font-medium">{user.email}</p>
+                      {isAdmin && (
+                        <p className="text-xs text-blue-600 flex items-center gap-1 mt-1">
+                          <Shield className="h-3 w-3" />
+                          مدیر سیستم
+                        </p>
+                      )}
+                    </div>
+                    <DropdownMenuSeparator />
                     {isAdmin && (
-                      <p className="text-xs text-blue-600 flex items-center gap-1 mt-1">
-                        <Shield className="h-3 w-3" />
-                        مدیر سیستم
-                      </p>
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin" className="flex items-center gap-2">
+                            <Shield className="h-4 w-4" />
+                            پنل مدیریت
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
                     )}
-                  </div>
-                  <DropdownMenuSeparator />
-                  {isAdmin && (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin" className="flex items-center gap-2">
-                          <Shield className="h-4 w-4" />
-                          پنل مدیریت
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2">
-                    <LogOut className="h-4 w-4" />
-                    خروج
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2">
+                      <LogOut className="h-4 w-4" />
+                      خروج
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ) : (
               <Link to="/auth">
                 <Button variant="default">ورود / ثبت نام</Button>
               </Link>
             )}
           </div>
+
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="lg:hidden"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
         </div>
 
         {/* Mobile Navigation */}

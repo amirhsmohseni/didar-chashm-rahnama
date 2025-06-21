@@ -61,19 +61,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUserRole = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Security enhancement: Multiple validation layers
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching role:', error);
+      if (roleError && roleError.code !== 'PGRST116') {
+        console.error('Error fetching role:', roleError);
         setUserRole('user');
         return;
       }
 
-      setUserRole(data?.role || 'user');
+      const role = roleData?.role || 'user';
+      
+      // Additional security check: Verify admin role with server-side function
+      if (role === 'admin') {
+        try {
+          const { data: hasAdminRole, error: checkError } = await supabase
+            .rpc('has_role', { _user_id: userId, _role: 'admin' });
+          
+          if (checkError) {
+            console.error('Error verifying admin role:', checkError);
+            setUserRole('user');
+            return;
+          }
+          
+          setUserRole(hasAdminRole ? 'admin' : 'user');
+        } catch (error) {
+          console.error('Admin role verification failed:', error);
+          setUserRole('user');
+        }
+      } else {
+        setUserRole(role);
+      }
     } catch (error) {
       console.error('Error fetching user role:', error);
       setUserRole('user');
@@ -88,47 +110,123 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Error signing out:', error);
+    try {
+      // Security audit: Log logout
+      if (user) {
+        try {
+          await supabase.rpc('log_admin_activity', {
+            action_name: 'user_logout',
+            resource_type_name: 'auth',
+            details_data: { 
+              logout_time: new Date().toISOString(),
+              user_id: user.id
+            }
+          });
+        } catch (logError) {
+          console.warn('Failed to log logout:', logError);
+        }
+      }
+
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+        throw error;
+      }
+      
+      // Clear all local state
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setUserRole(null);
+    } catch (error) {
+      console.error('Signout error:', error);
       throw error;
     }
   };
 
   useEffect(() => {
-    // Set up auth state listener
+    let mounted = true;
+
+    // Enhanced auth state listener with security checks
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        if (!mounted) return;
+
         console.log('Auth state changed:', event, session?.user?.email);
+        
+        // Security enhancement: Log auth events
+        try {
+          if (event === 'SIGNED_IN' && session?.user) {
+            await supabase.rpc('log_admin_activity', {
+              action_name: 'user_login',
+              resource_type_name: 'auth',
+              details_data: { 
+                login_time: new Date().toISOString(),
+                user_id: session.user.id,
+                login_method: 'email_password'
+              }
+            });
+          }
+        } catch (logError) {
+          console.warn('Failed to log auth event:', logError);
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user) {
+        if (session?.user && mounted) {
+          // Use setTimeout to prevent auth state callback deadlocks
           setTimeout(() => {
-            fetchUserProfile(session.user.id);
-            fetchUserRole(session.user.id);
+            if (mounted) {
+              fetchUserProfile(session.user.id);
+              fetchUserRole(session.user.id);
+            }
           }, 0);
         } else {
           setProfile(null);
           setUserRole(null);
         }
-        setIsLoading(false);
+        
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-        fetchUserRole(session.user.id);
-      }
-      setIsLoading(false);
-    });
+    // Initial session check with enhanced security
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Initial session check error:', error);
+          if (mounted) {
+            setIsLoading(false);
+          }
+          return;
+        }
 
-    return () => subscription.unsubscribe();
+        if (session?.user && mounted) {
+          setSession(session);
+          setUser(session.user);
+          await fetchUserProfile(session.user.id);
+          await fetchUserRole(session.user.id);
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const isAdmin = userRole === 'admin';
