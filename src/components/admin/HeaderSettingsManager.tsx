@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Save, RotateCcw, Settings, Image as ImageIcon, Type, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -97,7 +96,7 @@ const HeaderSettingsManager = () => {
       ];
 
       for (const setting of settingsToSave) {
-        console.log(`Saving ${setting.key}:`, setting.value);
+        console.log(`Upserting ${setting.key}:`, setting.value);
         
         const { error } = await supabase
           .from('site_settings')
@@ -105,10 +104,12 @@ const HeaderSettingsManager = () => {
             key: setting.key,
             value: JSON.stringify(setting.value),
             updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'key'
           });
 
         if (error) {
-          console.error(`Error saving ${setting.key}:`, error);
+          console.error(`Error upserting ${setting.key}:`, error);
           throw error;
         }
       }

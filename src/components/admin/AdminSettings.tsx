@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Save, Upload, Download, Trash2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -87,9 +86,9 @@ const AdminSettings = () => {
         { key: 'contact_address', value: settings.address },
       ];
 
-      // Save each setting individually
+      // Save each setting individually using upsert
       for (const setting of settingsToSave) {
-        console.log(`Saving ${setting.key}:`, setting.value);
+        console.log(`Upserting ${setting.key}:`, setting.value);
         
         const { error: upsertError } = await supabase
           .from('site_settings')
@@ -97,10 +96,12 @@ const AdminSettings = () => {
             key: setting.key,
             value: JSON.stringify(setting.value),
             updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'key'
           });
 
         if (upsertError) {
-          console.error(`Error saving ${setting.key}:`, upsertError);
+          console.error(`Error upserting ${setting.key}:`, upsertError);
           throw upsertError;
         }
       }

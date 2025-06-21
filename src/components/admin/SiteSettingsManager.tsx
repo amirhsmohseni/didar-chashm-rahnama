@@ -129,9 +129,9 @@ const SiteSettingsManager = () => {
     try {
       console.log('Saving settings with data:', formData);
       
-      // Save each setting individually
+      // Save each setting individually using upsert
       const updatePromises = Object.entries(formData).map(async ([key, value]) => {
-        console.log(`Updating ${key} with value:`, value);
+        console.log(`Upserting ${key} with value:`, value);
         
         const { error } = await supabase
           .from('site_settings')
@@ -139,10 +139,12 @@ const SiteSettingsManager = () => {
             key: key,
             value: JSON.stringify(value || ''),
             updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'key'
           });
           
         if (error) {
-          console.error(`Error updating ${key}:`, error);
+          console.error(`Error upserting ${key}:`, error);
           throw error;
         }
       });
