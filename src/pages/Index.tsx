@@ -25,33 +25,35 @@ interface SiteSettings {
 
 const Index = () => {
   const navigate = useNavigate();
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>({
-    site_title: 'دیدار چشم رهنما',
-    site_description: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم',
-    hero_title: 'دیدار چشم رهنما',
-    hero_description: 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران',
-    contact_phone: '021-12345678',
-    contact_email: 'info@clinic.com',
-    contact_address: 'تهران، خیابان ولیعصر',
-    site_logo: '',
-    site_background: ''
-  });
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   const handleSettingsLoad = (settings: SiteSettings) => {
     console.log('Settings loaded in Index:', settings);
     if (settings && typeof settings === 'object') {
       setSiteSettings(settings);
+      setSettingsLoaded(true);
     }
   };
+
+  // Don't render anything until settings are loaded
+  if (!settingsLoaded || !siteSettings) {
+    return (
+      <>
+        <SiteSettingsLoader onSettingsLoad={handleSettingsLoad} />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
       <SEO 
-        title={siteSettings?.site_title || 'دیدار چشم رهنما'}
-        description={siteSettings?.site_description || 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم'}
+        title={siteSettings.site_title}
+        description={siteSettings.site_description}
       />
-      
-      <SiteSettingsLoader onSettingsLoad={handleSettingsLoad} />
       
       <Header />
       
@@ -59,20 +61,20 @@ const Index = () => {
       <section 
         className="relative bg-gradient-to-b from-primary to-primary/80 text-white py-20 overflow-hidden"
         style={{
-          backgroundImage: siteSettings?.site_background ? `url(${siteSettings.site_background})` : undefined,
+          backgroundImage: siteSettings.site_background ? `url(${siteSettings.site_background})` : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundBlendMode: siteSettings?.site_background ? 'overlay' : undefined
+          backgroundBlendMode: siteSettings.site_background ? 'overlay' : undefined
         }}
       >
         <div className="absolute inset-0 bg-primary/70"></div>
         <div className="container relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              {siteSettings?.hero_title || 'دیدار چشم رهنما'}
+              {siteSettings.hero_title}
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-white/90 leading-relaxed">
-              {siteSettings?.hero_description || 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران'}
+              {siteSettings.hero_description}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
@@ -89,10 +91,10 @@ const Index = () => {
                 size="lg" 
                 variant="outline" 
                 className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-6"
-                onClick={() => window.open(`tel:${siteSettings?.contact_phone || '021-12345678'}`, '_self')}
+                onClick={() => window.open(`tel:${siteSettings.contact_phone}`, '_self')}
               >
                 <Phone className="ml-2 h-6 w-6" />
-                {siteSettings?.contact_phone || '021-12345678'}
+                {siteSettings.contact_phone}
               </Button>
             </div>
 
