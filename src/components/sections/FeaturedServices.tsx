@@ -26,6 +26,7 @@ const FeaturedServices = () => {
 
   const fetchServices = async () => {
     try {
+      console.log('Fetching featured services...');
       const { data, error } = await supabase
         .from('services')
         .select('id, title, description, icon, image_url, is_featured, slug')
@@ -34,10 +35,16 @@ const FeaturedServices = () => {
         .order('order_index', { ascending: true })
         .limit(6);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching featured services:', error);
+        throw error;
+      }
+
+      console.log('Featured services fetched:', data?.length || 0);
       setServices(data || []);
     } catch (error) {
       console.error('Error fetching services:', error);
+      setServices([]);
     } finally {
       setIsLoading(false);
     }
@@ -47,9 +54,9 @@ const FeaturedServices = () => {
     switch (iconName) {
       case 'Eye':
         return <Eye className="h-8 w-8" />;
-      case 'Droplets':
+      case 'Heart':
         return <Heart className="h-8 w-8" />;
-      case 'Camera':
+      case 'Stethoscope':
         return <Stethoscope className="h-8 w-8" />;
       case 'User':
         return <User className="h-8 w-8" />;
@@ -63,7 +70,8 @@ const FeaturedServices = () => {
       <section className="py-16 bg-gray-50">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-eyecare-800 mb-4">در حال بارگذاری...</h2>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-gray-600">در حال بارگذاری خدمات ویژه...</p>
           </div>
         </div>
       </section>
