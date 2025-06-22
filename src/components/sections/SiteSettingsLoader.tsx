@@ -5,6 +5,18 @@ import { supabase } from "@/integrations/supabase/client";
 const SiteSettingsLoader = () => {
   useEffect(() => {
     loadAndApplySettings();
+    
+    // Listen for settings changes
+    const handleSettingsChange = (event: CustomEvent) => {
+      const settings = event.detail;
+      applySettingsToPage(settings);
+    };
+
+    window.addEventListener('siteSettingsChanged', handleSettingsChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('siteSettingsChanged', handleSettingsChange as EventListener);
+    };
   }, []);
 
   const loadAndApplySettings = async () => {
@@ -12,7 +24,7 @@ const SiteSettingsLoader = () => {
       console.log('Loading site settings for application...');
       const { data, error } = await supabase
         .from('site_settings')
-        .select('*');
+        .select('key, value');
 
       if (error) {
         console.error('Error loading site settings:', error);
@@ -26,37 +38,27 @@ const SiteSettingsLoader = () => {
           if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
             value = value.slice(1, -1);
           } else if (typeof value !== 'string') {
-            value = JSON.stringify(value).replace(/^"|"$/g, '');
+            value = String(value).replace(/^"|"$/g, '');
           }
           settingsMap[setting.key] = value;
         });
 
-        // Apply site title
-        if (settingsMap.site_title) {
-          document.title = settingsMap.site_title;
-        }
-
-        // Apply custom colors if available
-        const savedSettings = localStorage.getItem('headerSettings');
-        if (savedSettings) {
-          try {
-            const headerSettings = JSON.parse(savedSettings);
-            if (headerSettings.primaryColor) {
-              document.documentElement.style.setProperty('--primary-color', headerSettings.primaryColor);
-            }
-            if (headerSettings.secondaryColor) {
-              document.documentElement.style.setProperty('--secondary-color', headerSettings.secondaryColor);
-            }
-          } catch (parseError) {
-            console.warn('Failed to parse header settings from localStorage:', parseError);
-          }
-        }
-        
+        applySettingsToPage(settingsMap);
         console.log('Site settings applied successfully');
       }
     } catch (error) {
       console.error('Error applying site settings:', error);
     }
+  };
+
+  const applySettingsToPage = (settings: Record<string, any>) => {
+    // Apply site title
+    if (settings.site_title) {
+      document.title = settings.site_title;
+    }
+
+    // Store settings for components to use
+    localStorage.setItem('appliedSiteSettings', JSON.stringify(settings));
   };
 
   return null;
