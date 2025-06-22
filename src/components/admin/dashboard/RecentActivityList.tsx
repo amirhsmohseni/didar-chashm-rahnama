@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -69,15 +68,21 @@ const RecentActivityList = () => {
     return colors[color as keyof typeof colors] || colors.blue;
   };
 
-  const getBadgeVariant = (type: string): "default" | "destructive" | "outline" | "secondary" => {
-    const variants = {
-      consultation: "default" as const,
-      message: "secondary" as const,
-      user: "outline" as const,
-      system: "destructive" as const,
-      content: "default" as const
-    };
-    return variants[type as keyof typeof variants] || "default";
+  const getBadgeVariant = (type: string) => {
+    switch (type) {
+      case 'consultation':
+        return "default" as const;
+      case 'message':
+        return "secondary" as const;
+      case 'user':
+        return "outline" as const;
+      case 'system':
+        return "destructive" as const;
+      case 'content':
+        return "default" as const;
+      default:
+        return "default" as const;
+    }
   };
 
   return (
