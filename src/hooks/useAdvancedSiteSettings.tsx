@@ -54,7 +54,7 @@ export const useAdvancedSiteSettings = () => {
           // Type assertion to ensure compatibility
           const typedSetting: SettingItem = {
             ...setting,
-            type: setting.type as SettingItem['type']
+            type: (setting.type as SettingItem['type']) || 'text'
           };
           
           if (!groupedSettings[setting.category]) {
@@ -69,7 +69,7 @@ export const useAdvancedSiteSettings = () => {
         // Apply public settings to page
         const publicSettings = data.filter(s => s.is_public).map(s => ({
           ...s,
-          type: s.type as SettingItem['type']
+          type: (s.type as SettingItem['type']) || 'text'
         }));
         applyPublicSettings(publicSettings);
       }
@@ -147,9 +147,7 @@ export const useAdvancedSiteSettings = () => {
 
       await Promise.all(promises);
 
-      // Update local state and capture the updated settings
-      let updatedSettingsForPublic: SettingItem[] = [];
-      
+      // Update local state and collect public settings in one operation
       setSettings(prev => {
         const updatedSettings = { ...prev };
         Object.keys(updatedSettings).forEach(category => {
@@ -160,16 +158,18 @@ export const useAdvancedSiteSettings = () => {
           );
         });
         
-        // Collect public settings from the updated state
-        updatedSettingsForPublic = Object.keys(updatedSettings).flatMap(category => 
+        // Apply public settings immediately with the updated state
+        const publicSettings = Object.keys(updatedSettings).flatMap(category => 
           updatedSettings[category].filter(s => s.is_public)
         );
         
+        // Apply settings without waiting for state update
+        setTimeout(() => {
+          applyPublicSettings(publicSettings);
+        }, 0);
+        
         return updatedSettings;
       });
-
-      // Apply public settings immediately
-      applyPublicSettings(updatedSettingsForPublic);
       
       toast.success('تنظیمات با موفقیت ذخیره شد');
       console.log('Multiple settings saved successfully');
