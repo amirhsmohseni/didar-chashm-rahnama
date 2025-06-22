@@ -130,6 +130,7 @@ export const useAdvancedSiteSettings = () => {
       setIsSaving(true);
       console.log('Saving multiple settings:', settingsToSave);
 
+      // Save all settings to database
       const promises = Object.entries(settingsToSave).map(async ([key, value]) => {
         const { error } = await supabase
           .from('site_settings')
@@ -147,7 +148,7 @@ export const useAdvancedSiteSettings = () => {
 
       await Promise.all(promises);
 
-      // Update local state and collect public settings in one operation
+      // Update local state
       setSettings(prev => {
         const updatedSettings = { ...prev };
         Object.keys(updatedSettings).forEach(category => {
@@ -157,19 +158,19 @@ export const useAdvancedSiteSettings = () => {
               : setting
           );
         });
-        
-        // Apply public settings immediately with the updated state
-        const publicSettings = Object.keys(updatedSettings).flatMap(category => 
-          updatedSettings[category].filter(s => s.is_public)
-        );
-        
-        // Apply settings without waiting for state update
-        setTimeout(() => {
-          applyPublicSettings(publicSettings);
-        }, 0);
-        
         return updatedSettings;
       });
+
+      // Apply public settings after state update
+      setTimeout(() => {
+        setSettings(currentSettings => {
+          const publicSettings = Object.keys(currentSettings).flatMap(category => 
+            currentSettings[category].filter(s => s.is_public)
+          );
+          applyPublicSettings(publicSettings);
+          return currentSettings;
+        });
+      }, 0);
       
       toast.success('تنظیمات با موفقیت ذخیره شد');
       console.log('Multiple settings saved successfully');
