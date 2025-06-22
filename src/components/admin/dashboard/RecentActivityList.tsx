@@ -69,15 +69,15 @@ const RecentActivityList = () => {
     return colors[color as keyof typeof colors] || colors.blue;
   };
 
-  const getBadgeVariant = (type: string) => {
+  const getBadgeVariant = (type: string): "default" | "destructive" | "outline" | "secondary" => {
     const variants = {
-      consultation: 'default',
-      message: 'secondary',
-      user: 'outline',
-      system: 'destructive',
-      content: 'default'
+      consultation: "default" as const,
+      message: "secondary" as const,
+      user: "outline" as const,
+      system: "destructive" as const,
+      content: "default" as const
     };
-    return variants[type as keyof typeof variants] || 'default';
+    return variants[type as keyof typeof variants] || "default";
   };
 
   return (
