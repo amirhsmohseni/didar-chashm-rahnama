@@ -130,7 +130,7 @@ const SettingsCategory = ({
                     </span>
                   )}
                 </Label>
-                {setting.description && setting.type !== 'boolean' && (
+                {setting.description && (
                   <p className="text-sm text-gray-600 mt-1">{setting.description}</p>
                 )}
               </div>

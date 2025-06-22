@@ -51,17 +51,27 @@ export const useAdvancedSiteSettings = () => {
         const groupedSettings: SettingsGroup = {};
         
         data.forEach((setting) => {
+          // Type assertion to ensure compatibility
+          const typedSetting: SettingItem = {
+            ...setting,
+            type: setting.type as SettingItem['type']
+          };
+          
           if (!groupedSettings[setting.category]) {
             groupedSettings[setting.category] = [];
           }
-          groupedSettings[setting.category].push(setting);
+          groupedSettings[setting.category].push(typedSetting);
         });
 
         setSettings(groupedSettings);
         console.log('Settings loaded successfully:', groupedSettings);
         
         // Apply public settings to page
-        applyPublicSettings(data.filter(s => s.is_public));
+        const publicSettings = data.filter(s => s.is_public).map(s => ({
+          ...s,
+          type: s.type as SettingItem['type']
+        }));
+        applyPublicSettings(publicSettings);
       }
     } catch (error) {
       console.error('Error in loadSettings:', error);
@@ -93,15 +103,15 @@ export const useAdvancedSiteSettings = () => {
 
       // Update local state
       setSettings(prev => {
-        const newSettings = { ...prev };
-        Object.keys(newSettings).forEach(category => {
-          newSettings[category] = newSettings[category].map(setting => 
+        const updatedSettings = { ...prev };
+        Object.keys(updatedSettings).forEach(category => {
+          updatedSettings[category] = updatedSettings[category].map(setting => 
             setting.key === key 
               ? { ...setting, value, updated_at: new Date().toISOString() }
               : setting
           );
         });
-        return newSettings;
+        return updatedSettings;
       });
 
       toast.success(`تنظیم ${key} با موفقیت ذخیره شد`);
@@ -139,20 +149,20 @@ export const useAdvancedSiteSettings = () => {
 
       // Update local state
       setSettings(prev => {
-        const newSettings = { ...prev };
-        Object.keys(newSettings).forEach(category => {
-          newSettings[category] = newSettings[category].map(setting => 
+        const updatedSettings = { ...prev };
+        Object.keys(updatedSettings).forEach(category => {
+          updatedSettings[category] = updatedSettings[category].map(setting => 
             settingsToSave[setting.key] !== undefined
               ? { ...setting, value: settingsToSave[setting.key], updated_at: new Date().toISOString() }
               : setting
           );
         });
-        return newSettings;
+        return updatedSettings;
       });
 
       // Apply public settings immediately
-      const publicSettings = Object.keys(newSettings).flatMap(category => 
-        newSettings[category].filter(s => s.is_public)
+      const publicSettings = Object.keys(updatedSettings).flatMap(category => 
+        updatedSettings[category].filter(s => s.is_public)
       );
       applyPublicSettings(publicSettings);
       
