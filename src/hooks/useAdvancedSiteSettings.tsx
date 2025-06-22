@@ -147,8 +147,9 @@ export const useAdvancedSiteSettings = () => {
 
       await Promise.all(promises);
 
-      // Update local state
-      let updatedSettingsForPublic: SettingsGroup = {};
+      // Update local state and capture the updated settings
+      let updatedSettingsForPublic: SettingItem[] = [];
+      
       setSettings(prev => {
         const updatedSettings = { ...prev };
         Object.keys(updatedSettings).forEach(category => {
@@ -158,15 +159,17 @@ export const useAdvancedSiteSettings = () => {
               : setting
           );
         });
-        updatedSettingsForPublic = updatedSettings;
+        
+        // Collect public settings from the updated state
+        updatedSettingsForPublic = Object.keys(updatedSettings).flatMap(category => 
+          updatedSettings[category].filter(s => s.is_public)
+        );
+        
         return updatedSettings;
       });
 
       // Apply public settings immediately
-      const publicSettings = Object.keys(updatedSettingsForPublic).flatMap(category => 
-        updatedSettingsForPublic[category].filter(s => s.is_public)
-      );
-      applyPublicSettings(publicSettings);
+      applyPublicSettings(updatedSettingsForPublic);
       
       toast.success('تنظیمات با موفقیت ذخیره شد');
       console.log('Multiple settings saved successfully');
