@@ -734,31 +734,49 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          category: string
           created_at: string | null
           description: string | null
           id: string
+          is_public: boolean | null
           key: string
+          label: string
+          sort_order: number | null
+          type: string
           updated_at: string | null
           updated_by: string | null
-          value: Json
+          validation_rules: Json | null
+          value: string
         }
         Insert: {
+          category?: string
           created_at?: string | null
           description?: string | null
           id?: string
+          is_public?: boolean | null
           key: string
+          label: string
+          sort_order?: number | null
+          type?: string
           updated_at?: string | null
           updated_by?: string | null
-          value: Json
+          validation_rules?: Json | null
+          value?: string
         }
         Update: {
+          category?: string
           created_at?: string | null
           description?: string | null
           id?: string
+          is_public?: boolean | null
           key?: string
+          label?: string
+          sort_order?: number | null
+          type?: string
           updated_at?: string | null
           updated_by?: string | null
-          value?: Json
+          validation_rules?: Json | null
+          value?: string
         }
         Relationships: []
       }

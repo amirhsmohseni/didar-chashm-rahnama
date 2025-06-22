@@ -1,8 +1,8 @@
 
-import SystemSettingsForm from './settings/SystemSettingsForm';
+import AdvancedSettingsManager from './settings/AdvancedSettingsManager';
 
 const AdminSettings = () => {
-  return <SystemSettingsForm />;
+  return <AdvancedSettingsManager />;
 };
 
 export default AdminSettings;

@@ -1,8 +1,8 @@
 
-import SiteSettingsForm from './settings/SiteSettingsForm';
+import AdvancedSettingsManager from './settings/AdvancedSettingsManager';
 
 const HeaderSettingsManager = () => {
-  return <SiteSettingsForm />;
+  return <AdvancedSettingsManager />;
 };
 
 export default HeaderSettingsManager;
