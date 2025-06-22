@@ -148,6 +148,7 @@ export const useAdvancedSiteSettings = () => {
       await Promise.all(promises);
 
       // Update local state
+      let updatedSettingsForPublic: SettingsGroup = {};
       setSettings(prev => {
         const updatedSettings = { ...prev };
         Object.keys(updatedSettings).forEach(category => {
@@ -157,12 +158,13 @@ export const useAdvancedSiteSettings = () => {
               : setting
           );
         });
+        updatedSettingsForPublic = updatedSettings;
         return updatedSettings;
       });
 
       // Apply public settings immediately
-      const publicSettings = Object.keys(updatedSettings).flatMap(category => 
-        updatedSettings[category].filter(s => s.is_public)
+      const publicSettings = Object.keys(updatedSettingsForPublic).flatMap(category => 
+        updatedSettingsForPublic[category].filter(s => s.is_public)
       );
       applyPublicSettings(publicSettings);
       
