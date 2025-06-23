@@ -23,9 +23,10 @@ const SettingsCategory = ({
 }: SettingsCategoryProps) => {
 
   const renderSettingInput = (setting: SettingItem) => {
-    const currentValue = changedSettings[setting.key] !== undefined 
+    // Use changedSettings value if exists, otherwise use original setting value
+    const currentValue = changedSettings.hasOwnProperty(setting.key) 
       ? changedSettings[setting.key] 
-      : setting.value;
+      : (setting.value || '');
 
     const handleChange = (value: string) => {
       onSettingChange(setting.key, value);
@@ -38,7 +39,7 @@ const SettingsCategory = ({
             id={setting.key}
             value={currentValue}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder={setting.description}
+            placeholder={setting.description || ''}
             className="mt-2"
           />
         );
@@ -49,7 +50,7 @@ const SettingsCategory = ({
             id={setting.key}
             value={currentValue}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder={setting.description}
+            placeholder={setting.description || ''}
             rows={4}
             className="mt-2"
           />
@@ -78,7 +79,7 @@ const SettingsCategory = ({
             type="number"
             value={currentValue}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder={setting.description}
+            placeholder={setting.description || ''}
             className="mt-2"
           />
         );
@@ -108,7 +109,7 @@ const SettingsCategory = ({
             id={setting.key}
             value={currentValue}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder={setting.description}
+            placeholder={setting.description || ''}
             className="mt-2"
           />
         );
@@ -138,7 +139,7 @@ const SettingsCategory = ({
             
             {renderSettingInput(setting)}
             
-            {changedSettings[setting.key] !== undefined && (
+            {changedSettings.hasOwnProperty(setting.key) && (
               <div className="mt-2 flex items-center gap-2">
                 <div className="h-2 w-2 bg-orange-500 rounded-full"></div>
                 <span className="text-xs text-orange-600">تغییر یافته</span>

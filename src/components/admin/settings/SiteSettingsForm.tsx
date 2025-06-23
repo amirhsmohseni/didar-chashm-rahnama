@@ -16,6 +16,7 @@ const SiteSettingsForm = () => {
 
   useEffect(() => {
     setFormData(settings);
+    setHasChanges(false);
   }, [settings]);
 
   const handleInputChange = (key: string, value: string) => {
@@ -86,7 +87,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="site_title">عنوان سایت</Label>
               <Input
                 id="site_title"
-                value={formData.site_title}
+                value={formData.site_title || ''}
                 onChange={(e) => handleInputChange('site_title', e.target.value)}
                 placeholder="عنوان سایت را وارد کنید"
                 className="mt-1"
@@ -96,7 +97,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="contact_phone">شماره تماس</Label>
               <Input
                 id="contact_phone"
-                value={formData.contact_phone}
+                value={formData.contact_phone || ''}
                 onChange={(e) => handleInputChange('contact_phone', e.target.value)}
                 placeholder="شماره تماس را وارد کنید"
                 className="mt-1"
@@ -107,7 +108,7 @@ const SiteSettingsForm = () => {
               <Input
                 id="contact_email"
                 type="email"
-                value={formData.contact_email}
+                value={formData.contact_email || ''}
                 onChange={(e) => handleInputChange('contact_email', e.target.value)}
                 placeholder="ایمیل تماس را وارد کنید"
                 className="mt-1"
@@ -120,7 +121,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="site_description">توضیحات سایت</Label>
               <Textarea
                 id="site_description"
-                value={formData.site_description}
+                value={formData.site_description || ''}
                 onChange={(e) => handleInputChange('site_description', e.target.value)}
                 placeholder="توضیحات کوتاه درباره سایت"
                 rows={3}
@@ -131,7 +132,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="contact_address">آدرس</Label>
               <Textarea
                 id="contact_address"
-                value={formData.contact_address}
+                value={formData.contact_address || ''}
                 onChange={(e) => handleInputChange('contact_address', e.target.value)}
                 placeholder="آدرس کامل را وارد کنید"
                 rows={2}
@@ -151,7 +152,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="hero_title">عنوان اصلی صفحه</Label>
               <Input
                 id="hero_title"
-                value={formData.hero_title}
+                value={formData.hero_title || ''}
                 onChange={(e) => handleInputChange('hero_title', e.target.value)}
                 placeholder="عنوان اصلی صفحه را وارد کنید"
                 className="mt-1"
@@ -161,7 +162,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="hero_description">توضیحات صفحه اصلی</Label>
               <Textarea
                 id="hero_description"
-                value={formData.hero_description}
+                value={formData.hero_description || ''}
                 onChange={(e) => handleInputChange('hero_description', e.target.value)}
                 placeholder="توضیحات صفحه اصلی را وارد کنید"
                 rows={4}
