@@ -23,12 +23,15 @@ const SettingsCategory = ({
 }: SettingsCategoryProps) => {
 
   const renderSettingInput = (setting: SettingItem) => {
-    // Use changedSettings value if exists, otherwise use original setting value
-    const currentValue = changedSettings.hasOwnProperty(setting.key) 
+    // Always use changedSettings value if it exists (even if empty string), otherwise use original setting value
+    const currentValue = setting.key in changedSettings 
       ? changedSettings[setting.key] 
       : (setting.value || '');
 
+    console.log(`Rendering ${setting.key}: changedValue="${changedSettings[setting.key]}", originalValue="${setting.value}", currentValue="${currentValue}"`);
+
     const handleChange = (value: string) => {
+      console.log(`Changing ${setting.key} to: "${value}"`);
       onSettingChange(setting.key, value);
     };
 
@@ -139,7 +142,7 @@ const SettingsCategory = ({
             
             {renderSettingInput(setting)}
             
-            {changedSettings.hasOwnProperty(setting.key) && (
+            {setting.key in changedSettings && (
               <div className="mt-2 flex items-center gap-2">
                 <div className="h-2 w-2 bg-orange-500 rounded-full"></div>
                 <span className="text-xs text-orange-600">تغییر یافته</span>
