@@ -9,9 +9,32 @@ import { useSiteSettings } from '@/hooks/useSiteSettings';
 import SettingsLayout from './SettingsLayout';
 import ImageUploadSection from './ImageUploadSection';
 
+interface FormData {
+  site_title: string;
+  contact_phone: string;
+  contact_email: string;
+  site_description: string;
+  contact_address: string;
+  hero_title: string;
+  hero_description: string;
+  site_logo: string;
+  site_background: string;
+}
+
 const SiteSettingsForm = () => {
   const { settings, isLoading, isSaving, saveSettings, loadSettings } = useSiteSettings();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
+    site_title: '',
+    contact_phone: '',
+    contact_email: '',
+    site_description: '',
+    contact_address: '',
+    hero_title: '',
+    hero_description: '',
+    site_logo: '',
+    site_background: ''
+  });
+  const [initialData, setInitialData] = useState<FormData>({
     site_title: '',
     contact_phone: '',
     contact_email: '',
@@ -27,7 +50,7 @@ const SiteSettingsForm = () => {
   useEffect(() => {
     if (settings) {
       console.log('Settings loaded:', settings);
-      setFormData({
+      const newData: FormData = {
         site_title: settings.site_title || '',
         contact_phone: settings.contact_phone || '',
         contact_email: settings.contact_email || '',
@@ -37,21 +60,32 @@ const SiteSettingsForm = () => {
         hero_description: settings.hero_description || '',
         site_logo: settings.site_logo || '',
         site_background: settings.site_background || ''
-      });
+      };
+      
+      setFormData(newData);
+      setInitialData(newData);
       setHasChanges(false);
     }
   }, [settings]);
 
-  const handleInputChange = (key: string, value: string) => {
-    console.log(`Changing ${key} to:`, value);
-    setFormData(prev => ({ ...prev, [key]: value }));
-    setHasChanges(true);
+  const handleInputChange = (key: keyof FormData, value: string) => {
+    console.log(`Changing ${key} from "${formData[key]}" to "${value}"`);
+    
+    const newFormData = { ...formData, [key]: value };
+    setFormData(newFormData);
+    
+    // Check if there are changes
+    const hasActualChanges = JSON.stringify(newFormData) !== JSON.stringify(initialData);
+    setHasChanges(hasActualChanges);
+    
+    console.log('Has changes:', hasActualChanges);
   };
 
   const handleSave = async () => {
     try {
       console.log('Saving form data:', formData);
       await saveSettings(formData);
+      setInitialData(formData);
       setHasChanges(false);
     } catch (error) {
       console.error('Save failed:', error);
