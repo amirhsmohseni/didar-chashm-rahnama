@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -19,6 +18,7 @@ interface FormData {
   hero_description: string;
   site_logo: string;
   site_background: string;
+  [key: string]: string; // Index signature to make it compatible with Record<string, string>
 }
 
 const SiteSettingsForm = () => {
