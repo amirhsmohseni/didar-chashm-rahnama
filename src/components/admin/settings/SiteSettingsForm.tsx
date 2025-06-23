@@ -11,21 +11,46 @@ import ImageUploadSection from './ImageUploadSection';
 
 const SiteSettingsForm = () => {
   const { settings, isLoading, isSaving, saveSettings, loadSettings } = useSiteSettings();
-  const [formData, setFormData] = useState(settings);
+  const [formData, setFormData] = useState({
+    site_title: '',
+    contact_phone: '',
+    contact_email: '',
+    site_description: '',
+    contact_address: '',
+    hero_title: '',
+    hero_description: '',
+    site_logo: '',
+    site_background: ''
+  });
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    setFormData(settings);
-    setHasChanges(false);
+    if (settings) {
+      console.log('Settings loaded:', settings);
+      setFormData({
+        site_title: settings.site_title || '',
+        contact_phone: settings.contact_phone || '',
+        contact_email: settings.contact_email || '',
+        site_description: settings.site_description || '',
+        contact_address: settings.contact_address || '',
+        hero_title: settings.hero_title || '',
+        hero_description: settings.hero_description || '',
+        site_logo: settings.site_logo || '',
+        site_background: settings.site_background || ''
+      });
+      setHasChanges(false);
+    }
   }, [settings]);
 
   const handleInputChange = (key: string, value: string) => {
+    console.log(`Changing ${key} to:`, value);
     setFormData(prev => ({ ...prev, [key]: value }));
     setHasChanges(true);
   };
 
   const handleSave = async () => {
     try {
+      console.log('Saving form data:', formData);
       await saveSettings(formData);
       setHasChanges(false);
     } catch (error) {
@@ -87,7 +112,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="site_title">عنوان سایت</Label>
               <Input
                 id="site_title"
-                value={formData.site_title || ''}
+                value={formData.site_title}
                 onChange={(e) => handleInputChange('site_title', e.target.value)}
                 placeholder="عنوان سایت را وارد کنید"
                 className="mt-1"
@@ -97,7 +122,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="contact_phone">شماره تماس</Label>
               <Input
                 id="contact_phone"
-                value={formData.contact_phone || ''}
+                value={formData.contact_phone}
                 onChange={(e) => handleInputChange('contact_phone', e.target.value)}
                 placeholder="شماره تماس را وارد کنید"
                 className="mt-1"
@@ -108,7 +133,7 @@ const SiteSettingsForm = () => {
               <Input
                 id="contact_email"
                 type="email"
-                value={formData.contact_email || ''}
+                value={formData.contact_email}
                 onChange={(e) => handleInputChange('contact_email', e.target.value)}
                 placeholder="ایمیل تماس را وارد کنید"
                 className="mt-1"
@@ -121,7 +146,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="site_description">توضیحات سایت</Label>
               <Textarea
                 id="site_description"
-                value={formData.site_description || ''}
+                value={formData.site_description}
                 onChange={(e) => handleInputChange('site_description', e.target.value)}
                 placeholder="توضیحات کوتاه درباره سایت"
                 rows={3}
@@ -132,7 +157,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="contact_address">آدرس</Label>
               <Textarea
                 id="contact_address"
-                value={formData.contact_address || ''}
+                value={formData.contact_address}
                 onChange={(e) => handleInputChange('contact_address', e.target.value)}
                 placeholder="آدرس کامل را وارد کنید"
                 rows={2}
@@ -152,7 +177,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="hero_title">عنوان اصلی صفحه</Label>
               <Input
                 id="hero_title"
-                value={formData.hero_title || ''}
+                value={formData.hero_title}
                 onChange={(e) => handleInputChange('hero_title', e.target.value)}
                 placeholder="عنوان اصلی صفحه را وارد کنید"
                 className="mt-1"
@@ -162,7 +187,7 @@ const SiteSettingsForm = () => {
               <Label htmlFor="hero_description">توضیحات صفحه اصلی</Label>
               <Textarea
                 id="hero_description"
-                value={formData.hero_description || ''}
+                value={formData.hero_description}
                 onChange={(e) => handleInputChange('hero_description', e.target.value)}
                 placeholder="توضیحات صفحه اصلی را وارد کنید"
                 rows={4}
