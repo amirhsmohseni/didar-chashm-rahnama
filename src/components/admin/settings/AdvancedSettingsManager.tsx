@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Settings, Globe, Palette, Share2, Search, Shield, Home, Phone } from 'lucide-react';
 import { useAdvancedSiteSettings } from '@/hooks/useAdvancedSiteSettings';
@@ -57,14 +57,22 @@ const AdvancedSettingsManager = () => {
   };
 
   const handleSettingChange = (key: string, value: string) => {
-    setChangedSettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
+    console.log(`AdvancedSettingsManager: Setting ${key} changed to: "${value}"`);
+    setChangedSettings(prev => {
+      const newChangedSettings = {
+        ...prev,
+        [key]: value
+      };
+      console.log('Updated changedSettings:', newChangedSettings);
+      return newChangedSettings;
+    });
   };
 
   const handleSaveAll = async () => {
-    if (Object.keys(changedSettings).length === 0) {
+    const changeCount = Object.keys(changedSettings).length;
+    console.log(`Attempting to save ${changeCount} changes:`, changedSettings);
+    
+    if (changeCount === 0) {
       toast.info('تغییری برای ذخیره وجود ندارد');
       return;
     }
@@ -72,17 +80,28 @@ const AdvancedSettingsManager = () => {
     try {
       await saveMultipleSettings(changedSettings);
       setChangedSettings({});
+      console.log('All settings saved successfully');
     } catch (error) {
       console.error('Save failed:', error);
+      toast.error('خطا در ذخیره تنظیمات');
     }
   };
 
   const handleRefresh = () => {
+    console.log('Refreshing settings...');
     loadSettings();
     setChangedSettings({});
   };
 
   const hasChanges = Object.keys(changedSettings).length > 0;
+
+  // Reset changed settings when settings are loaded
+  useEffect(() => {
+    if (settings && !isLoading) {
+      console.log('Settings loaded, clearing changed settings');
+      setChangedSettings({});
+    }
+  }, [settings, isLoading]);
 
   if (isLoading) {
     return (
@@ -208,9 +227,9 @@ const AdvancedSettingsManager = () => {
         <Button
           onClick={handleSaveAll}
           disabled={isSaving || !hasChanges}
-          className="px-8 bg-green-600 hover:bg-green-700 shadow-lg"
+          className={`px-8 shadow-lg ${hasChanges ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400'}`}
         >
-          {isSaving ? 'در حال ذخیره...' : 'ذخیره تنظیمات'}
+          {isSaving ? 'در حال ذخیره...' : `ذخیره تنظیمات${hasChanges ? ` (${Object.keys(changedSettings).length})` : ''}`}
         </Button>
       </div>
     </div>

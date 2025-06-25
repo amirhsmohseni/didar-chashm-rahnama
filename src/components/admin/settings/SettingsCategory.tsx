@@ -23,15 +23,14 @@ const SettingsCategory = ({
 }: SettingsCategoryProps) => {
 
   const renderSettingInput = (setting: SettingItem) => {
-    // Always use changedSettings value if it exists (even if empty string), otherwise use original setting value
-    const currentValue = setting.key in changedSettings 
-      ? changedSettings[setting.key] 
-      : (setting.value || '');
+    // Get the current value - prioritize changed value over original
+    const hasChanged = Object.prototype.hasOwnProperty.call(changedSettings, setting.key);
+    const currentValue = hasChanged ? changedSettings[setting.key] : (setting.value || '');
 
-    console.log(`Rendering ${setting.key}: changedValue="${changedSettings[setting.key]}", originalValue="${setting.value}", currentValue="${currentValue}"`);
+    console.log(`Rendering ${setting.key}: hasChanged=${hasChanged}, changedValue="${changedSettings[setting.key]}", originalValue="${setting.value}", currentValue="${currentValue}"`);
 
     const handleChange = (value: string) => {
-      console.log(`Changing ${setting.key} to: "${value}"`);
+      console.log(`Changing ${setting.key} from "${currentValue}" to: "${value}"`);
       onSettingChange(setting.key, value);
     };
 
@@ -142,7 +141,7 @@ const SettingsCategory = ({
             
             {renderSettingInput(setting)}
             
-            {setting.key in changedSettings && (
+            {Object.prototype.hasOwnProperty.call(changedSettings, setting.key) && (
               <div className="mt-2 flex items-center gap-2">
                 <div className="h-2 w-2 bg-orange-500 rounded-full"></div>
                 <span className="text-xs text-orange-600">تغییر یافته</span>
