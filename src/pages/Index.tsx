@@ -9,7 +9,7 @@ import Footer from '@/components/layout/Footer';
 import SiteSettingsLoader from '@/components/sections/SiteSettingsLoader';
 import FeaturedServices from '@/components/sections/FeaturedServices';
 import OptimizedHeroSection from '@/components/sections/OptimizedHeroSection';
-import OptimizedImageSlider from '@/components/sections/OptimizedImageSlider';
+import TopBanner from '@/components/sections/TopBanner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -193,8 +193,8 @@ const Index = () => {
       <SiteSettingsLoader />
       <Header />
       
-      {/* Move Image Slider to top */}
-      <OptimizedImageSlider />
+      {/* Replace Image Slider with Top Banner */}
+      <TopBanner />
 
       {/* Optimized Hero Section */}
       <OptimizedHeroSection siteSettings={siteSettings} isLoading={isLoading} />
