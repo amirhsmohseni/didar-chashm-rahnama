@@ -138,7 +138,7 @@ const Index = () => {
                 </Button>
               </Link>
               <Link to="/doctors">
-                <Button variant="outline" size="lg" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8 py-4 rounded-2xl backdrop-blur-sm transform hover:scale-105 transition-all duration-300 h-14 min-w-[220px]">
+                <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8 py-4 rounded-2xl backdrop-blur-sm transform hover:scale-105 transition-all duration-300 h-14 min-w-[220px]">
                   <Users className="ml-2 h-5 w-5" />
                   مشاهده پزشکان
                 </Button>
@@ -238,30 +238,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
-        <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <div className="transform hover:scale-105 transition-all duration-300">
-              <div className="text-4xl font-bold text-primary mb-2">1000+</div>
-              <div className="text-gray-600">مشاوره موفق</div>
-            </div>
-            <div className="transform hover:scale-105 transition-all duration-300">
-              <div className="text-4xl font-bold text-primary mb-2">50+</div>
-              <div className="text-gray-600">پزشک متخصص</div>
-            </div>
-            <div className="transform hover:scale-105 transition-all duration-300">
-              <div className="text-4xl font-bold text-primary mb-2">98%</div>
-              <div className="text-gray-600">رضایت بیماران</div>
-            </div>
-            <div className="transform hover:scale-105 transition-all duration-300">
-              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-gray-600">پشتیبانی</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Services Preview */}
       <section className="py-20 bg-white">
         <div className="container">
@@ -338,6 +314,34 @@ const Index = () => {
               شروع مشاوره
             </Button>
           </Link>
+        </div>
+      </section>
+
+      {/* Stats Section - Moved to bottom */}
+      <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">دستاوردهای ما</h2>
+            <p className="text-xl text-gray-600">آمار موفقیت‌های کلینیک چشم‌پزشکی</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+            <div className="transform hover:scale-105 transition-all duration-300">
+              <div className="text-4xl font-bold text-primary mb-2">1000+</div>
+              <div className="text-gray-600">مشاوره موفق</div>
+            </div>
+            <div className="transform hover:scale-105 transition-all duration-300">
+              <div className="text-4xl font-bold text-primary mb-2">50+</div>
+              <div className="text-gray-600">پزشک متخصص</div>
+            </div>
+            <div className="transform hover:scale-105 transition-all duration-300">
+              <div className="text-4xl font-bold text-primary mb-2">98%</div>
+              <div className="text-gray-600">رضایت بیماران</div>
+            </div>
+            <div className="transform hover:scale-105 transition-all duration-300">
+              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
+              <div className="text-gray-600">پشتیبانی</div>
+            </div>
+          </div>
         </div>
       </section>
 

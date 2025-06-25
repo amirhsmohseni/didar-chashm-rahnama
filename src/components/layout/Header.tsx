@@ -59,16 +59,16 @@ const Header = () => {
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo - moved to left side */}
-          <Link to="/" className="flex items-center space-x-2 order-1">
+          {/* Logo - positioned on the left */}
+          <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">چ</span>
             </div>
             <span className="font-bold text-xl text-primary mr-2">چشم پزشکی</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8 space-x-reverse order-2">
+          {/* Desktop Navigation - centered */}
+          <nav className="hidden lg:flex items-center space-x-8 space-x-reverse">
             {navigationItems.map((item) => (
               <Link
                 key={item.name}
@@ -80,11 +80,11 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Auth Section */}
-          <div className="flex items-center gap-4 order-3">
+          {/* Right side - Auth section and mobile menu */}
+          <div className="flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-2">
-                {/* Admin Panel Button - Show for all authenticated users for testing */}
+                {/* Admin Panel Button */}
                 <Link to="/admin">
                   <Button variant="outline" className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 border-blue-600">
                     <Shield className="h-4 w-4" />
@@ -128,11 +128,11 @@ const Header = () => {
               </Link>
             )}
 
-            {/* Mobile menu button - moved to right side */}
+            {/* Mobile menu button - positioned on the right */}
             <Button
               variant="ghost"
               size="sm"
-              className="lg:hidden order-4"
+              className="lg:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
