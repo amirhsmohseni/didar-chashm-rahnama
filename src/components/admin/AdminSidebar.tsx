@@ -1,7 +1,6 @@
-
 import { 
   Home, Users, UserCheck, MessageSquare, FileText, Settings, Cog, 
-  Star, Briefcase, Type, BarChart3, Bell, Shield, X 
+  Star, Briefcase, Type, BarChart3, Bell, Shield, X, Image as ImageIcon 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -40,6 +39,7 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
     {
       title: 'مدیریت محتوا',
       items: [
+        { id: 'slider', label: 'اسلایدر صفحه اصلی', icon: ImageIcon, badge: 'جدید' },
         { id: 'media', label: 'مرکز رسانه', icon: FileText, badge: null },
         { id: 'pages', label: 'صفحات', icon: FileText, badge: null },
         { id: 'blog', label: 'بلاگ', icon: FileText, badge: null },

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Menu, X } from 'lucide-react';
@@ -19,6 +20,7 @@ import FaqManager from '@/components/admin/FaqManager';
 import MediaCenterManager from '@/components/admin/MediaCenterManager';
 import PagesManager from '@/components/admin/PagesManager';
 import BlogManager from '@/components/admin/BlogManager';
+import SliderManager from '@/components/admin/SliderManager';
 import SiteSettingsForm from '@/components/admin/settings/SiteSettingsForm';
 import SystemSettingsForm from '@/components/admin/settings/SystemSettingsForm';
 import SettingsManager from '@/components/admin/settings/SettingsManager';
@@ -46,6 +48,8 @@ const Admin = () => {
         return <FaqManager />;
       case 'media':
         return <MediaCenterManager />;
+      case 'slider':
+        return <SliderManager />;
       case 'pages':
         return <PagesManager />;
       case 'blog':

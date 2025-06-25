@@ -1,3 +1,4 @@
+
 import { useEffect, useState, memo } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -192,11 +193,11 @@ const Index = () => {
       <SiteSettingsLoader />
       <Header />
       
+      {/* Move Image Slider to top */}
+      <OptimizedImageSlider />
+
       {/* Optimized Hero Section */}
       <OptimizedHeroSection siteSettings={siteSettings} isLoading={isLoading} />
-
-      {/* Optimized Image Slider Section */}
-      <OptimizedImageSlider />
 
       {/* Featured Services */}
       <FeaturedServices />
