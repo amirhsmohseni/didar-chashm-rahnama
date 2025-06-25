@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Eye, Shield, Clock, Star, ChevronDown, Play, ArrowLeft, CheckCircle, Users, Award, Heart, ChevronLeft, ChevronRight, Phone, Calendar, MapPin, Stethoscope } from 'lucide-react';
+import { Eye, Shield, Clock, Star, ChevronDown, Play, ArrowLeft, CheckCircle, Users, Award, Heart, ChevronLeft, ChevronRight, Phone, Calendar, MapPin, Stethoscope, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 
