@@ -56,61 +56,13 @@ const Header = () => {
   ];
 
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50 backdrop-blur-md bg-white/95">
-      {/* Top Bar */}
-      <div className="bg-blue-600 text-white py-2 hidden lg:block">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-6 space-x-reverse">
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <Phone className="h-4 w-4" />
-                <span>021-12345678</span>
-              </div>
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <Shield className="h-4 w-4" />
-                <span>مرکز معتبر چشم‌پزشکی</span>
-              </div>
-            </div>
-            <div className="text-sm opacity-90">
-              ساعات کاری: شنبه تا چهارشنبه ۸:۰۰ - ۲۰:۰۰
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Header */}
+    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8 space-x-reverse">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium text-base relative group"
-              >
-                {item.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-            ))}
-          </nav>
-
-          {/* Mobile menu button */}
-          <div className="lg:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="mr-0"
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
-          </div>
-
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-3 space-x-reverse">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">چ</span>
               </div>
               <div className="hidden sm:block">
@@ -119,6 +71,19 @@ const Header = () => {
               </div>
             </Link>
           </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-8 space-x-reverse">
+            {navigationItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
 
           {/* Right side - Auth section */}
           <div className="flex items-center gap-4">
@@ -139,8 +104,8 @@ const Header = () => {
                       <span className="hidden sm:inline">حساب کاربری</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-white shadow-xl border border-gray-200">
-                    <div className="p-3 border-b border-gray-100">
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="p-3 border-b">
                       <p className="text-sm font-medium text-gray-900">{user.email}</p>
                       <p className="text-xs text-blue-600 flex items-center gap-1 mt-1">
                         <Shield className="h-3 w-3" />
@@ -148,13 +113,13 @@ const Header = () => {
                       </p>
                     </div>
                     <DropdownMenuItem asChild>
-                      <Link to="/admin" className="flex items-center gap-2 px-3 py-2">
+                      <Link to="/admin" className="flex items-center gap-2">
                         <Shield className="h-4 w-4" />
                         پنل مدیریت
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50">
+                    <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50">
                       <LogOut className="h-4 w-4" />
                       خروج
                     </DropdownMenuItem>
@@ -175,17 +140,29 @@ const Header = () => {
               </div>
             )}
           </div>
+
+          {/* Mobile menu button */}
+          <div className="lg:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="mr-0"
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="lg:hidden border-t bg-white py-4 shadow-lg rounded-b-lg">
+          <div className="lg:hidden border-t py-4">
             <nav className="flex flex-col space-y-4">
               {navigationItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 font-medium px-4 py-3 rounded-lg text-left"
+                  className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium px-4 py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
@@ -194,7 +171,7 @@ const Header = () => {
               {user && (
                 <Link
                   to="/admin"
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors duration-200 font-medium px-4 py-3 flex items-center gap-2 justify-start rounded-lg"
+                  className="text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium px-4 py-2 flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Shield className="h-4 w-4" />
@@ -204,7 +181,7 @@ const Header = () => {
               {!user && (
                 <Link
                   to="/consultation"
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors duration-200 font-medium px-4 py-3 flex items-center gap-2 justify-start rounded-lg"
+                  className="text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium px-4 py-2 flex items-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Phone className="h-4 w-4" />
