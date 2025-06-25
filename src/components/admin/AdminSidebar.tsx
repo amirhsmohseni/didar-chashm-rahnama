@@ -1,12 +1,13 @@
-
 import { 
   Home, Users, UserCheck, MessageSquare, FileText, Settings, Cog, 
-  Star, Briefcase, Type, BarChart3, Bell, Shield, X 
+  Star, Briefcase, Type, BarChart3, Bell, Shield, X, Menu, Palette 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/context/auth';
+import { useState } from 'react';
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -14,6 +15,9 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
+  const [expandedSections, setExpandedSections] = useState<string[]>(['main']);
+  const { user } = useAuth();
+
   const sidebarSections = [
     {
       title: 'داشبورد',
@@ -38,11 +42,12 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       ]
     },
     {
+      id: 'content',
       title: 'مدیریت محتوا',
+      icon: FileText,
       items: [
-        { id: 'media', label: 'مرکز رسانه', icon: FileText, badge: null },
-        { id: 'pages', label: 'صفحات', icon: FileText, badge: null },
-        { id: 'blog', label: 'بلاگ', icon: FileText, badge: null },
+        { id: 'header-manager', title: 'مدیریت هدر', icon: Menu, description: 'ویرایش منوی ناوبری' },
+        { id: 'service-icons', title: 'آیکون‌های خدمات', icon: Palette, description: 'مدیریت آیکون‌ها' },
       ]
     },
     {

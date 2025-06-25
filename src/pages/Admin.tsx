@@ -22,6 +22,8 @@ import BlogManager from '@/components/admin/BlogManager';
 import SiteSettingsForm from '@/components/admin/settings/SiteSettingsForm';
 import SystemSettingsForm from '@/components/admin/settings/SystemSettingsForm';
 import SettingsManager from '@/components/admin/settings/SettingsManager';
+import HeaderManager from '@/components/admin/HeaderManager';
+import ServiceIconManager from '@/components/admin/ServiceIconManager';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -54,6 +56,10 @@ const Admin = () => {
         return <SettingsManager />;
       case 'site-settings':
         return <SettingsManager />;
+      case 'header-manager':
+        return <HeaderManager />;
+      case 'service-icons':
+        return <ServiceIconManager />;
       case 'settings':
         return <SystemSettingsForm />;
       default:
