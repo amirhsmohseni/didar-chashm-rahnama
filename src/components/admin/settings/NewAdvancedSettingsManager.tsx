@@ -1,17 +1,12 @@
 
-import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from '@/components/ui/button';
 import { Settings, Globe, Palette, Share2, Search, Shield, Home, Phone } from 'lucide-react';
-import { useAdvancedSiteSettings } from '@/hooks/useAdvancedSiteSettings';
-import SettingsCategory from './SettingsCategory';
-import { toast } from 'sonner';
+import { useSimpleSiteSettings } from '@/hooks/useSimpleSiteSettings';
+import SimpleSettingsCard from './SimpleSettingsCard';
 
-const AdvancedSettingsManager = () => {
-  const { settings, isLoading, isSaving, error, saveMultipleSettings, loadSettings } = useAdvancedSiteSettings();
-  const [changedSettings, setChangedSettings] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState('general');
+const NewAdvancedSettingsManager = () => {
+  const { settings, isLoading, error, saveSetting, loadSettings } = useSimpleSiteSettings();
 
   const categoryConfig = {
     general: {
@@ -56,53 +51,6 @@ const AdvancedSettingsManager = () => {
     }
   };
 
-  const handleSettingChange = (key: string, value: string) => {
-    console.log(`AdvancedSettingsManager: Setting ${key} changed to: "${value}"`);
-    setChangedSettings(prev => {
-      const newChangedSettings = {
-        ...prev,
-        [key]: value
-      };
-      console.log('Updated changedSettings:', newChangedSettings);
-      return newChangedSettings;
-    });
-  };
-
-  const handleSaveAll = async () => {
-    const changeCount = Object.keys(changedSettings).length;
-    console.log(`Attempting to save ${changeCount} changes:`, changedSettings);
-    
-    if (changeCount === 0) {
-      toast.info('تغییری برای ذخیره وجود ندارد');
-      return;
-    }
-
-    try {
-      await saveMultipleSettings(changedSettings);
-      setChangedSettings({});
-      console.log('All settings saved successfully');
-    } catch (error) {
-      console.error('Save failed:', error);
-      toast.error('خطا در ذخیره تنظیمات');
-    }
-  };
-
-  const handleRefresh = () => {
-    console.log('Refreshing settings...');
-    loadSettings();
-    setChangedSettings({});
-  };
-
-  const hasChanges = Object.keys(changedSettings).length > 0;
-
-  // Reset changed settings when settings are loaded
-  useEffect(() => {
-    if (settings && !isLoading) {
-      console.log('Settings loaded, clearing changed settings');
-      setChangedSettings({});
-    }
-  }, [settings, isLoading]);
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -117,9 +65,12 @@ const AdvancedSettingsManager = () => {
       <Card className="p-6">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
-          <Button onClick={handleRefresh} variant="outline">
+          <button 
+            onClick={loadSettings}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
             تلاش مجدد
-          </Button>
+          </button>
         </div>
       </Card>
     );
@@ -128,37 +79,20 @@ const AdvancedSettingsManager = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-            <Settings className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">مدیریت تنظیمات</h1>
-            <p className="text-gray-600 mt-1">مدیریت کامل تنظیمات و پیکربندی سایت</p>
-          </div>
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
+          <Settings className="h-6 w-6 text-white" />
         </div>
-        
-        {hasChanges && (
-          <div className="flex items-center gap-3">
-            <div className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
-              {Object.keys(changedSettings).length} تغییر ذخیره نشده
-            </div>
-            <Button
-              onClick={handleSaveAll}
-              disabled={isSaving}
-              className="bg-green-600 hover:bg-green-700 shadow-lg"
-            >
-              {isSaving ? 'در حال ذخیره...' : 'ذخیره همه تغییرات'}
-            </Button>
-          </div>
-        )}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">مدیریت تنظیمات</h1>
+          <p className="text-gray-600 mt-1">مدیریت کامل تنظیمات و پیکربندی سایت</p>
+        </div>
       </div>
 
       {/* Settings Tabs */}
       <Card className="shadow-lg border-0">
         <CardContent className="p-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs defaultValue="general" className="w-full">
             <div className="border-b bg-gray-50">
               <TabsList className="w-full justify-start bg-transparent p-0 h-auto">
                 <div className="flex flex-wrap gap-1 p-4">
@@ -196,12 +130,15 @@ const AdvancedSettingsManager = () => {
                 </div>
 
                 {settings[key] && settings[key].length > 0 ? (
-                  <SettingsCategory
-                    category={key}
-                    settings={settings[key]}
-                    changedSettings={changedSettings}
-                    onSettingChange={handleSettingChange}
-                  />
+                  <div className="grid gap-6">
+                    {settings[key].map((setting) => (
+                      <SimpleSettingsCard
+                        key={setting.id}
+                        setting={setting}
+                        onSave={saveSetting}
+                      />
+                    ))}
+                  </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     هیچ تنظیمی در این بخش موجود نیست
@@ -212,28 +149,8 @@ const AdvancedSettingsManager = () => {
           </Tabs>
         </CardContent>
       </Card>
-
-      {/* Action Buttons */}
-      <div className="flex justify-end gap-4">
-        <Button
-          onClick={handleRefresh}
-          variant="outline"
-          disabled={isSaving}
-          className="px-6"
-        >
-          بازخوانی
-        </Button>
-        
-        <Button
-          onClick={handleSaveAll}
-          disabled={isSaving || !hasChanges}
-          className={`px-8 shadow-lg ${hasChanges ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400'}`}
-        >
-          {isSaving ? 'در حال ذخیره...' : `ذخیره تنظیمات${hasChanges ? ` (${Object.keys(changedSettings).length})` : ''}`}
-        </Button>
-      </div>
     </div>
   );
 };
 
-export default AdvancedSettingsManager;
+export default NewAdvancedSettingsManager;

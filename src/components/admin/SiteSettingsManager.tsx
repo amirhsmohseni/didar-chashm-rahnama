@@ -1,8 +1,8 @@
 
-import AdvancedSettingsManager from './settings/AdvancedSettingsManager';
+import NewAdvancedSettingsManager from './settings/NewAdvancedSettingsManager';
 
 const SiteSettingsManager = () => {
-  return <AdvancedSettingsManager />;
+  return <NewAdvancedSettingsManager />;
 };
 
 export default SiteSettingsManager;

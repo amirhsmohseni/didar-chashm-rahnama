@@ -22,6 +22,7 @@ import PagesManager from '@/components/admin/PagesManager';
 import BlogManager from '@/components/admin/BlogManager';
 import SiteSettingsForm from '@/components/admin/settings/SiteSettingsForm';
 import SystemSettingsForm from '@/components/admin/settings/SystemSettingsForm';
+import NewAdvancedSettingsManager from '@/components/admin/settings/NewAdvancedSettingsManager';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -51,9 +52,9 @@ const Admin = () => {
       case 'blog':
         return <BlogManager />;
       case 'header-settings':
-        return <SiteSettingsForm />;
+        return <NewAdvancedSettingsManager />;
       case 'site-settings':
-        return <SiteSettingsForm />;
+        return <NewAdvancedSettingsManager />;
       case 'settings':
         return <SystemSettingsForm />;
       default:
