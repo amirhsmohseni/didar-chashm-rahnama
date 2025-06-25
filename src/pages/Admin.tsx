@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Menu, X } from 'lucide-react';
@@ -23,6 +22,7 @@ import BlogManager from '@/components/admin/BlogManager';
 import SiteSettingsForm from '@/components/admin/settings/SiteSettingsForm';
 import SystemSettingsForm from '@/components/admin/settings/SystemSettingsForm';
 import NewAdvancedSettingsManager from '@/components/admin/settings/NewAdvancedSettingsManager';
+import SettingsManager from '@/components/admin/settings/SettingsManager';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -52,9 +52,9 @@ const Admin = () => {
       case 'blog':
         return <BlogManager />;
       case 'header-settings':
-        return <NewAdvancedSettingsManager />;
+        return <SettingsManager />;
       case 'site-settings':
-        return <NewAdvancedSettingsManager />;
+        return <SettingsManager />;
       case 'settings':
         return <SystemSettingsForm />;
       default:

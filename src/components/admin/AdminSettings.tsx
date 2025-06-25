@@ -1,8 +1,8 @@
 
-import NewAdvancedSettingsManager from './settings/NewAdvancedSettingsManager';
+import SettingsManager from './settings/SettingsManager';
 
 const AdminSettings = () => {
-  return <NewAdvancedSettingsManager />;
+  return <SettingsManager />;
 };
 
 export default AdminSettings;
