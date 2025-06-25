@@ -1,3 +1,4 @@
+
 import { 
   Home, Users, UserCheck, MessageSquare, FileText, Settings, Cog, 
   Star, Briefcase, Type, BarChart3, Bell, Shield, X, Menu, Palette 
@@ -6,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/context/auth';
+import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 
 interface AdminSidebarProps {

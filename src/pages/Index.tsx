@@ -7,8 +7,11 @@ import FeaturedDoctors from '@/components/sections/FeaturedDoctors';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SiteSettingsLoader from '@/components/sections/SiteSettingsLoader';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const Index = () => {
+  const { settings: siteSettings, isLoading } = useSiteSettings();
+
   return (
     <div className="min-h-screen">
       <Helmet>
@@ -20,7 +23,7 @@ const Index = () => {
       <SiteSettingsLoader />
       <Header />
       <main>
-        <OptimizedHeroSection />
+        <OptimizedHeroSection siteSettings={siteSettings} isLoading={isLoading} />
         {/* Move image slider right after hero section */}
         <OptimizedImageSlider />
         <FeaturedServices />
