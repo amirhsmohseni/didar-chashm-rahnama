@@ -684,6 +684,7 @@ export type Database = {
           meta_description: string | null
           meta_title: string | null
           order_index: number | null
+          price: number | null
           reading_time: number | null
           slug: string | null
           title: string
@@ -704,6 +705,7 @@ export type Database = {
           meta_description?: string | null
           meta_title?: string | null
           order_index?: number | null
+          price?: number | null
           reading_time?: number | null
           slug?: string | null
           title: string
@@ -724,6 +726,7 @@ export type Database = {
           meta_description?: string | null
           meta_title?: string | null
           order_index?: number | null
+          price?: number | null
           reading_time?: number | null
           slug?: string | null
           title?: string
