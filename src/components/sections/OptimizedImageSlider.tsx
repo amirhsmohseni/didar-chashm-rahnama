@@ -1,4 +1,3 @@
-
 import { useState, useEffect, memo, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +23,7 @@ const OptimizedImageSlider = memo(() => {
     const loadSliderImages = async () => {
       try {
         const { data, error } = await supabase
-          .from('slider_images' as any)
+          .from('slider_images')
           .select('*')
           .eq('is_active', true)
           .order('order_index', { ascending: true });
@@ -56,7 +55,7 @@ const OptimizedImageSlider = memo(() => {
             }
           ]);
         } else {
-          setSliderImages((data as SliderImage[]) || []);
+          setSliderImages((data as unknown as SliderImage[]) || []);
         }
       } catch (error) {
         console.error('Error in loadSliderImages:', error);

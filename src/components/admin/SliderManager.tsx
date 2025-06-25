@@ -55,8 +55,9 @@ const SliderManager = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('slider_images' as any)
+        .from('slider_images')
         .select('*')
+        .eq('is_active', true)
         .order('order_index', { ascending: true });
 
       if (error) {
@@ -65,7 +66,7 @@ const SliderManager = () => {
         return;
       }
 
-      setImages((data as SliderImage[]) || []);
+      setImages((data as unknown as SliderImage[]) || []);
     } catch (error) {
       console.error('Error in loadSliderImages:', error);
       toast.error('خطا در بارگذاری تصاویر اسلایدر');
@@ -90,7 +91,7 @@ const SliderManager = () => {
 
       if (editingImage) {
         const { error } = await supabase
-          .from('slider_images' as any)
+          .from('slider_images')
           .update(imageData)
           .eq('id', editingImage.id);
 
@@ -98,7 +99,7 @@ const SliderManager = () => {
         toast.success('تصویر با موفقیت به‌روزرسانی شد');
       } else {
         const { error } = await supabase
-          .from('slider_images' as any)
+          .from('slider_images')
           .insert([imageData]);
 
         if (error) throw error;
@@ -118,7 +119,7 @@ const SliderManager = () => {
 
     try {
       const { error } = await supabase
-        .from('slider_images' as any)
+        .from('slider_images')
         .delete()
         .eq('id', id);
 
@@ -135,7 +136,7 @@ const SliderManager = () => {
   const toggleActive = async (id: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
-        .from('slider_images' as any)
+        .from('slider_images')
         .update({ is_active: !currentStatus })
         .eq('id', id);
 
@@ -152,7 +153,7 @@ const SliderManager = () => {
   const updateOrder = async (id: string, newOrder: number) => {
     try {
       const { error } = await supabase
-        .from('slider_images' as any)
+        .from('slider_images')
         .update({ order_index: newOrder })
         .eq('id', id);
 
