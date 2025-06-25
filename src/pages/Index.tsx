@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Eye, Shield, Clock, Star, ChevronDown, Play, ArrowLeft, CheckCircle, Users, Award, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, Shield, Clock, Star, ChevronDown, Play, ArrowLeft, CheckCircle, Users, Award, Heart, ChevronLeft, ChevronRight, Phone, Calendar, MapPin, Stethoscope } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 
@@ -155,102 +155,163 @@ const Index = () => {
       <SiteSettingsLoader />
       <Header />
       
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background with Glass Effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800">
-          {siteSettings.site_background && (
-            <div 
-              className="absolute inset-0 bg-cover bg-center opacity-30"
-              style={{ backgroundImage: `url(${siteSettings.site_background})` }}
-            />
-          )}
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
-        </div>
-        
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-500/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+      {/* Modern Medical Hero Section */}
+      <section className="relative bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-20 pb-32 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-20 left-20 w-96 h-96 bg-blue-600 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-teal-500 rounded-full blur-3xl"></div>
         </div>
 
-        {/* Content */}
-        <div className="container relative z-10 text-center text-white">
-          <div className="max-w-4xl mx-auto">
-            {/* Logo */}
-            {siteSettings.site_logo && (
-              <div className="mb-8 flex justify-center">
-                <img 
-                  src={siteSettings.site_logo} 
-                  alt="لوگو"
-                  className="h-24 w-auto drop-shadow-2xl animate-fade-in"
-                />
+        <div className="container relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Content Side */}
+            <div className="space-y-8">
+              {/* Trust Badge */}
+              <div className="flex items-center space-x-4 space-x-reverse">
+                <div className="flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
+                  <Shield className="h-4 w-4 ml-2" />
+                  مرکز معتبر چشم‌پزشکی
+                </div>
+                <div className="flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
+                  <Award className="h-4 w-4 ml-2" />
+                  ۱۰+ سال تجربه
+                </div>
               </div>
-            )}
-            
-            {/* Main Heading */}
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent animate-fade-in">
-              {isLoading ? 'دیدار چشم رهنما' : (siteSettings.hero_title || 'دیدار چشم رهنما')}
-            </h1>
-            
-            {/* Subtitle */}
-            <p className="text-xl md:text-2xl mb-8 text-white/90 leading-relaxed animate-fade-in delay-200">
-              {isLoading ? 'مشاوره تخ...' : (siteSettings.hero_description || 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران')}
-            </p>
-            
-            {/* CTA Buttons - Fixed styling and sizing */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-fade-in delay-300">
-              <Link to="/consultation">
-                <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8 py-4 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-2 border-white h-14 min-w-[220px]">
-                  <Eye className="ml-2 h-5 w-5" />
-                  دریافت مشاوره رایگان
-                </Button>
-              </Link>
-              <Link to="/doctors">
-                <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8 py-4 rounded-2xl backdrop-blur-sm transform hover:scale-105 transition-all duration-300 h-14 min-w-[220px]">
-                  <Users className="ml-2 h-5 w-5" />
-                  مشاهده پزشکان
-                </Button>
-              </Link>
+
+              {/* Main Heading */}
+              <div className="space-y-6">
+                <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                  {isLoading ? 'دیدار چشم رهنما' : (siteSettings.hero_title || 'دیدار چشم رهنما')}
+                </h1>
+                <p className="text-xl text-gray-600 leading-relaxed max-w-xl">
+                  {isLoading ? 'مشاوره تخصصی...' : (siteSettings.hero_description || 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران')}
+                </p>
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link to="/consultation">
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <Calendar className="ml-2 h-5 w-5" />
+                    رزرو مشاوره رایگان
+                  </Button>
+                </Link>
+                <Link to="/doctors">
+                  <Button size="lg" variant="outline" className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-xl transition-all duration-300">
+                    <Users className="ml-2 h-5 w-5" />
+                    مشاهده پزشکان
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">1000+</div>
+                  <div className="text-sm text-gray-600">مشاوره موفق</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">50+</div>
+                  <div className="text-sm text-gray-600">پزشک متخصص</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">98%</div>
+                  <div className="text-sm text-gray-600">رضایت بیماران</div>
+                </div>
+              </div>
             </div>
 
-            {/* Features Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate-fade-in delay-500">
-              <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
-                <CardContent className="p-6 text-center">
-                  <Shield className="h-12 w-12 mx-auto mb-4 text-green-400" />
-                  <h3 className="text-lg font-semibold mb-2">مشاوره تخصصی</h3>
-                  <p className="text-white/80">مشاوره رایگان با بهترین متخصصان چشم</p>
-                </CardContent>
-              </Card>
+            {/* Image Side */}
+            <div className="relative">
+              {siteSettings.site_background ? (
+                <img 
+                  src={siteSettings.site_background}
+                  alt="مرکز چشم‌پزشکی"
+                  className="w-full h-96 lg:h-[500px] object-cover rounded-2xl shadow-2xl"
+                />
+              ) : (
+                <div className="w-full h-96 lg:h-[500px] bg-gradient-to-br from-blue-100 to-teal-100 rounded-2xl shadow-2xl flex items-center justify-center">
+                  <Eye className="h-24 w-24 text-blue-600" />
+                </div>
+              )}
               
-              <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
-                <CardContent className="p-6 text-center">
-                  <Award className="h-12 w-12 mx-auto mb-4 text-yellow-400" />
-                  <h3 className="text-lg font-semibold mb-2">پزشکان مجرب</h3>
-                  <p className="text-white/80">دسترسی به بهترین متخصصان کشور</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
-                <CardContent className="p-6 text-center">
-                  <Heart className="h-12 w-12 mx-auto mb-4 text-red-400" />
-                  <h3 className="text-lg font-semibold mb-2">مراقبت کامل</h3>
-                  <p className="text-white/80">پیگیری و مراقبت در تمام مراحل</p>
-                </CardContent>
-              </Card>
+              {/* Floating Card */}
+              <div className="absolute -bottom-8 -left-8 bg-white p-6 rounded-xl shadow-xl border border-gray-100">
+                <div className="flex items-center space-x-4 space-x-reverse">
+                  <div className="bg-green-100 p-3 rounded-lg">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900">مشاوره رایگان</div>
+                    <div className="text-sm text-gray-600">24 ساعته در دسترس</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <ChevronDown className="h-8 w-8 text-white/60" />
+      {/* Services Section */}
+      <section className="py-20 bg-white">
+        <div className="container">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">خدمات تخصصی ما</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              طیف کاملی از خدمات چشم‌پزشکی با استفاده از جدیدترین تکنولوژی‌های روز دنیا
+            </p>
+          </div>
+
+          {/* Service Categories */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <div className="bg-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-600 transition-colors duration-300">
+                  <Eye className="h-8 w-8 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">جراحی رفرکتیو</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">تصحیح نابینایی با لیزر و جدیدترین روش‌های درمانی</p>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <div className="bg-teal-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-teal-600 transition-colors duration-300">
+                  <Heart className="h-8 w-8 text-teal-600 group-hover:text-white transition-colors duration-300" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">درمان آب مروارید</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">جراحی آب مروارید با تکنیک‌های پیشرفته</p>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <div className="bg-purple-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-600 transition-colors duration-300">
+                  <Shield className="h-8 w-8 text-purple-600 group-hover:text-white transition-colors duration-300" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">درمان گلوکوم</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">تشخیص و درمان فشار چشم</p>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <div className="bg-orange-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-orange-600 transition-colors duration-300">
+                  <Stethoscope className="h-8 w-8 text-orange-600 group-hover:text-white transition-colors duration-300" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">معاینات تخصصی</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">بررسی کامل سلامت چشم</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 
-      {/* Image Slider Section */}
+      {/* Featured Services Component */}
+      <FeaturedServices />
+
+      {/* Technology Section */}
       <section className="py-20 bg-gray-50">
         <div className="container">
           <div className="text-center mb-12">
@@ -258,13 +319,13 @@ const Index = () => {
             <p className="text-xl text-gray-600">آشنایی با تجهیزات مدرن چشم‌پزشکی</p>
           </div>
           
-          <div className="relative max-w-4xl mx-auto">
-            <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
+          <div className="relative max-w-5xl mx-auto">
+            <div className="relative h-96 rounded-3xl overflow-hidden shadow-2xl">
               {sliderImages.map((image, index) => (
                 <div
                   key={index}
-                  className={`absolute inset-0 transition-opacity duration-1000 ${
-                    index === currentSlide ? 'opacity-100' : 'opacity-0'
+                  className={`absolute inset-0 transition-all duration-1000 ${
+                    index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
                   }`}
                 >
                   <img
@@ -272,34 +333,38 @@ const Index = () => {
                     alt={`تجهیزات چشم‌پزشکی ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                  <div className="absolute bottom-8 left-8 text-white">
+                    <h3 className="text-2xl font-bold mb-2">تکنولوژی پیشرفته</h3>
+                    <p className="text-lg opacity-90">جدیدترین دستگاه‌های چشم‌پزشکی</p>
+                  </div>
                 </div>
               ))}
             </div>
             
-            {/* Navigation Buttons */}
+            {/* Navigation */}
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
             >
-              <ChevronLeft className="h-6 w-6 text-white" />
+              <ChevronLeft className="h-6 w-6 text-gray-800" />
             </button>
             
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
             >
-              <ChevronRight className="h-6 w-6 text-white" />
+              <ChevronRight className="h-6 w-6 text-gray-800" />
             </button>
             
-            {/* Dots Indicator */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+            {/* Dots */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
               {sliderImages.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
                   className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    index === currentSlide ? 'bg-white' : 'bg-white/50'
+                    index === currentSlide ? 'bg-white scale-125' : 'bg-white/60 hover:bg-white/80'
                   }`}
                 />
               ))}
@@ -308,59 +373,44 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Services */}
-      <FeaturedServices />
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-primary-600 text-white relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-10 right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="container relative z-10 text-center">
-          <h2 className="text-4xl font-bold mb-6">آماده شروع هستید؟</h2>
-          <p className="text-xl mb-8 text-white/90">همین امروز مشاوره رایگان خود را دریافت کنید</p>
-          <Link to="/consultation">
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold px-8 py-4 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300">
-              <Eye className="ml-2 h-5 w-5" />
-              شروع مشاوره
-            </Button>
-          </Link>
-        </div>
-      </section>
-
       {/* Patient Reviews Section */}
       {reviews.length > 0 && (
-        <section className="py-20 bg-gray-50">
+        <section className="py-20 bg-white">
           <div className="container">
-            <div className="text-center mb-12">
+            <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-gray-900 mb-4">نظرات بیماران</h2>
-              <p className="text-xl text-gray-600">تجربه بیماران ما از خدمات چشم‌پزشکی</p>
+              <p className="text-xl text-gray-600">تجربه واقعی بیماران ما از خدمات چشم‌پزشکی</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {reviews.map((review) => (
-                <Card key={review.id} className="hover:shadow-lg transition-shadow duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center mb-4">
+                <Card key={review.id} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                  <CardContent className="p-8">
+                    <div className="flex items-center mb-6">
                       {renderStars(review.rating)}
                     </div>
-                    <p className="text-gray-600 mb-4 leading-relaxed">"{review.review_text}"</p>
-                    <div className="text-sm text-gray-500">
-                      <p className="font-semibold">{review.patient_name}</p>
-                      {review.doctor_name && (
-                        <p>بیمار دکتر {review.doctor_name}</p>
-                      )}
+                    <blockquote className="text-gray-700 mb-6 leading-relaxed text-lg">
+                      "{review.review_text}"
+                    </blockquote>
+                    <div className="flex items-center space-x-4 space-x-reverse">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <User className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">{review.patient_name}</div>
+                        {review.doctor_name && (
+                          <div className="text-sm text-gray-600">بیمار دکتر {review.doctor_name}</div>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
             
-            <div className="text-center mt-8">
+            <div className="text-center mt-12">
               <Link to="/reviews">
-                <Button variant="outline" className="px-8 py-3">
+                <Button variant="outline" size="lg" className="px-8 py-3 border-2 border-blue-600 text-blue-600 hover:bg-blue-50">
                   مشاهده همه نظرات
                   <ArrowLeft className="mr-2 h-4 w-4" />
                 </Button>
@@ -372,27 +422,27 @@ const Index = () => {
 
       {/* FAQ Section */}
       {faqs.length > 0 && (
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-gray-50">
           <div className="container">
-            <div className="text-center mb-12">
+            <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-gray-900 mb-4">سوالات متداول</h2>
               <p className="text-xl text-gray-600">پاسخ سوالات رایج در مورد خدمات چشم‌پزشکی</p>
             </div>
             
-            <div className="max-w-3xl mx-auto space-y-4">
+            <div className="max-w-4xl mx-auto space-y-6">
               {faqs.slice(0, 5).map((faq) => (
-                <Card key={faq.id} className="hover:shadow-md transition-shadow duration-300">
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">{faq.question}</h3>
-                    <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                <Card key={faq.id} className="border-0 shadow-md hover:shadow-lg transition-all duration-300">
+                  <CardContent className="p-8">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">{faq.question}</h3>
+                    <p className="text-gray-700 leading-relaxed text-lg">{faq.answer}</p>
                   </CardContent>
                 </Card>
               ))}
             </div>
             
-            <div className="text-center mt-8">
+            <div className="text-center mt-12">
               <Link to="/faq">
-                <Button variant="outline" className="px-8 py-3">
+                <Button variant="outline" size="lg" className="px-8 py-3 border-2 border-blue-600 text-blue-600 hover:bg-blue-50">
                   مشاهده همه سوالات
                   <ArrowLeft className="mr-2 h-4 w-4" />
                 </Button>
@@ -402,29 +452,34 @@ const Index = () => {
         </section>
       )}
 
-      {/* Stats Section - Moved to bottom */}
-      <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">دستاوردهای ما</h2>
-            <p className="text-xl text-gray-600">آمار موفقیت‌های کلینیک چشم‌پزشکی</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <div className="transform hover:scale-105 transition-all duration-300">
-              <div className="text-4xl font-bold text-primary mb-2">1000+</div>
-              <div className="text-gray-600">مشاوره موفق</div>
-            </div>
-            <div className="transform hover:scale-105 transition-all duration-300">
-              <div className="text-4xl font-bold text-primary mb-2">50+</div>
-              <div className="text-gray-600">پزشک متخصص</div>
-            </div>
-            <div className="transform hover:scale-105 transition-all duration-300">
-              <div className="text-4xl font-bold text-primary mb-2">98%</div>
-              <div className="text-gray-600">رضایت بیماران</div>
-            </div>
-            <div className="transform hover:scale-105 transition-all duration-300">
-              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-gray-600">پشتیبانی</div>
+      {/* Contact CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="container relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl lg:text-5xl font-bold mb-6">آماده شروع هستید؟</h2>
+            <p className="text-xl mb-8 opacity-90 leading-relaxed">
+              همین امروز مشاوره رایگان خود را دریافت کنید و اولین قدم را برای بینایی بهتر بردارید
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              <Link to="/consultation">
+                <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                  <Calendar className="ml-2 h-5 w-5" />
+                  رزرو مشاوره رایگان
+                </Button>
+              </Link>
+              
+              <div className="flex items-center space-x-6 space-x-reverse text-white/90">
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <Phone className="h-5 w-5" />
+                  <span>021-12345678</span>
+                </div>
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <Clock className="h-5 w-5" />
+                  <span>24/7 پشتیبانی</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
