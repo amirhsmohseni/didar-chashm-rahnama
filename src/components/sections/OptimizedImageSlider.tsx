@@ -24,7 +24,7 @@ const OptimizedImageSlider = memo(() => {
     const loadSliderImages = async () => {
       try {
         const { data, error } = await supabase
-          .from('slider_images')
+          .from('slider_images' as any)
           .select('*')
           .eq('is_active', true)
           .order('order_index', { ascending: true });
@@ -56,7 +56,7 @@ const OptimizedImageSlider = memo(() => {
             }
           ]);
         } else {
-          setSliderImages(data || []);
+          setSliderImages((data as SliderImage[]) || []);
         }
       } catch (error) {
         console.error('Error in loadSliderImages:', error);
