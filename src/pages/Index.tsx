@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Eye, Shield, Clock, Star, ChevronDown, Play, ArrowLeft, CheckCircle, Users, Award, Heart } from 'lucide-react';
+import { Eye, Shield, Clock, Star, ChevronDown, Play, ArrowLeft, CheckCircle, Users, Award, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,10 +20,25 @@ interface SiteSettings {
 const Index = () => {
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Sample images for the slider
+  const sliderImages = [
+    '/lovable-uploads/2044c494-74f5-42c3-9979-6effb4059825.png',
+    '/lovable-uploads/3bf77a26-5255-49db-ae88-bf1a5d13339c.png',
+    '/lovable-uploads/56cc2662-9b74-49e6-b2e9-3c799a4ba344.png'
+  ];
 
   useEffect(() => {
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [sliderImages.length]);
 
   const loadSettings = async () => {
     try {
@@ -55,6 +70,14 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + sliderImages.length) % sliderImages.length);
   };
 
   return (
@@ -106,16 +129,16 @@ const Index = () => {
               {isLoading ? 'مشاوره تخ...' : (siteSettings.hero_description || 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم و معرفی به بهترین پزشکان متخصص ایران')}
             </p>
             
-            {/* CTA Buttons */}
+            {/* CTA Buttons - Fixed styling and sizing */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-fade-in delay-300">
               <Link to="/consultation">
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold px-8 py-4 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300">
+                <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8 py-4 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-2 border-white h-14 min-w-[220px]">
                   <Eye className="ml-2 h-5 w-5" />
                   دریافت مشاوره رایگان
                 </Button>
               </Link>
               <Link to="/doctors">
-                <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10 font-semibold px-8 py-4 rounded-2xl backdrop-blur-sm transform hover:scale-105 transition-all duration-300">
+                <Button variant="outline" size="lg" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8 py-4 rounded-2xl backdrop-blur-sm transform hover:scale-105 transition-all duration-300 h-14 min-w-[220px]">
                   <Users className="ml-2 h-5 w-5" />
                   مشاهده پزشکان
                 </Button>
@@ -154,6 +177,64 @@ const Index = () => {
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
           <ChevronDown className="h-8 w-8 text-white/60" />
+        </div>
+      </section>
+
+      {/* Image Slider Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">تجهیزات پیشرفته</h2>
+            <p className="text-xl text-gray-600">آشنایی با تجهیزات مدرن چشم‌پزشکی</p>
+          </div>
+          
+          <div className="relative max-w-4xl mx-auto">
+            <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
+              {sliderImages.map((image, index) => (
+                <div
+                  key={index}
+                  className={`absolute inset-0 transition-opacity duration-1000 ${
+                    index === currentSlide ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <img
+                    src={image}
+                    alt={`تجهیزات چشم‌پزشکی ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Navigation Buttons */}
+            <button
+              onClick={prevSlide}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300"
+            >
+              <ChevronLeft className="h-6 w-6 text-white" />
+            </button>
+            
+            <button
+              onClick={nextSlide}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300"
+            >
+              <ChevronRight className="h-6 w-6 text-white" />
+            </button>
+            
+            {/* Dots Indicator */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+              {sliderImages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentSlide ? 'bg-white' : 'bg-white/50'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

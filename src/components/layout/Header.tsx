@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Menu, X, Shield, LogOut, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -58,8 +59,8 @@ const Header = () => {
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          {/* Logo - moved to left side */}
+          <Link to="/" className="flex items-center space-x-2 order-1">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">چ</span>
             </div>
@@ -67,7 +68,7 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8 space-x-reverse">
+          <nav className="hidden lg:flex items-center space-x-8 space-x-reverse order-2">
             {navigationItems.map((item) => (
               <Link
                 key={item.name}
@@ -80,7 +81,7 @@ const Header = () => {
           </nav>
 
           {/* Auth Section */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 order-3">
             {user ? (
               <div className="flex items-center gap-2">
                 {/* Admin Panel Button - Show for all authenticated users for testing */}
@@ -98,7 +99,7 @@ const Header = () => {
                       <span className="hidden sm:inline">حساب کاربری</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56 bg-white">
                     <div className="p-2">
                       <p className="text-sm font-medium">{user.email}</p>
                       <p className="text-xs text-blue-600 flex items-center gap-1 mt-1">
@@ -126,17 +127,17 @@ const Header = () => {
                 <Button variant="default">ورود / ثبت نام</Button>
               </Link>
             )}
-          </div>
 
-          {/* Mobile menu button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="lg:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </Button>
+            {/* Mobile menu button - moved to right side */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="lg:hidden order-4"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
