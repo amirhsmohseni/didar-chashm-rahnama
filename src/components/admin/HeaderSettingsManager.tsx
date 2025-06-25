@@ -1,8 +1,8 @@
 
-import AdvancedSettingsManager from './settings/AdvancedSettingsManager';
+import SettingsManager from './settings/SettingsManager';
 
 const HeaderSettingsManager = () => {
-  return <AdvancedSettingsManager />;
+  return <SettingsManager />;
 };
 
 export default HeaderSettingsManager;

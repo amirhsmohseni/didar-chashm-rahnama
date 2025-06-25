@@ -35,7 +35,22 @@ export const useSettingsManager = () => {
       }
 
       if (data) {
-        setSettings(data);
+        // Convert the database type to our Setting interface
+        const convertedSettings: Setting[] = data.map(item => ({
+          id: item.id,
+          key: item.key,
+          value: item.value || '',
+          category: item.category,
+          type: ['text', 'textarea', 'boolean', 'number', 'image', 'color'].includes(item.type) 
+            ? item.type as 'text' | 'textarea' | 'boolean' | 'number' | 'image' | 'color'
+            : 'text',
+          label: item.label,
+          description: item.description,
+          is_public: item.is_public,
+          sort_order: item.sort_order
+        }));
+        
+        setSettings(convertedSettings);
       }
     } catch (error) {
       console.error('Error in loadSettings:', error);

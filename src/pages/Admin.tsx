@@ -21,7 +21,6 @@ import PagesManager from '@/components/admin/PagesManager';
 import BlogManager from '@/components/admin/BlogManager';
 import SiteSettingsForm from '@/components/admin/settings/SiteSettingsForm';
 import SystemSettingsForm from '@/components/admin/settings/SystemSettingsForm';
-import NewAdvancedSettingsManager from '@/components/admin/settings/NewAdvancedSettingsManager';
 import SettingsManager from '@/components/admin/settings/SettingsManager';
 
 const Admin = () => {
