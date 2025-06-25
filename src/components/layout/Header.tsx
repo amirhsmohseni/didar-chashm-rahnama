@@ -60,15 +60,17 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo - positioned on the left */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">چ</span>
-            </div>
-            <span className="font-bold text-xl text-primary mr-2">چشم پزشکی</span>
-          </Link>
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">چ</span>
+              </div>
+              <span className="font-bold text-xl text-primary mr-2">چشم پزشکی</span>
+            </Link>
+          </div>
 
           {/* Desktop Navigation - centered */}
-          <nav className="hidden lg:flex items-center space-x-8 space-x-reverse">
+          <nav className="hidden lg:flex items-center space-x-8 space-x-reverse flex-1 justify-center">
             {navigationItems.map((item) => (
               <Link
                 key={item.name}
@@ -129,14 +131,16 @@ const Header = () => {
             )}
 
             {/* Mobile menu button - positioned on the right */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
+            <div className="lg:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="ml-0"
+              >
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -148,7 +152,7 @@ const Header = () => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium px-4 py-2"
+                  className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium px-4 py-2 text-right"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
@@ -157,11 +161,11 @@ const Header = () => {
               {user && (
                 <Link
                   to="/admin"
-                  className="text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium px-4 py-2 flex items-center gap-2"
+                  className="text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium px-4 py-2 flex items-center gap-2 justify-end"
                   onClick={() => setIsMenuOpen(false)}
                 >
+                  <span>پنل مدیریت</span>
                   <Shield className="h-4 w-4" />
-                  پنل مدیریت
                 </Link>
               )}
             </nav>
