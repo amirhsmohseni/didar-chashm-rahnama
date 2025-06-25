@@ -20,7 +20,7 @@ interface Service {
   is_featured: boolean;
   is_active: boolean;
   slug: string | null;
-  reading_time: number | null;
+  price: number | null;
   order_index: number | null;
 }
 
@@ -44,7 +44,7 @@ const Services = () => {
       console.log('Fetching services...');
       const { data, error } = await supabase
         .from('services')
-        .select('id, title, description, icon, image_url, is_featured, is_active, slug, reading_time, order_index')
+        .select('id, title, description, icon, image_url, is_featured, is_active, slug, price, order_index')
         .eq('is_active', true)
         .order('order_index', { ascending: true });
 
@@ -95,6 +95,11 @@ const Services = () => {
       default:
         return <Stethoscope className="h-8 w-8" />;
     }
+  };
+
+  const formatPrice = (price: number | null) => {
+    if (price === null || price === 0) return 'تماس بگیرید';
+    return `${price.toLocaleString('fa-IR')} تومان`;
   };
 
   if (isLoading) {
@@ -210,11 +215,9 @@ const Services = () => {
 
                   {/* Service Info */}
                   <div className="space-y-2 mb-6">
-                    {service.reading_time && (
-                      <div className="flex items-center justify-center text-sm text-gray-500">
-                        <span>زمان مطالعه: {service.reading_time} دقیقه</span>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-center text-lg font-semibold text-primary">
+                      <span>{formatPrice(service.price)}</span>
+                    </div>
                   </div>
 
                   {/* Action Button */}

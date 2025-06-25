@@ -14,6 +14,7 @@ interface Service {
   image_url: string | null;
   is_featured: boolean;
   slug: string | null;
+  price: number | null;
 }
 
 const FeaturedServices = () => {
@@ -29,7 +30,7 @@ const FeaturedServices = () => {
       console.log('Fetching featured services...');
       const { data, error } = await supabase
         .from('services')
-        .select('id, title, description, icon, image_url, is_featured, slug')
+        .select('id, title, description, icon, image_url, is_featured, slug, price')
         .eq('is_active', true)
         .eq('is_featured', true)
         .order('order_index', { ascending: true })
@@ -65,6 +66,11 @@ const FeaturedServices = () => {
     }
   };
 
+  const formatPrice = (price: number | null) => {
+    if (price === null || price === 0) return 'تماس بگیرید';
+    return `${price.toLocaleString('fa-IR')} تومان`;
+  };
+
   if (isLoading) {
     return (
       <section className="py-16 bg-gray-50">
@@ -83,7 +89,7 @@ const FeaturedServices = () => {
   }
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 bg-white">
       <div className="container">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-eyecare-800 mb-4">خدمات برجسته ما</h2>
@@ -94,7 +100,7 @@ const FeaturedServices = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {services.map((service) => (
-            <Card key={service.id} className="group hover:shadow-lg transition-shadow duration-300">
+            <Card key={service.id} className="group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
               <CardHeader className="text-center">
                 <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
                   {getIcon(service.icon)}
@@ -107,10 +113,18 @@ const FeaturedServices = () => {
                 <CardDescription className="text-center text-gray-600 leading-relaxed mb-4">
                   {service.description}
                 </CardDescription>
+                
+                {/* Price Display */}
+                <div className="text-center mb-4">
+                  <div className="text-lg font-semibold text-primary">
+                    {formatPrice(service.price)}
+                  </div>
+                </div>
+
                 {service.slug && (
                   <div className="text-center">
                     <Link to={`/services/${service.slug}`}>
-                      <Button variant="outline" size="sm" className="group-hover:bg-primary group-hover:text-white transition-colors">
+                      <Button variant="outline" size="sm" className="group-hover:bg-primary group-hover:text-white transition-colors w-full">
                         اطلاعات بیشتر
                         <ArrowLeft className="mr-2 h-4 w-4" />
                       </Button>

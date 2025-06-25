@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SiteSettingsLoader from '@/components/sections/SiteSettingsLoader';
+import FeaturedServices from '@/components/sections/FeaturedServices';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -17,10 +18,29 @@ interface SiteSettings {
   site_background?: string;
 }
 
+interface Review {
+  id: string;
+  patient_name: string;
+  review_text: string;
+  rating: number;
+  doctor_name?: string;
+  is_featured: boolean;
+}
+
+interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  category: string | null;
+  is_published: boolean | null;
+}
+
 const Index = () => {
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({});
   const [isLoading, setIsLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
 
   // Sample images for the slider
   const sliderImages = [
@@ -31,6 +51,8 @@ const Index = () => {
 
   useEffect(() => {
     loadSettings();
+    loadReviews();
+    loadFaqs();
   }, []);
 
   useEffect(() => {
@@ -72,12 +94,60 @@ const Index = () => {
     }
   };
 
+  const loadReviews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('patient_reviews')
+        .select('*')
+        .eq('is_featured', true)
+        .eq('is_approved', true)
+        .limit(6);
+
+      if (error) {
+        console.error('Error loading reviews:', error);
+        return;
+      }
+
+      setReviews(data || []);
+    } catch (error) {
+      console.error('Error loading reviews:', error);
+    }
+  };
+
+  const loadFaqs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('faqs')
+        .select('*')
+        .eq('is_published', true)
+        .limit(6);
+
+      if (error) {
+        console.error('Error loading FAQs:', error);
+        return;
+      }
+
+      setFaqs(data || []);
+    } catch (error) {
+      console.error('Error loading FAQs:', error);
+    }
+  };
+
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % sliderImages.length);
   };
 
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + sliderImages.length) % sliderImages.length);
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`h-4 w-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+      />
+    ));
   };
 
   return (
@@ -238,65 +308,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Services Preview */}
-      <section className="py-20 bg-white">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">خدمات ما</h2>
-            <p className="text-xl text-gray-600">طیف وسیعی از خدمات چشم‌پزشکی</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 bg-gradient-to-br from-blue-50 to-white">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Eye className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold mb-4">جراحی لیزیک</h3>
-                <p className="text-gray-600 mb-6">تصحیح عیوب انکساری چشم با آخرین تکنولوژی</p>
-                <Link to="/services">
-                  <Button variant="outline" className="group">
-                    اطلاعات بیشتر
-                    <ArrowLeft className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 bg-gradient-to-br from-purple-50 to-white">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Shield className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold mb-4">جراحی آب مروارید</h3>
-                <p className="text-gray-600 mb-6">درمان آب مروارید با تکنیک‌های پیشرفته</p>
-                <Link to="/services">
-                  <Button variant="outline" className="group">
-                    اطلاعات بیشتر
-                    <ArrowLeft className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 bg-gradient-to-br from-green-50 to-white">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Star className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold mb-4">معاینات تخصصی</h3>
-                <p className="text-gray-600 mb-6">بررسی جامع وضعیت سلامت چشمان</p>
-                <Link to="/services">
-                  <Button variant="outline" className="group">
-                    اطلاعات بیشتر
-                    <ArrowLeft className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
+      {/* Featured Services */}
+      <FeaturedServices />
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-primary to-primary-600 text-white relative overflow-hidden">
@@ -316,6 +329,78 @@ const Index = () => {
           </Link>
         </div>
       </section>
+
+      {/* Patient Reviews Section */}
+      {reviews.length > 0 && (
+        <section className="py-20 bg-gray-50">
+          <div className="container">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">نظرات بیماران</h2>
+              <p className="text-xl text-gray-600">تجربه بیماران ما از خدمات چشم‌پزشکی</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reviews.map((review) => (
+                <Card key={review.id} className="hover:shadow-lg transition-shadow duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center mb-4">
+                      {renderStars(review.rating)}
+                    </div>
+                    <p className="text-gray-600 mb-4 leading-relaxed">"{review.review_text}"</p>
+                    <div className="text-sm text-gray-500">
+                      <p className="font-semibold">{review.patient_name}</p>
+                      {review.doctor_name && (
+                        <p>بیمار دکتر {review.doctor_name}</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            <div className="text-center mt-8">
+              <Link to="/reviews">
+                <Button variant="outline" className="px-8 py-3">
+                  مشاهده همه نظرات
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* FAQ Section */}
+      {faqs.length > 0 && (
+        <section className="py-20 bg-white">
+          <div className="container">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">سوالات متداول</h2>
+              <p className="text-xl text-gray-600">پاسخ سوالات رایج در مورد خدمات چشم‌پزشکی</p>
+            </div>
+            
+            <div className="max-w-3xl mx-auto space-y-4">
+              {faqs.slice(0, 5).map((faq) => (
+                <Card key={faq.id} className="hover:shadow-md transition-shadow duration-300">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">{faq.question}</h3>
+                    <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            <div className="text-center mt-8">
+              <Link to="/faq">
+                <Button variant="outline" className="px-8 py-3">
+                  مشاهده همه سوالات
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Stats Section - Moved to bottom */}
       <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
