@@ -350,7 +350,23 @@ const EnhancedMediaManager = () => {
                 {formData.file_url && (
                   <div className="mt-2">
                     <div className="w-32 h-20 bg-gray-100 rounded border overflow-hidden">
-                      {getMediaPreview({ ...formData, id: 'preview' } as MediaItem)}
+                      {/* Create proper MediaItem object for preview */}
+                      {getMediaPreview({
+                        id: 'preview',
+                        title: formData.title,
+                        file_url: formData.file_url,
+                        type: formData.type,
+                        category: formData.category,
+                        tags: [],
+                        is_published: formData.is_published,
+                        is_featured: formData.is_featured,
+                        order_index: 0,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                        description: formData.description,
+                        thumbnail_url: formData.thumbnail_url,
+                        duration: formData.duration
+                      })}
                     </div>
                   </div>
                 )}
