@@ -47,9 +47,9 @@ const Admin = () => {
       case 'faq':
         return <FaqManager />;
       case 'media':
-        return <MediaCenterManager />;
+        return <EnhancedMediaManager />;
       case 'slider':
-        return <SliderManager />;
+        return <EnhancedSliderManager />;
       case 'pages':
         return <PagesManager />;
       case 'blog':

@@ -787,36 +787,45 @@ export type Database = {
         Row: {
           alt_text: string
           created_at: string
+          cta_link: string | null
+          cta_text: string | null
           description: string | null
           id: string
           image_url: string
           is_active: boolean
           link_url: string | null
           order_index: number
+          subtitle: string | null
           title: string
           updated_at: string
         }
         Insert: {
           alt_text: string
           created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
           description?: string | null
           id?: string
           image_url: string
           is_active?: boolean
           link_url?: string | null
           order_index?: number
+          subtitle?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           alt_text?: string
           created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
           description?: string | null
           id?: string
           image_url?: string
           is_active?: boolean
           link_url?: string | null
           order_index?: number
+          subtitle?: string | null
           title?: string
           updated_at?: string
         }
