@@ -50,12 +50,26 @@ const ThemeSettingsForm = () => {
       );
       
       await Promise.all(promises);
+      
+      // اعمال فوری تغییرات به CSS
+      Object.entries(tempColors).forEach(([key, color]) => {
+        const cssVar = key.replace('theme_', '--').replace('_', '-');
+        document.documentElement.style.setProperty(cssVar, color);
+      });
+      
+      // اطلاع‌رسانی به کامپوننت‌های دیگر
+      const updatedSettings: Record<string, string> = {};
+      Object.entries(tempColors).forEach(([key, color]) => {
+        updatedSettings[key] = color;
+      });
+      
+      window.dispatchEvent(new CustomEvent('siteSettingsChanged', { 
+        detail: updatedSettings 
+      }));
+      
       setTempColors({});
       setPreviewMode(false);
-      toast.success('تم با موفقیت ذخیره شد');
-      
-      // اعمال تغییرات به CSS
-      applyPreview();
+      toast.success('تم با موفقیت ذخیره شد و اعمال گردید');
     } catch (error) {
       toast.error('خطا در ذخیره تم');
     }

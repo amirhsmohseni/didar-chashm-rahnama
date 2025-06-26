@@ -84,6 +84,19 @@ export const useSettingsManager = () => {
         )
       );
 
+      // اعمال فوری تنظیمات تم
+      if (key.startsWith('theme_')) {
+        const cssVar = key.replace('theme_', '--').replace('_', '-');
+        document.documentElement.style.setProperty(cssVar, value);
+      }
+
+      // اطلاع‌رسانی به سایر کامپوننت‌ها
+      const settingsObj: Record<string, string> = {};
+      settingsObj[key] = value;
+      window.dispatchEvent(new CustomEvent('siteSettingsChanged', { 
+        detail: settingsObj 
+      }));
+
       toast.success('تنظیم با موفقیت ذخیره شد');
       return true;
     } catch (error) {

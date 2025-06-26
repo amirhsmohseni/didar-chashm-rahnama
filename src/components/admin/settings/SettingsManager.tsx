@@ -1,7 +1,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings, Globe, Palette, Share2, Search, Shield, Home, Phone, Brush } from 'lucide-react';
+import { Settings, Globe, Palette, Share2, Search, Shield, Home, Phone, Brush, Info } from 'lucide-react';
 import { useSettingsManager } from '@/hooks/useSettingsManager';
 import SettingInput from './SettingInput';
 import ThemeSettingsForm from './ThemeSettingsForm';
@@ -14,6 +14,7 @@ const SettingsManager = () => {
     { key: 'theme', label: 'تم و ظاهر', icon: Brush, description: 'تنظیمات رنگ و ظاهر', isCustom: true },
     { key: 'header', label: 'هدر', icon: Settings, description: 'تنظیمات هدر' },
     { key: 'homepage', label: 'صفحه اصلی', icon: Home, description: 'تنظیمات صفحه اصلی' },
+    { key: 'about', label: 'درباره ما', icon: Info, description: 'تنظیمات صفحه درباره ما' },
     { key: 'contact', label: 'تماس', icon: Phone, description: 'اطلاعات تماس' },
     { key: 'social', label: 'شبکه‌های اجتماعی', icon: Share2, description: 'لینک‌های اجتماعی' },
     { key: 'seo', label: 'سئو', icon: Search, description: 'تنظیمات SEO' },

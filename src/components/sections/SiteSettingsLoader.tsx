@@ -57,17 +57,28 @@ const SiteSettingsLoader = () => {
       updateFavicon(settings.site_favicon);
     }
 
-    // Apply theme colors
-    if (settings.theme_primary_color) {
-      document.documentElement.style.setProperty('--primary-color', settings.theme_primary_color);
-    }
+    // Apply theme colors with proper CSS variable names
+    const themeColorMappings = {
+      'theme_primary_color': '--primary-color',
+      'theme_secondary_color': '--secondary-color',
+      'theme_accent_color': '--accent-color',
+      'theme_background_color': '--background-color',
+      'theme_text_primary': '--text-primary',
+      'theme_text_secondary': '--text-secondary'
+    };
 
-    if (settings.theme_secondary_color) {
-      document.documentElement.style.setProperty('--secondary-color', settings.theme_secondary_color);
-    }
+    Object.entries(themeColorMappings).forEach(([settingKey, cssVar]) => {
+      if (settings[settingKey]) {
+        document.documentElement.style.setProperty(cssVar, settings[settingKey]);
+        console.log(`Applied ${cssVar}: ${settings[settingKey]}`);
+      }
+    });
 
     // Store settings for components to use
     localStorage.setItem('appliedSiteSettings', JSON.stringify(settings));
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('siteSettingsApplied', { detail: settings }));
   };
 
   const updateFavicon = (faviconUrl: string) => {
