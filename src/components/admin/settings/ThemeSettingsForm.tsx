@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Palette, Monitor, Sun, Moon, Sparkles } from 'lucide-react';
+import { Palette, Monitor, Sparkles } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,34 +15,65 @@ const ThemeSettingsForm = () => {
   const [previewMode, setPreviewMode] = useState(false);
   const [tempColors, setTempColors] = useState<Record<string, string>>({});
 
-  // دریافت رنگ‌های فعلی
   const getCurrentColor = (key: string, defaultColor: string) => {
     if (previewMode && tempColors[key]) return tempColors[key];
     const setting = settings.find(s => s.key === key);
     return setting?.value || defaultColor;
   };
 
-  // پیش‌نمایش تم
-  const applyPreview = () => {
-    Object.entries(tempColors).forEach(([key, color]) => {
-      const cssVar = key.replace('theme_', '--').replace('_', '-');
-      document.documentElement.style.setProperty(cssVar, color);
-    });
+  const hexToHsl = (hex: string) => {
+    hex = hex.replace('#', '');
+    
+    const r = parseInt(hex.substr(0, 2), 16) / 255;
+    const g = parseInt(hex.substr(2, 2), 16) / 255;
+    const b = parseInt(hex.substr(4, 2), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+
+    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
   };
 
-  // بازگردانی تم
+  const applyColorToCSS = (key: string, color: string) => {
+    const themeColorMappings = {
+      'theme_primary_color': '--primary',
+      'theme_secondary_color': '--secondary', 
+      'theme_accent_color': '--accent',
+      'theme_background_color': '--background',
+      'theme_text_primary': '--foreground',
+      'theme_text_secondary': '--muted-foreground'
+    };
+
+    const cssVar = themeColorMappings[key as keyof typeof themeColorMappings];
+    if (cssVar) {
+      const hsl = hexToHsl(color);
+      document.documentElement.style.setProperty(cssVar, hsl);
+    }
+  };
+
   const resetPreview = () => {
     settings.forEach(setting => {
       if (setting.key.startsWith('theme_')) {
-        const cssVar = setting.key.replace('theme_', '--').replace('_', '-');
-        document.documentElement.style.setProperty(cssVar, setting.value);
+        applyColorToCSS(setting.key, setting.value);
       }
     });
     setTempColors({});
     setPreviewMode(false);
   };
 
-  // ذخیره تم
   const saveTheme = async () => {
     try {
       const promises = Object.entries(tempColors).map(([key, color]) => 
@@ -50,22 +81,6 @@ const ThemeSettingsForm = () => {
       );
       
       await Promise.all(promises);
-      
-      // اعمال فوری تغییرات به CSS
-      Object.entries(tempColors).forEach(([key, color]) => {
-        const cssVar = key.replace('theme_', '--').replace('_', '-');
-        document.documentElement.style.setProperty(cssVar, color);
-      });
-      
-      // اطلاع‌رسانی به کامپوننت‌های دیگر
-      const updatedSettings: Record<string, string> = {};
-      Object.entries(tempColors).forEach(([key, color]) => {
-        updatedSettings[key] = color;
-      });
-      
-      window.dispatchEvent(new CustomEvent('siteSettingsChanged', { 
-        detail: updatedSettings 
-      }));
       
       setTempColors({});
       setPreviewMode(false);
@@ -75,7 +90,6 @@ const ThemeSettingsForm = () => {
     }
   };
 
-  // تم‌های پیش‌ساخته
   const predefinedThemes = [
     {
       name: 'آبی کلاسیک',
@@ -123,10 +137,8 @@ const ThemeSettingsForm = () => {
     setTempColors(theme.colors);
     setPreviewMode(true);
     
-    // اعمال فوری برای پیش‌نمایش
     Object.entries(theme.colors).forEach(([key, color]) => {
-      const cssVar = key.replace('theme_', '--').replace('_', '-');
-      document.documentElement.style.setProperty(cssVar, color);
+      applyColorToCSS(key, color);
     });
     
     toast.success(`تم "${theme.name}" اعمال شد`);
@@ -136,9 +148,7 @@ const ThemeSettingsForm = () => {
     setTempColors(prev => ({ ...prev, [key]: color }));
     setPreviewMode(true);
     
-    // اعمال فوری برای پیش‌نمایش
-    const cssVar = key.replace('theme_', '--').replace('_', '-');
-    document.documentElement.style.setProperty(cssVar, color);
+    applyColorToCSS(key, color);
   };
 
   if (loading) {
@@ -224,7 +234,6 @@ const ThemeSettingsForm = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Primary Colors */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">رنگ‌های اصلی</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -250,7 +259,6 @@ const ThemeSettingsForm = () => {
 
           <Separator />
 
-          {/* Accent & Background */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">رنگ‌های تکمیلی</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -276,7 +284,6 @@ const ThemeSettingsForm = () => {
 
           <Separator />
 
-          {/* Text Colors */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">رنگ‌های متن</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -302,7 +309,6 @@ const ThemeSettingsForm = () => {
         </CardContent>
       </Card>
 
-      {/* Preview Section */}
       {previewMode && (
         <Card className="border-2 border-orange-200 bg-orange-50">
           <CardContent className="p-6">

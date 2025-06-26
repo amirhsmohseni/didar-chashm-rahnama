@@ -59,18 +59,20 @@ const SiteSettingsLoader = () => {
 
     // Apply theme colors with proper CSS variable names
     const themeColorMappings = {
-      'theme_primary_color': '--primary-color',
-      'theme_secondary_color': '--secondary-color',
-      'theme_accent_color': '--accent-color',
-      'theme_background_color': '--background-color',
-      'theme_text_primary': '--text-primary',
-      'theme_text_secondary': '--text-secondary'
+      'theme_primary_color': '--primary',
+      'theme_secondary_color': '--secondary', 
+      'theme_accent_color': '--accent',
+      'theme_background_color': '--background',
+      'theme_text_primary': '--foreground',
+      'theme_text_secondary': '--muted-foreground'
     };
 
     Object.entries(themeColorMappings).forEach(([settingKey, cssVar]) => {
       if (settings[settingKey]) {
-        document.documentElement.style.setProperty(cssVar, settings[settingKey]);
-        console.log(`Applied ${cssVar}: ${settings[settingKey]}`);
+        // Convert hex to HSL for better CSS variable support
+        const hsl = hexToHsl(settings[settingKey]);
+        document.documentElement.style.setProperty(cssVar, hsl);
+        console.log(`Applied ${cssVar}: ${hsl}`);
       }
     });
 
@@ -87,6 +89,34 @@ const SiteSettingsLoader = () => {
     link.rel = 'shortcut icon';
     link.href = faviconUrl;
     document.getElementsByTagName('head')[0].appendChild(link);
+  };
+
+  const hexToHsl = (hex: string) => {
+    // Remove # if present
+    hex = hex.replace('#', '');
+    
+    // Convert hex to RGB
+    const r = parseInt(hex.substr(0, 2), 16) / 255;
+    const g = parseInt(hex.substr(2, 2), 16) / 255;
+    const b = parseInt(hex.substr(4, 2), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+
+    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
   };
 
   return null;

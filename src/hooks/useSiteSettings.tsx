@@ -1,7 +1,6 @@
 
 import { useSettingsManager } from './useSettingsManager';
 
-// Compatibility wrapper for old useSiteSettings hook
 export const useSiteSettings = () => {
   const { settings, loading, updateSetting, loadSettings } = useSettingsManager();
 
@@ -15,12 +14,12 @@ export const useSiteSettings = () => {
     site_title: settingsObject.site_title || 'دیدار چشم رهنما',
     site_description: settingsObject.site_description || 'مشاوره تخصصی چشم',
     hero_title: settingsObject.hero_title || 'دیدار چشم رهنما',
-    hero_description: settingsObject.hero_subtitle || 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم',
+    hero_description: settingsObject.hero_subtitle || settingsObject.hero_description || 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم',
     contact_phone: settingsObject.contact_phone || '021-12345678',
     contact_email: settingsObject.contact_email || 'info@clinic.com',
     contact_address: settingsObject.contact_address || 'تهران، خیابان ولیعصر',
     site_logo: settingsObject.site_logo || '',
-    site_background: settingsObject.hero_background_image || ''
+    site_background: settingsObject.hero_background_image || settingsObject.site_background || ''
   };
 
   const saveSettings = async (newSettings: Record<string, string>) => {
@@ -29,6 +28,10 @@ export const useSiteSettings = () => {
     );
     
     const results = await Promise.all(promises);
+    
+    // Force reload settings to ensure UI updates
+    await loadSettings();
+    
     return results.every(result => result === true);
   };
 
