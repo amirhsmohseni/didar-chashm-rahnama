@@ -24,6 +24,8 @@ import SliderManager from '@/components/admin/SliderManager';
 import SiteSettingsForm from '@/components/admin/settings/SiteSettingsForm';
 import SystemSettingsForm from '@/components/admin/settings/SystemSettingsForm';
 import SettingsManager from '@/components/admin/settings/SettingsManager';
+import EnhancedMediaManager from '@/components/admin/EnhancedMediaManager';
+import EnhancedSliderManager from '@/components/admin/EnhancedSliderManager';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');

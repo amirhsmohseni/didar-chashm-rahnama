@@ -47,13 +47,17 @@ const AdvancedFileUploader = ({
       const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
       const filePath = folderPath ? `${folderPath}/${fileName}` : fileName;
 
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + 10, 90));
+      }, 200);
+
       const { data, error } = await supabase.storage
         .from(bucketName)
-        .upload(filePath, file, {
-          onUploadProgress: (progress) => {
-            setUploadProgress((progress.loaded / progress.total) * 100);
-          }
-        });
+        .upload(filePath, file);
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
 
       if (error) {
         throw error;
