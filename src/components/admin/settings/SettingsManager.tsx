@@ -1,15 +1,17 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings, Globe, Palette, Share2, Search, Shield, Home, Phone } from 'lucide-react';
+import { Settings, Globe, Palette, Share2, Search, Shield, Home, Phone, Brush } from 'lucide-react';
 import { useSettingsManager } from '@/hooks/useSettingsManager';
 import SettingInput from './SettingInput';
+import ThemeSettingsForm from './ThemeSettingsForm';
 
 const SettingsManager = () => {
   const { settings, loading, updateSetting, getSettingsByCategory } = useSettingsManager();
 
   const categories = [
     { key: 'general', label: 'عمومی', icon: Globe, description: 'تنظیمات کلی سایت' },
+    { key: 'theme', label: 'تم و ظاهر', icon: Brush, description: 'تنظیمات رنگ و ظاهر', isCustom: true },
     { key: 'header', label: 'هدر', icon: Settings, description: 'تنظیمات هدر' },
     { key: 'homepage', label: 'صفحه اصلی', icon: Home, description: 'تنظیمات صفحه اصلی' },
     { key: 'contact', label: 'تماس', icon: Phone, description: 'اطلاعات تماس' },
@@ -60,9 +62,14 @@ const SettingsManager = () => {
                       >
                         <Icon className="h-4 w-4" />
                         {category.label}
-                        {categorySettings.length > 0 && (
+                        {!category.isCustom && categorySettings.length > 0 && (
                           <span className="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">
                             {categorySettings.length}
+                          </span>
+                        )}
+                        {category.isCustom && (
+                          <span className="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full">
+                            جدید
                           </span>
                         )}
                       </TabsTrigger>
@@ -90,20 +97,27 @@ const SettingsManager = () => {
                     </div>
                   </div>
 
-                  {categorySettings.length > 0 ? (
-                    <div className="grid gap-6">
-                      {categorySettings.map((setting) => (
-                        <SettingInput
-                          key={setting.id}
-                          setting={setting}
-                          onUpdate={updateSetting}
-                        />
-                      ))}
-                    </div>
+                  {/* Custom Theme Settings */}
+                  {category.key === 'theme' ? (
+                    <ThemeSettingsForm />
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      هیچ تنظیمی در این بخش موجود نیست
-                    </div>
+                    <>
+                      {categorySettings.length > 0 ? (
+                        <div className="grid gap-6">
+                          {categorySettings.map((setting) => (
+                            <SettingInput
+                              key={setting.id}
+                              setting={setting}
+                              onUpdate={updateSetting}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          هیچ تنظیمی در این بخش موجود نیست
+                        </div>
+                      )}
+                    </>
                   )}
                 </TabsContent>
               );

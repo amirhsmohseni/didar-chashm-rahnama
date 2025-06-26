@@ -36,6 +36,14 @@
     --ring: 199 89% 48%;
 
     --radius: 0.5rem;
+
+    /* Theme Variables - Dynamic colors that can be changed */
+    --primary-color: #0ea5e9;
+    --secondary-color: #0284c7;
+    --accent-color: #06b6d4;
+    --background-color: #f8fafc;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
   }
 
   .dark {
@@ -66,6 +74,14 @@
     --border: 212 30% 15%;
     --input: 212 30% 15%;
     --ring: 199 85% 60%;
+
+    /* Dark theme variables */
+    --primary-color: #3b82f6;
+    --secondary-color: #1e40af;
+    --accent-color: #06b6d4;
+    --background-color: #111827;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
   }
 }
 
@@ -75,9 +91,12 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-color: var(--background-color);
+    color: var(--text-primary);
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
+    color: var(--text-primary);
   }
 }
 
@@ -89,13 +108,77 @@
     @apply py-12 md:py-20;
   }
   .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-md font-medium transition-colors;
+    background-color: var(--primary-color);
+    color: white;
+    @apply hover:opacity-90 px-6 py-3 rounded-md font-medium transition-all;
   }
   .btn-outline {
-    @apply border border-primary text-primary hover:bg-primary/10 px-6 py-3 rounded-md font-medium transition-colors;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    @apply hover:bg-opacity-10 px-6 py-3 rounded-md font-medium transition-colors;
+  }
+  
+  /* Theme-aware utility classes */
+  .theme-primary {
+    color: var(--primary-color);
+  }
+  .theme-bg-primary {
+    background-color: var(--primary-color);
+  }
+  .theme-border-primary {
+    border-color: var(--primary-color);
+  }
+  .theme-secondary {
+    color: var(--secondary-color);
+  }
+  .theme-bg-secondary {
+    background-color: var(--secondary-color);
+  }
+  .theme-accent {
+    color: var(--accent-color);
+  }
+  .theme-bg-accent {
+    background-color: var(--accent-color);
   }
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Color transition animations */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Enhanced color picker styles */
+.color-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
+  gap: 8px;
+}
+
+.color-picker-button {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.color-picker-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.color-picker-button.selected {
+  border-color: #1f2937;
+  box-shadow: 0 0 0 2px rgba(31, 41, 55, 0.2);
+}
+
+/* Toast improvements */
+.sonner-toast {
+  direction: rtl;
 }
