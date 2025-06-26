@@ -1,396 +1,248 @@
-import { useState } from 'react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+
+import { useEffect, useState } from 'react';
+import { Eye, Users, Award, Phone, Mail, MapPin } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Phone, Mail, MessageSquare, BadgePercent, Award, HeartHandshake, ShieldCheck, Zap, BookOpen, Star } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from "@/hooks/use-toast";
+
+interface AboutSettings {
+  about_hero_title: string;
+  about_hero_description: string;
+  about_mission_title: string;
+  about_mission_content: string;
+  about_stats_patients: string;
+  about_stats_doctors: string;
+  about_stats_satisfaction: string;
+  about_team_title: string;
+  about_team_description: string;
+  about_contact_title: string;
+  about_contact_description: string;
+  contact_phone: string;
+  contact_email: string;
+  contact_address: string;
+}
 
 const About = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
+  const [settings, setSettings] = useState<AboutSettings>({
+    about_hero_title: 'درباره دیدار چشم رهنما',
+    about_hero_description: 'ما بیماران را به بهترین جراحان چشم ایران متصل می‌کنیم و در تمام مراحل درمان کنار شما هستیم.',
+    about_mission_title: 'ماموریت ما',
+    about_mission_content: 'ماموریت ما در دیدار چشم رهنما، کمک به بیماران برای دریافت بهترین خدمات جراحی چشم است.',
+    about_stats_patients: '500',
+    about_stats_doctors: '30',
+    about_stats_satisfaction: '98',
+    about_team_title: 'تیم ما',
+    about_team_description: 'تیم متخصص و باتجربه دیدار چشم رهنما، آماده کمک به شما در مسیر سلامت چشم',
+    about_contact_title: 'تماس با ما',
+    about_contact_description: 'برای پاسخگویی به سوالات، دریافت مشاوره یا ارائه بازخورد، با ما در ارتباط باشید.',
+    contact_phone: '021-12345678',
+    contact_email: 'info@eyecare.ir',
+    contact_address: 'تهران، خیابان ولیعصر'
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || !formData.email || !formData.message) {
-      toast({
-        title: "لطفا تمام فیلدها را پر کنید",
-        variant: "destructive",
-      });
-      return;
-    }
+  useEffect(() => {
+    loadSettings();
+  }, []);
 
-    setIsSubmitting(true);
-    // Simulate API call
+  const loadSettings = async () => {
     try {
-      console.log("Contact form submitted:", formData);
-      
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "پیام شما با موفقیت ارسال شد",
-        description: "به زودی با شما تماس خواهیم گرفت",
-      });
-      
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        message: '',
-      });
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('key, value')
+        .in('key', [
+          'about_hero_title', 'about_hero_description', 'about_mission_title', 
+          'about_mission_content', 'about_stats_patients', 'about_stats_doctors',
+          'about_stats_satisfaction', 'about_team_title', 'about_team_description',
+          'about_contact_title', 'about_contact_description', 'contact_phone',
+          'contact_email', 'contact_address'
+        ]);
+
+      if (error) {
+        console.error('Error loading settings:', error);
+        return;
+      }
+
+      if (data) {
+        const settingsObj = data.reduce((acc, item) => {
+          acc[item.key as keyof AboutSettings] = item.value;
+          return acc;
+        }, {} as Partial<AboutSettings>);
+
+        setSettings(prev => ({ ...prev, ...settingsObj }));
+      }
     } catch (error) {
-      toast({
-        title: "خطا در ارسال پیام",
-        description: "لطفا دوباره تلاش کنید",
-        variant: "destructive",
-      });
+      console.error('Error loading about settings:', error);
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
-  // Value propositions for infographic
-  const valueProps = [
-    {
-      icon: <BadgePercent className="h-10 w-10 text-eyecare-600" />,
-      title: "هزینه‌های پایین‌تر جراحی",
-      description: "تخفیف از محل کمیسیون پزشک برای بیماران ما"
-    },
-    {
-      icon: <Award className="h-10 w-10 text-eyecare-600" />,
-      title: "پزشکان تأیید شده",
-      description: "همکاری با بهترین متخصصان چشم پزشکی کشور"
-    },
-    {
-      icon: <MessageSquare className="h-10 w-10 text-eyecare-600" />,
-      title: "مشاوره رایگان",
-      description: "ارائه مشاوره تخصصی رایگان برای همه بیماران"
-    },
-    {
-      icon: <HeartHandshake className="h-10 w-10 text-eyecare-600" />,
-      title: "پیگیری پس از جراحی",
-      description: "پشتیبانی و پیگیری وضعیت بهبودی بعد از عمل"
-    },
-    {
-      icon: <ShieldCheck className="h-10 w-10 text-eyecare-600" />,
-      title: "ضمانت مسئولیت",
-      description: "در صورت بروز مشکل، مسئولیت کامل پذیرفته می‌شود"
-    },
-    {
-      icon: <Zap className="h-10 w-10 text-eyecare-600" />,
-      title: "دسترسی سریع به جراحی",
-      description: "هماهنگی سریع نوبت و مقایسه شفاف روش‌ها"
-    },
-    {
-      icon: <BookOpen className="h-10 w-10 text-eyecare-600" />,
-      title: "محتوای آموزشی",
-      description: "ارائه مقالات و محتوای مفید برای آگاهی بیماران"
-    },
-    {
-      icon: <Star className="h-10 w-10 text-eyecare-600" />,
-      title: "بررسی تجربیات بیماران واقعی",
-      description: "دسترسی به نظرات و تجربیات سایر بیماران"
-    },
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <Header />
-
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Hero Section */}
-      <div className="bg-secondary">
-        <div className="container py-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">درباره دیدار چشم رهنما</h1>
-          <p className="text-lg text-muted-foreground max-w-3xl">
-            ما بیماران را به بهترین جراحان چشم ایران متصل می‌کنیم و در تمام مراحل درمان کنار شما هستیم.
+      <section className="py-20 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            {settings.about_hero_title}
+          </h1>
+          <p className="text-xl text-gray-600 leading-relaxed">
+            {settings.about_hero_description}
           </p>
         </div>
-      </div>
-
-      {/* Our Mission */}
-      <section className="section bg-white">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">ماموریت ما</h2>
-              <p className="text-muted-foreground mb-6">
-                ماموریت ما در دیدار چشم رهنما، کمک به بیماران برای دریافت بهترین خدمات جراحی چشم است. ما معتقدیم که هر فرد باید به بهترین متخصصان دسترسی داشته باشد، بدون اینکه نگران یافتن پزشک مناسب باشد.
-              </p>
-              <p className="text-muted-foreground mb-6">
-                ما با ارائه مشاوره تخصصی و رایگان، معرفی به بهترین پزشکان و پیگیری پس از جراحی، اطمینان حاصل می‌کنیم که بیماران بهترین تجربه و نتیجه ممکن را دریافت می‌کنند.
-              </p>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
-                  <p>بیش از 500 بیمار با موفقیت به پزشکان معرفی شده‌اند</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
-                  <p>همکاری با بیش از 30 پزشک و جراح متخصص در سراسر ایران</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
-                  <p>رضایت 98 درصدی بیماران از خدمات ما</p>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="relative rounded-lg overflow-hidden shadow-lg">
-                <img src="/placeholder.svg" alt="دیدار چشم رهنما" className="w-full h-auto" />
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
-      {/* Value Propositions Infographic */}
-      <section className="section bg-eyecare-50">
-        <div className="container">
+      {/* Mission Section */}
+      <section className="py-16 px-4">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">چرا دیدار چشم رهنما را انتخاب کنید؟</h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              مزایای همکاری با دیدار چشم رهنما برای دریافت خدمات چشم پزشکی
-            </p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              {settings.about_mission_title}
+            </h2>
+            <div className="w-24 h-1 bg-blue-600 mx-auto"></div>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {valueProps.map((prop, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all">
-                <div className="flex flex-col items-center text-center">
-                  <div className="mb-4 bg-eyecare-100 p-4 rounded-full">
-                    {prop.icon}
+          
+          <Card className="bg-white shadow-lg">
+            <CardContent className="p-8">
+              <div className="flex items-start gap-6">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Eye className="w-8 h-8 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">{prop.title}</h3>
-                  <p className="text-muted-foreground">{prop.description}</p>
+                </div>
+                <div className="flex-1">
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    {settings.about_mission_content}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
-          <div className="mt-12 text-center">
-            <Button size="lg" asChild>
-              <Link to="/consultation">درخواست مشاوره رایگان</Link>
-            </Button>
+      {/* Statistics Section */}
+      <section className="py-16 px-4 bg-blue-600">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center text-white">
+              <div className="text-4xl font-bold mb-2">+{settings.about_stats_patients}</div>
+              <div className="text-blue-100">بیمار موفق</div>
+            </div>
+            <div className="text-center text-white">
+              <div className="text-4xl font-bold mb-2">+{settings.about_stats_doctors}</div>
+              <div className="text-blue-100">پزشک همکار</div>
+            </div>
+            <div className="text-center text-white">
+              <div className="text-4xl font-bold mb-2">{settings.about_stats_satisfaction}%</div>
+              <div className="text-blue-100">رضایت بیماران</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* How We Work */}
-      <section className="section bg-white">
-        <div className="container">
+      {/* Team Section */}
+      <section className="py-16 px-4">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">نحوه کار ما</h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              فرآیند ساده و موثر ما برای اطمینان از بهترین تجربه درمانی
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              {settings.about_team_title}
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              {settings.about_team_description}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                step: "01",
-                title: "مشاوره تخصصی",
-                description: "درخواست مشاوره رایگان خود را ارسال کنید. کارشناسان ما با بررسی اطلاعات و در صورت نیاز تماس با شما، به تمام سوالات شما پاسخ می‌دهند."
-              },
-              {
-                step: "02",
-                title: "معرفی به پزشک",
-                description: "بر اساس نیاز شما، بهترین و مناسب‌ترین پزشک متخصص را معرفی می‌کنیم. ما تنها با پزشکانی همکاری می‌کنیم که سابقه درخشانی در زمینه تخصصی خود دارند."
-              },
-              {
-                step: "03",
-                title: "پیگیری و حمایت",
-                description: "پس از انجام جراحی، تیم ما روند بهبودی شما را پیگیری می‌کند تا از نتیجه عالی و رضایت کامل شما اطمینان حاصل کند."
-              }
-            ].map((item, index) => (
-              <div key={index} className="bg-secondary p-6 rounded-lg relative">
-                <div className="absolute top-4 right-4 text-3xl font-bold text-eyecare-100">
-                  {item.step}
+            <Card className="text-center hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-blue-600" />
                 </div>
-                <div className="pt-12">
-                  <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
-                  <p className="text-muted-foreground">{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">تیم پزشکی</h3>
+                <p className="text-gray-600">متخصصان مجرب با سال‌ها تجربه در حوزه چشم‌پزشکی</p>
+              </CardContent>
+            </Card>
 
-          <div className="mt-12 text-center">
-            <Button size="lg" asChild>
-              <Link to="/consultation">درخواست مشاوره رایگان</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Our Team */}
-      <section className="section bg-secondary">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">تیم ما</h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              تیم متخصص و باتجربه دیدار چشم رهنما، آماده کمک به شما در مسیر سلامت چشم
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                name: "دکتر زهرا کریمی",
-                role: "مشاور ارشد پزشکی",
-                bio: "دارای بیش از 8 سال سابقه در زمینه چشم‌پزشکی و مشاوره بیماران",
-                imgUrl: "/placeholder.svg"
-              },
-              {
-                name: "مهندس علی محمدی",
-                role: "مدیر عامل",
-                bio: "بنیانگذار دیدار چشم رهنما با هدف بهبود دسترسی به خدمات چشم‌پزشکی با کیفیت",
-                imgUrl: "/placeholder.svg"
-              },
-              {
-                name: "مهسا رضایی",
-                role: "کارشناس ارتباط با بیماران",
-                bio: "متخصص در پاسخگویی به نیازهای بیماران و هماهنگی با پزشکان",
-                imgUrl: "/placeholder.svg"
-              }
-            ].map((person, index) => (
-              <div key={index} className="bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <div className="aspect-square relative">
-                  <img 
-                    src={person.imgUrl} 
-                    alt={person.name} 
-                    className="w-full h-full object-cover"
-                  />
+            <Card className="text-center hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Award className="w-8 h-8 text-green-600" />
                 </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold">{person.name}</h3>
-                  <p className="text-primary mb-2">{person.role}</p>
-                  <p className="text-sm text-muted-foreground">{person.bio}</p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">کیفیت بالا</h3>
+                <p className="text-gray-600">ارائه خدمات با بالاترین استانداردهای کیفی</p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Eye className="w-8 h-8 text-purple-600" />
                 </div>
-              </div>
-            ))}
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">تکنولوژی مدرن</h3>
+                <p className="text-gray-600">استفاده از جدیدترین تجهیزات و روش‌های درمانی</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section className="section bg-eyecare-800 text-white">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div>
-              <h2 className="text-3xl font-bold mb-6">تماس با ما</h2>
-              <p className="mb-6">
-                برای پاسخگویی به سوالات، دریافت مشاوره یا ارائه بازخورد، با ما در ارتباط باشید.
-              </p>
-              
-              <div className="space-y-6 mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="bg-eyecare-700 p-3 rounded-full">
-                    <Phone className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-300">شماره تماس</p>
-                    <a href="tel:+989123456789" className="text-lg hover:text-primary transition-colors">۰۹۱۲۳۴۵۶۷۸۹</a>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                  <div className="bg-eyecare-700 p-3 rounded-full">
-                    <Mail className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-300">ایمیل</p>
-                    <a href="mailto:info@eyecare.ir" className="text-lg hover:text-primary transition-colors">info@eyecare.ir</a>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                  <div className="bg-eyecare-700 p-3 rounded-full">
-                    <MessageSquare className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-300">واتساپ</p>
-                    <a href="https://wa.me/989123456789" className="text-lg hover:text-primary transition-colors">۰۹۱۲۳۴۵۶۷۸۹</a>
-                  </div>
-                </div>
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              {settings.about_contact_title}
+            </h2>
+            <p className="text-xl text-gray-600">
+              {settings.about_contact_description}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Phone className="w-8 h-8 text-blue-600" />
               </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">تماس تلفنی</h3>
+              <p className="text-gray-600">{settings.contact_phone}</p>
             </div>
-            
-            <div>
-              <div className="bg-eyecare-700 p-6 rounded-lg">
-                <h3 className="text-xl font-semibold mb-4">ارسال پیام</h3>
-                <form onSubmit={handleSubmit}>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="name" className="block mb-2 text-sm">نام و نام خانوادگی</label>
-                      <Input 
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="bg-eyecare-600 border-eyecare-500 text-white placeholder:text-gray-400"
-                        placeholder="نام خود را وارد کنید"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="email" className="block mb-2 text-sm">ایمیل</label>
-                      <Input 
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="bg-eyecare-600 border-eyecare-500 text-white placeholder:text-gray-400"
-                        placeholder="email@example.com"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="message" className="block mb-2 text-sm">پیام</label>
-                      <Textarea 
-                        id="message"
-                        name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        className="bg-eyecare-600 border-eyecare-500 text-white placeholder:text-gray-400 min-h-[120px]"
-                        placeholder="پیام خود را وارد کنید"
-                        required
-                      />
-                    </div>
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-white text-eyecare-800 hover:bg-gray-100"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? 'در حال ارسال...' : 'ارسال پیام'}
-                    </Button>
-                  </div>
-                </form>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="w-8 h-8 text-green-600" />
               </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">ایمیل</h3>
+              <p className="text-gray-600">{settings.contact_email}</p>
             </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MapPin className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">آدرس</h3>
+              <p className="text-gray-600">{settings.contact_address}</p>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
+              <Link to="/consultation">درخواست مشاوره رایگان</Link>
+            </Button>
           </div>
         </div>
       </section>
-
-      <Footer />
-    </>
+    </div>
   );
 };
 
