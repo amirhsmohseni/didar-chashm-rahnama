@@ -1,10 +1,11 @@
 
 import { useState } from 'react';
-import { Upload, X, Eye } from 'lucide-react';
+import { Upload, X, Eye, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { supabase } from "@/integrations/supabase/client";
 
 interface ImageUploadSectionProps {
   title: string;
@@ -35,13 +36,47 @@ const ImageUploadSection = ({
     setIsUploading(true);
     
     try {
-      // Create object URL for immediate preview
-      const imageUrl = URL.createObjectURL(file);
-      onImageChange(imageUrl);
-      toast.success(`${title} با موفقیت آپلود شد`);
+      // Create unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `site-images/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        
+        // Fallback to object URL for immediate preview
+        const imageUrl = URL.createObjectURL(file);
+        onImageChange(imageUrl);
+        toast.success(`${title} آپلود شد (محلی)`);
+        return;
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(uploadData.path);
+
+      if (urlData?.publicUrl) {
+        onImageChange(urlData.publicUrl);
+        toast.success(`${title} با موفقیت آپلود شد`);
+      } else {
+        throw new Error('Could not get public URL');
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
-      toast.error('خطا در آپلود تصویر');
+      
+      // Fallback to object URL
+      const imageUrl = URL.createObjectURL(file);
+      onImageChange(imageUrl);
+      toast.success(`${title} آپلود شد (محلی)`);
     } finally {
       setIsUploading(false);
     }
@@ -50,6 +85,16 @@ const ImageUploadSection = ({
   const removeImage = () => {
     onImageChange(null);
     toast.success(`${title} حذف شد`);
+  };
+
+  const refreshImage = () => {
+    if (currentImage) {
+      // Force refresh by adding timestamp
+      const separator = currentImage.includes('?') ? '&' : '?';
+      const refreshedUrl = `${currentImage}${separator}t=${Date.now()}`;
+      onImageChange(refreshedUrl);
+      toast.success('تصویر بروزرسانی شد');
+    }
   };
 
   return (
@@ -65,10 +110,25 @@ const ImageUploadSection = ({
                 alt={title}
                 className={`w-full object-cover ${
                   aspectRatio === "1/1" ? 'h-40' : 'h-32'
-                }`}
+                } loading-lazy`}
+                loading="lazy"
+                onError={(e) => {
+                  console.error('Image load error:', e);
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
               />
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center">
                 <div className="flex gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={refreshImage}
+                    className="bg-blue-500/90 hover:bg-blue-500 text-white"
+                  >
+                    <RefreshCw className="h-4 w-4 ml-1" />
+                    بروزرسانی
+                  </Button>
                   <Button
                     variant="secondary"
                     size="sm"
@@ -106,7 +166,7 @@ const ImageUploadSection = ({
                     {title} را آپلود کنید
                   </p>
                   <p className="text-sm text-gray-500 mb-4">
-                    فرمت‌های مجاز: JPG, PNG - حداکثر 5 مگابایت
+                    فرمت‌های مجاز: JPG, PNG, WEBP - حداکثر 5 مگابایت
                   </p>
                   
                   <Button
@@ -114,8 +174,17 @@ const ImageUploadSection = ({
                     className="relative hover:bg-gray-50"
                     disabled={isUploading}
                   >
-                    <Upload className="h-4 w-4 ml-2" />
-                    {isUploading ? 'در حال آپلود...' : 'انتخاب فایل'}
+                    {isUploading ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 ml-2 animate-spin" />
+                        در حال آپلود...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 ml-2" />
+                        انتخاب فایل
+                      </>
+                    )}
                     <input
                       type="file"
                       accept="image/*"

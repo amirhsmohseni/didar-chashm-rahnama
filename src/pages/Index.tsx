@@ -1,5 +1,5 @@
 
-import { useEffect, useState, memo } from 'react';
+import { useEffect, useState, memo, lazy, Suspense } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -7,11 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SiteSettingsLoader from '@/components/sections/SiteSettingsLoader';
-import FeaturedServices from '@/components/sections/FeaturedServices';
-import OptimizedHeroSection from '@/components/sections/OptimizedHeroSection';
-import HeroSlider from '@/components/sections/HeroSlider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+
+// Lazy load heavy components
+const FeaturedServices = lazy(() => import('@/components/sections/FeaturedServices'));
+const OptimizedHeroSection = lazy(() => import('@/components/sections/OptimizedHeroSection'));
+const HeroSlider = lazy(() => import('@/components/sections/HeroSlider'));
 
 interface SiteSettings {
   hero_title?: string;
@@ -37,7 +39,20 @@ interface FAQ {
   is_published: boolean | null;
 }
 
-// Memoized Star Rating Component for better performance
+// Loading Skeleton Component
+const LoadingSkeleton = memo(() => (
+  <div className="animate-pulse">
+    <div className="h-64 bg-gray-200 rounded-lg mb-4"></div>
+    <div className="space-y-3">
+      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+    </div>
+  </div>
+));
+
+LoadingSkeleton.displayName = 'LoadingSkeleton';
+
+// Memoized components for better performance
 const StarRating = memo(({ rating }: { rating: number }) => {
   return (
     <div className="flex items-center">
@@ -55,7 +70,6 @@ const StarRating = memo(({ rating }: { rating: number }) => {
 
 StarRating.displayName = 'StarRating';
 
-// Memoized Review Card Component
 const ReviewCard = memo(({ review }: { review: Review }) => (
   <Card className="hover:shadow-lg transition-shadow duration-300 h-full">
     <CardContent className="p-4 sm:p-6 h-full flex flex-col">
@@ -73,7 +87,6 @@ const ReviewCard = memo(({ review }: { review: Review }) => (
 
 ReviewCard.displayName = 'ReviewCard';
 
-// Memoized FAQ Card Component
 const FAQCard = memo(({ faq }: { faq: FAQ }) => (
   <Card className="hover:shadow-md transition-shadow duration-300">
     <CardContent className="p-4 sm:p-6">
@@ -85,7 +98,6 @@ const FAQCard = memo(({ faq }: { faq: FAQ }) => (
 
 FAQCard.displayName = 'FAQCard';
 
-// Memoized Stat Item Component
 const StatItem = memo(({ value, label }: { value: string; label: string }) => (
   <div className="transform hover:scale-105 transition-all duration-300 text-center">
     <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-2">{value}</div>
@@ -104,11 +116,13 @@ const Index = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        await Promise.all([
-          loadSettings(),
-          loadReviews(),
-          loadFaqs()
-        ]);
+        // Load critical data first
+        await loadSettings();
+        
+        // Load non-critical data with a slight delay for better performance
+        setTimeout(async () => {
+          await Promise.all([loadReviews(), loadFaqs()]);
+        }, 100);
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -193,14 +207,20 @@ const Index = () => {
       <SiteSettingsLoader />
       <Header />
       
-      {/* Beautiful Hero Slider */}
-      <HeroSlider />
+      {/* Hero Slider with Suspense */}
+      <Suspense fallback={<LoadingSkeleton />}>
+        <HeroSlider />
+      </Suspense>
 
-      {/* Optimized Hero Section */}
-      <OptimizedHeroSection siteSettings={siteSettings} isLoading={isLoading} />
+      {/* Optimized Hero Section with Suspense */}
+      <Suspense fallback={<LoadingSkeleton />}>
+        <OptimizedHeroSection siteSettings={siteSettings} isLoading={isLoading} />
+      </Suspense>
 
-      {/* Featured Services */}
-      <FeaturedServices />
+      {/* Featured Services with Suspense */}
+      <Suspense fallback={<LoadingSkeleton />}>
+        <FeaturedServices />
+      </Suspense>
 
       {/* Enhanced CTA Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-primary to-primary-600 text-white relative overflow-hidden">
@@ -223,7 +243,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Enhanced Patient Reviews Section */}
+      {/* Patient Reviews Section */}
       {reviews.length > 0 && (
         <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
           <div className="container px-4 sm:px-6 lg:px-8">
@@ -250,7 +270,7 @@ const Index = () => {
         </section>
       )}
 
-      {/* Enhanced FAQ Section */}
+      {/* FAQ Section */}
       {faqs.length > 0 && (
         <section className="py-12 sm:py-16 lg:py-20 bg-white">
           <div className="container px-4 sm:px-6 lg:px-8">
@@ -277,7 +297,7 @@ const Index = () => {
         </section>
       )}
 
-      {/* Enhanced Stats Section */}
+      {/* Stats Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">

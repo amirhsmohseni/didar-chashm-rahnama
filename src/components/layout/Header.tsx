@@ -19,7 +19,7 @@ import {
 const NavigationItem = memo(({ name, href, onClick }: { name: string; href: string; onClick?: () => void }) => (
   <Link
     to={href}
-    className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium text-sm sm:text-base"
+    className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium text-sm sm:text-base px-3 py-2 rounded-md hover:bg-gray-50"
     onClick={onClick}
   >
     {name}
@@ -47,13 +47,11 @@ const Header = () => {
 
   const handleLogout = useCallback(async () => {
     try {
-      // Enhanced security: Clear all local storage and session data
       localStorage.clear();
       sessionStorage.clear();
       
       await supabase.auth.signOut();
       
-      // Security: Force page reload to clear any cached data
       window.location.href = '/';
       
       toast({
@@ -82,8 +80,20 @@ const Header = () => {
     <header className="bg-white shadow-sm border-b sticky top-0 z-50 backdrop-blur-sm bg-white/95">
       <div className="container mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex items-center justify-between h-14 sm:h-16">
-          {/* Desktop Navigation - Enhanced Responsive */}
-          <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8 space-x-reverse">
+          {/* Logo - Moved to the far right */}
+          <div className="flex items-center order-3">
+            <Link to="/" className="flex items-center space-x-2 group">
+              <span className="font-bold text-lg sm:text-xl lg:text-2xl text-primary ml-2 group-hover:text-primary/80 transition-colors">
+                چشم پزشکی
+              </span>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-lg flex items-center justify-center group-hover:bg-primary/80 transition-colors">
+                <span className="text-white font-bold text-xs sm:text-sm">چ</span>
+              </div>
+            </Link>
+          </div>
+
+          {/* Desktop Navigation - Enhanced spacing */}
+          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 space-x-reverse order-2 flex-1 justify-center">
             {navigationItems.map((item) => (
               <NavigationItem
                 key={item.name}
@@ -93,8 +103,8 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Mobile menu button - Enhanced Touch Target */}
-          <div className="lg:hidden">
+          {/* Mobile menu button */}
+          <div className="lg:hidden order-1">
             <Button
               variant="ghost"
               size="sm"
@@ -110,23 +120,10 @@ const Header = () => {
             </Button>
           </div>
 
-          {/* Logo - Enhanced Responsive */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2 group">
-              <span className="font-bold text-lg sm:text-xl lg:text-2xl text-primary ml-2 group-hover:text-primary/80 transition-colors">
-                چشم پزشکی
-              </span>
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-lg flex items-center justify-center group-hover:bg-primary/80 transition-colors">
-                <span className="text-white font-bold text-xs sm:text-sm">چ</span>
-              </div>
-            </Link>
-          </div>
-
-          {/* Auth Section - Enhanced Mobile Layout */}
-          <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
+          {/* Auth Section */}
+          <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 order-1 lg:order-3">
             {user ? (
               <div className="flex items-center gap-1 sm:gap-2">
-                {/* Admin Panel Button - Enhanced Security Display */}
                 <Link to="/admin">
                   <Button 
                     variant="outline" 
@@ -192,10 +189,10 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Enhanced Mobile Navigation with Better UX */}
+        {/* Enhanced Mobile Navigation */}
         {isMenuOpen && (
           <div className="lg:hidden border-t bg-white/95 backdrop-blur-sm py-4 shadow-lg">
-            <nav className="flex flex-col space-y-3">
+            <nav className="flex flex-col space-y-1">
               {navigationItems.map((item) => (
                 <NavigationItem
                   key={item.name}
@@ -207,7 +204,7 @@ const Header = () => {
               {user && (
                 <Link
                   to="/admin"
-                  className="text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium px-4 py-3 flex items-center gap-2 justify-start hover:bg-blue-50 rounded-lg mx-2"
+                  className="text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium px-3 py-2 flex items-center gap-2 justify-start hover:bg-blue-50 rounded-lg mx-2"
                   onClick={closeMenu}
                 >
                   <Shield className="h-4 w-4" />
