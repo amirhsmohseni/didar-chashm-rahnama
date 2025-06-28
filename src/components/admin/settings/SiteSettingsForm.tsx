@@ -50,7 +50,7 @@ const SiteSettingsForm = () => {
 
   useEffect(() => {
     if (settings) {
-      console.log('Settings loaded:', settings);
+      console.log('Settings loaded in form:', settings);
       const newData: FormData = {
         site_title: settings.site_title || '',
         contact_phone: settings.contact_phone || '',
@@ -70,16 +70,17 @@ const SiteSettingsForm = () => {
   }, [settings]);
 
   const handleInputChange = (key: keyof FormData, value: string | null) => {
-    console.log(`Changing ${key} from "${formData[key]}" to "${value}"`);
+    const newValue = value || '';
+    console.log(`Updating ${key}:`, newValue);
     
-    const newFormData = { ...formData, [key]: value || '' };
+    const newFormData = { ...formData, [key]: newValue };
     setFormData(newFormData);
     
     // Check if there are changes
     const hasActualChanges = JSON.stringify(newFormData) !== JSON.stringify(initialData);
     setHasChanges(hasActualChanges);
     
-    console.log('Has changes:', hasActualChanges);
+    console.log('Form has changes:', hasActualChanges);
   };
 
   const handleSave = async () => {
@@ -129,7 +130,10 @@ const SiteSettingsForm = () => {
               <ImageUploadSection
                 title="لوگوی سایت"
                 currentImage={formData.site_logo || null}
-                onImageChange={(url) => handleInputChange('site_logo', url)}
+                onImageChange={(url) => {
+                  console.log('Logo image changed to:', url);
+                  handleInputChange('site_logo', url);
+                }}
                 aspectRatio="1/1"
               />
               <p className="text-xs text-gray-500">
@@ -141,7 +145,10 @@ const SiteSettingsForm = () => {
               <ImageUploadSection
                 title="تصویر پس‌زمینه صفحه اصلی"
                 currentImage={formData.site_background || null}
-                onImageChange={(url) => handleInputChange('site_background', url)}
+                onImageChange={(url) => {
+                  console.log('Background image changed to:', url);
+                  handleInputChange('site_background', url);
+                }}
                 aspectRatio="16/9"
               />
               <p className="text-xs text-gray-500">
@@ -240,7 +247,7 @@ const SiteSettingsForm = () => {
                 onChange={(e) => handleInputChange('hero_description', e.target.value)}
                 placeholder="توضیحات صفحه اصلی را وارد کنید"
                 rows={4}
-                className="mt-1"
+                className="rt-1"
               />
             </div>
           </div>

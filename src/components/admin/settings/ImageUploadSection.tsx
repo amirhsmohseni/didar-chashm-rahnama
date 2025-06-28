@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Upload, X, Eye, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,12 +21,13 @@ const ImageUploadSection = ({
 }: ImageUploadSectionProps) => {
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleImageUpload = async (file: File) => {
-    if (!file) {
-      toast.error('لطفاً فایل را انتخاب کنید');
-      return;
-    }
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
+    console.log('File selected:', file.name, file.size, file.type);
+
+    // Validation
     if (file.size > 5 * 1024 * 1024) {
       toast.error('فایل نباید بیشتر از 5 مگابایت باشد');
       return;
@@ -41,15 +41,20 @@ const ImageUploadSection = ({
     setIsUploading(true);
     
     try {
-      // Create local URL for immediate display
-      const localUrl = URL.createObjectURL(file);
-      onImageChange(localUrl);
-      toast.success(`${title} آپلود شد`);
+      // Create immediate preview
+      const previewUrl = URL.createObjectURL(file);
+      console.log('Created preview URL:', previewUrl);
       
-      // Try to upload to Supabase in background
-      const fileExt = file.name.split('.').pop();
+      // Update UI immediately for better UX
+      onImageChange(previewUrl);
+      toast.success(`${title} انتخاب شد، در حال آپلود...`);
+      
+      // Upload to Supabase in background
+      const fileExt = file.name.split('.').pop() || 'jpg';
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `site-images/${fileName}`;
+
+      console.log('Uploading to Supabase:', filePath);
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('uploads')
@@ -58,35 +63,54 @@ const ImageUploadSection = ({
           upsert: false
         });
 
-      if (!uploadError && uploadData) {
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        // Keep the preview URL if upload fails
+        toast.warning('فایل محلی بارگذاری شد ولی آپلود به سرور ناموفق بود');
+        return;
+      }
+
+      if (uploadData) {
         const { data: urlData } = supabase.storage
           .from('uploads')
           .getPublicUrl(uploadData.path);
 
         if (urlData?.publicUrl) {
+          console.log('Got public URL:', urlData.publicUrl);
+          // Update with server URL
           onImageChange(urlData.publicUrl);
-          console.log('Image uploaded to Supabase:', urlData.publicUrl);
+          toast.success(`${title} با موفقیت آپلود شد`);
         }
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
-      // Don't show error toast since local upload worked
+      console.error('Error in upload process:', error);
+      toast.error('خطا در آپلود فایل');
     } finally {
       setIsUploading(false);
+      // Reset file input
+      event.target.value = '';
     }
   };
 
-  const removeImage = () => {
+  const handleRemove = () => {
+    console.log('Removing image:', currentImage);
     onImageChange(null);
     toast.success(`${title} حذف شد`);
   };
 
-  const refreshImage = () => {
+  const handleRefresh = () => {
     if (currentImage) {
       const separator = currentImage.includes('?') ? '&' : '?';
       const refreshedUrl = `${currentImage}${separator}t=${Date.now()}`;
+      console.log('Refreshing image:', refreshedUrl);
       onImageChange(refreshedUrl);
       toast.success('تصویر بروزرسانی شد');
+    }
+  };
+
+  const handlePreview = () => {
+    if (currentImage) {
+      window.open(currentImage, '_blank');
     }
   };
 
@@ -103,39 +127,47 @@ const ImageUploadSection = ({
                 alt={title}
                 className={`w-full object-cover ${
                   aspectRatio === "1/1" ? 'h-40' : 'h-32'
-                } loading-lazy`}
+                } transition-opacity duration-200`}
                 loading="lazy"
+                onLoad={() => console.log('Image loaded successfully:', currentImage)}
                 onError={(e) => {
                   console.error('Image load error:', e);
                   const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
+                  target.style.opacity = '0.5';
                 }}
               />
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center">
+              
+              {/* Overlay with action buttons */}
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                 <div className="flex gap-2">
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={refreshImage}
-                    className="bg-blue-500/90 hover:bg-blue-500 text-white"
+                    onClick={handleRefresh}
+                    className="bg-blue-500/90 hover:bg-blue-600 text-white border-0"
+                    title="بروزرسانی تصویر"
                   >
                     <RefreshCw className="h-4 w-4 ml-1" />
                     بروزرسانی
                   </Button>
+                  
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => window.open(currentImage, '_blank')}
-                    className="bg-white/90 hover:bg-white text-gray-800"
+                    onClick={handlePreview}
+                    className="bg-white/90 hover:bg-white text-gray-800 border-0"
+                    title="مشاهده تصویر"
                   >
                     <Eye className="h-4 w-4 ml-1" />
                     مشاهده
                   </Button>
+                  
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={removeImage}
-                    className="bg-red-500/90 hover:bg-red-500"
+                    onClick={handleRemove}
+                    className="bg-red-500/90 hover:bg-red-600 border-0"
+                    title="حذف تصویر"
                   >
                     <X className="h-4 w-4 ml-1" />
                     حذف
@@ -146,7 +178,7 @@ const ImageUploadSection = ({
           </CardContent>
         </Card>
       ) : (
-        <Card className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors">
+        <Card className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors cursor-pointer">
           <CardContent className="p-8">
             <div className="text-center">
               <div className="flex flex-col items-center justify-center space-y-4">
@@ -164,32 +196,30 @@ const ImageUploadSection = ({
                   
                   <Button
                     variant="outline"
-                    className="relative hover:bg-gray-50"
+                    className="relative hover:bg-gray-50 cursor-pointer"
                     disabled={isUploading}
+                    asChild
                   >
-                    {isUploading ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 ml-2 animate-spin" />
-                        در حال آپلود...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-4 w-4 ml-2" />
-                        انتخاب فایل
-                      </>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          handleImageUpload(file);
-                        }
-                      }}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      disabled={isUploading}
-                    />
+                    <label className="cursor-pointer">
+                      {isUploading ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 ml-2 animate-spin" />
+                          در حال آپلود...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4 ml-2" />
+                          انتخاب فایل
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        disabled={isUploading}
+                      />
+                    </label>
                   </Button>
                 </div>
               </div>
