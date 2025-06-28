@@ -42,27 +42,27 @@ const ImageUploadSection = ({
       
       img.onload = () => {
         try {
-          // محاسبه ابعاد جدید با حفظ نسبت
           let { width, height } = img;
-          const aspectRatio = width / height;
+          const imageAspectRatio = width / height;
           
+          // محاسبه ابعاد جدید
           if (width > maxWidth) {
             width = maxWidth;
-            height = width / aspectRatio;
+            height = width / imageAspectRatio;
           }
           
           if (height > maxHeight) {
             height = maxHeight;
-            width = height * aspectRatio;
+            width = height * imageAspectRatio;
           }
           
           canvas.width = width;
           canvas.height = height;
           
-          // تنظیمات بهتر برای کیفیت
+          // تنظیمات کیفیت
           ctx.imageSmoothingEnabled = true;
           ctx.imageSmoothingQuality = 'high';
-          ctx.fillStyle = '#FFFFFF'; // پس‌زمینه سفید
+          ctx.fillStyle = '#FFFFFF';
           ctx.fillRect(0, 0, width, height);
           ctx.drawImage(img, 0, 0, width, height);
           
@@ -70,13 +70,13 @@ const ImageUploadSection = ({
             resolve(blob);
           }, 'image/jpeg', quality);
         } catch (error) {
-          console.error('Error in image processing:', error);
+          console.error('خطا در پردازش تصویر:', error);
           resolve(null);
         }
       };
       
       img.onerror = () => {
-        console.error('Error loading image');
+        console.error('خطا در بارگذاری تصویر');
         resolve(null);
       };
       
@@ -84,12 +84,12 @@ const ImageUploadSection = ({
     });
   };
 
-  // اعتبارسنجی و پردازش فایل
+  // اعتبارسنجی فایل
   const validateAndProcessFile = async (file: File): Promise<{ processedFile: Blob; originalSize: number; newSize: number } | null> => {
     setError(null);
     setFileInfo(null);
     
-    console.log('شروع پردازش فایل:', {
+    console.log('پردازش فایل:', {
       name: file.name,
       type: file.type,
       size: `${(file.size / 1024 / 1024).toFixed(2)} MB`
@@ -98,35 +98,33 @@ const ImageUploadSection = ({
     // بررسی نوع فایل
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      setError(`نوع فایل پشتیبانی نمی‌شود. فرمت‌های مجاز: ${allowedTypes.join(', ')}`);
+      setError(`نوع فایل پشتیبانی نمی‌شود. فرمت‌های مجاز: JPG, PNG, WEBP`);
       return null;
     }
 
     const originalSize = file.size;
-    const maxSizeBytes = 3 * 1024 * 1024; // 3MB حد مجاز
+    const maxSizeBytes = 3 * 1024 * 1024; // 3MB
     
     let processedFile: Blob = file;
     
-    // اگر فایل بزرگ است، کوچک‌سازی کنیم
+    // کوچک‌سازی در صورت نیاز
     if (originalSize > maxSizeBytes) {
       toast.info(`فایل ${(originalSize / 1024 / 1024).toFixed(1)}MB است، در حال کوچک‌سازی...`);
       
       try {
-        // تعیین ابعاد بر اساس نوع تصویر
-        const maxWidth = aspectRatio === "1/1" ? 600 : 1000;
-        const maxHeight = aspectRatio === "1/1" ? 600 : 600;
+        const maxWidth = aspectRatio === "1/1" ? 600 : 1200;
+        const maxHeight = aspectRatio === "1/1" ? 600 : 800;
         
-        // اول با کیفیت متوسط امتحان کنیم
         let resizedBlob = await resizeImage(file, maxWidth, maxHeight, 0.7);
         
         if (!resizedBlob) {
-          setError('خطا در پردازش تصویر. لطفاً فایل دیگری امتحان کنید.');
+          setError('خطا در پردازش تصویر. لطفاً فایل دیگری انتخاب کنید.');
           return null;
         }
         
-        // اگر هنوز بزرگ است، کیفیت کمتر
+        // اگر هنوز بزرگ است
         if (resizedBlob.size > maxSizeBytes) {
-          resizedBlob = await resizeImage(file, maxWidth * 0.8, maxHeight * 0.8, 0.5);
+          resizedBlob = await resizeImage(file, maxWidth * 0.7, maxHeight * 0.7, 0.5);
           
           if (!resizedBlob || resizedBlob.size > maxSizeBytes) {
             setError('فایل خیلی بزرگ است. لطفاً تصویر کوچک‌تری انتخاب کنید.');
@@ -138,11 +136,10 @@ const ImageUploadSection = ({
         const newSize = processedFile.size;
         
         setFileInfo({ original: originalSize, compressed: newSize });
-        
         toast.success(`تصویر از ${(originalSize / 1024 / 1024).toFixed(1)}MB به ${(newSize / 1024 / 1024).toFixed(1)}MB کوچک شد`);
       } catch (error) {
         console.error('خطا در کوچک‌سازی:', error);
-        setError('خطا در پردازش تصویر. لطفاً فایل دیگری امتحان کنید.');
+        setError('خطا در پردازش تصویر');
         return null;
       }
     }
@@ -157,19 +154,36 @@ const ImageUploadSection = ({
   // آپلود به Supabase
   const uploadToSupabase = async (file: Blob): Promise<string | null> => {
     try {
+      setUploadProgress(10);
+      
+      // تست اتصال به bucket
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+      
+      if (bucketError) {
+        console.error('خطا در دسترسی به storage:', bucketError);
+        setError('خطا در اتصال به سرور ذخیره‌سازی');
+        return null;
+      }
+      
+      const uploadsExists = buckets?.some(bucket => bucket.id === 'uploads');
+      if (!uploadsExists) {
+        setError('Bucket مورد نظر یافت نشد. لطفاً با مدیر سیستم تماس بگیرید.');
+        return null;
+      }
+      
+      setUploadProgress(20);
+      
       // نام فایل منحصر به فرد
       const timestamp = Date.now();
       const random = Math.random().toString(36).substring(2);
-      const fileName = `${timestamp}-${random}.jpg`;
-      const filePath = `site-images/${fileName}`;
+      const fileName = `site-images/${timestamp}-${random}.jpg`;
 
-      console.log('آپلود به Supabase:', filePath, `${(file.size / 1024 / 1024).toFixed(2)}MB`);
-      setUploadProgress(20);
-
+      console.log('آپلود فایل:', fileName, `${(file.size / 1024 / 1024).toFixed(2)}MB`);
+      
       // آپلود فایل
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('uploads')
-        .upload(filePath, file, {
+        .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false,
           contentType: 'image/jpeg'
@@ -179,11 +193,9 @@ const ImageUploadSection = ({
         console.error('خطا در آپلود:', uploadError);
         
         if (uploadError.message.includes('Payload too large')) {
-          setError('حجم فایل بیش از حد مجاز است. لطفاً تصویر کوچک‌تری استفاده کنید.');
-        } else if (uploadError.message.includes('duplicate')) {
-          setError('فایل با این نام از قبل وجود دارد.');
-        } else if (uploadError.message.includes('storage')) {
-          setError('مشکل در اتصال به سرور ذخیره‌سازی');
+          setError('حجم فایل بیش از حد مجاز است');
+        } else if (uploadError.message.includes('Bucket not found')) {
+          setError('Bucket یافت نشد. لطفاً صفحه را تازه‌سازی کنید');
         } else {
           setError(`خطا در آپلود: ${uploadError.message}`);
         }
@@ -208,7 +220,7 @@ const ImageUploadSection = ({
       setError('خطا در دریافت لینک تصویر');
       return null;
     } catch (error) {
-      console.error('خطای کلی در آپلود:', error);
+      console.error('خطای کلی:', error);
       setError(`خطای غیرمنتظره: ${error instanceof Error ? error.message : 'خطای ناشناخته'}`);
       return null;
     }
@@ -219,23 +231,19 @@ const ImageUploadSection = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    console.log('فایل انتخاب شد:', file.name, file.type, `${(file.size / 1024 / 1024).toFixed(2)}MB`);
+    console.log('فایل انتخاب شد:', file.name);
     
     setError(null);
     setIsUploading(true);
     setUploadProgress(0);
     
     try {
-      // پردازش فایل
       const result = await validateAndProcessFile(file);
       if (!result) {
         setIsUploading(false);
         return;
       }
 
-      setUploadProgress(10);
-      
-      // آپلود
       const serverUrl = await uploadToSupabase(result.processedFile);
       
       if (serverUrl) {
@@ -252,7 +260,6 @@ const ImageUploadSection = ({
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
-      // پاک کردن input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -261,7 +268,6 @@ const ImageUploadSection = ({
 
   // حذف تصویر
   const handleRemove = () => {
-    console.log('حذف تصویر:', currentImageUrl);
     setCurrentImageUrl(null);
     onImageChange(null);
     setError(null);
@@ -272,21 +278,20 @@ const ImageUploadSection = ({
   // بروزرسانی
   const handleRefresh = () => {
     if (currentImageUrl) {
-      const separator = currentImageUrl.includes('?') ? '&' : '?';
-      const refreshedUrl = `${currentImageUrl}${separator}t=${Date.now()}`;
+      const refreshedUrl = `${currentImageUrl}?t=${Date.now()}`;
       setCurrentImageUrl(refreshedUrl);
       onImageChange(refreshedUrl);
       toast.success('تصویر بروزرسانی شد');
     }
   };
 
-  // باز کردن دیالوگ انتخاب فایل
+  // باز کردن انتخاب فایل
   const openFileDialog = () => {
     setError(null);
     fileInputRef.current?.click();
   };
 
-  // نمایش تصویر
+  // نمایش تصویر در تب جدید
   const handlePreview = () => {
     if (currentImageUrl) {
       window.open(currentImageUrl, '_blank');
@@ -297,7 +302,7 @@ const ImageUploadSection = ({
     <div className="space-y-3">
       <Label className="text-sm font-medium text-gray-700">{title}</Label>
       
-      {/* نمایش اطلاعات فایل */}
+      {/* نمایش اطلاعات کوچک‌سازی */}
       {fileInfo && (
         <div className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-lg text-green-700">
           <CheckCircle className="h-4 w-4 flex-shrink-0" />
@@ -326,11 +331,8 @@ const ImageUploadSection = ({
                   aspectRatio === "1/1" ? 'h-40' : 'h-32'
                 } transition-opacity duration-200`}
                 loading="lazy"
-                onLoad={() => console.log('تصویر بارگذاری شد:', currentImageUrl)}
-                onError={(e) => {
-                  console.error('خطا در نمایش تصویر:', e);
-                  setError('خطا در نمایش تصویر. لطفاً دوباره امتحان کنید.');
-                }}
+                onLoad={() => console.log('تصویر نمایش داده شد')}
+                onError={() => setError('خطا در نمایش تصویر')}
               />
               
               {/* نوار پیشرفت */}
