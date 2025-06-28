@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -49,7 +50,7 @@ const SiteSettingsForm = () => {
 
   useEffect(() => {
     if (settings) {
-      console.log('Settings loaded in form:', settings);
+      console.log('تنظیمات در فرم بارگذاری شد:', settings);
       const newData: FormData = {
         site_title: settings.site_title || '',
         contact_phone: settings.contact_phone || '',
@@ -70,34 +71,48 @@ const SiteSettingsForm = () => {
 
   const handleInputChange = (key: keyof FormData, value: string | null) => {
     const newValue = value || '';
-    console.log(`Updating ${key}:`, newValue);
+    console.log(`بروزرسانی ${key}:`, newValue);
     
     setFormData(prevData => {
       const newFormData = { ...prevData, [key]: newValue };
       
-      // Check if there are changes
-      const hasActualChanges = JSON.stringify(newFormData) !== JSON.stringify(initialData);
+      // بررسی تغییرات
+      const hasActualChanges = Object.keys(newFormData).some(
+        k => newFormData[k] !== initialData[k]
+      );
       setHasChanges(hasActualChanges);
       
-      console.log('Form has changes:', hasActualChanges);
-      console.log('New form data:', newFormData);
+      console.log('فرم دارای تغییرات:', hasActualChanges);
+      console.log('داده‌های جدید فرم:', newFormData);
       
       return newFormData;
     });
   };
 
+  const handleImageChange = (key: 'site_logo' | 'site_background', url: string | null) => {
+    console.log(`تغییر تصویر ${key}:`, url);
+    handleInputChange(key, url);
+  };
+
   const handleSave = async () => {
     try {
-      console.log('Saving form data:', formData);
-      await saveSettings(formData);
-      setInitialData(formData);
-      setHasChanges(false);
+      console.log('ذخیره داده‌های فرم:', formData);
+      const success = await saveSettings(formData);
+      
+      if (success) {
+        setInitialData({ ...formData });
+        setHasChanges(false);
+        console.log('تنظیمات با موفقیت ذخیره شد');
+      } else {
+        console.error('خطا در ذخیره تنظیمات');
+      }
     } catch (error) {
-      console.error('Save failed:', error);
+      console.error('ذخیره ناموفق:', error);
     }
   };
 
   const handleRefresh = () => {
+    console.log('بارگذاری مجدد تنظیمات');
     loadSettings();
     setHasChanges(false);
   };
@@ -133,10 +148,7 @@ const SiteSettingsForm = () => {
               <ImageUploadSection
                 title="لوگوی سایت"
                 currentImage={formData.site_logo || null}
-                onImageChange={(url) => {
-                  console.log('Logo image changed to:', url);
-                  handleInputChange('site_logo', url);
-                }}
+                onImageChange={(url) => handleImageChange('site_logo', url)}
                 aspectRatio="1/1"
               />
               <p className="text-xs text-gray-500">
@@ -148,10 +160,7 @@ const SiteSettingsForm = () => {
               <ImageUploadSection
                 title="تصویر پس‌زمینه صفحه اصلی"
                 currentImage={formData.site_background || null}
-                onImageChange={(url) => {
-                  console.log('Background image changed to:', url);
-                  handleInputChange('site_background', url);
-                }}
+                onImageChange={(url) => handleImageChange('site_background', url)}
                 aspectRatio="16/9"
               />
               <p className="text-xs text-gray-500">

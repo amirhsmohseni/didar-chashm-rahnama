@@ -4,7 +4,7 @@ import { useSettingsManager } from './useSettingsManager';
 export const useSiteSettings = () => {
   const { settings, loading, updateSetting, loadSettings } = useSettingsManager();
 
-  // Convert settings array to object for backward compatibility
+  // تبدیل آرایه تنظیمات به شی برای سازگاری
   const settingsObject = settings.reduce((acc, setting) => {
     acc[setting.key] = setting.value;
     return acc;
@@ -23,16 +23,39 @@ export const useSiteSettings = () => {
   };
 
   const saveSettings = async (newSettings: Record<string, string>) => {
-    const promises = Object.entries(newSettings).map(([key, value]) => 
-      updateSetting(key, value)
-    );
+    console.log('شروع ذخیره تنظیمات:', newSettings);
     
-    const results = await Promise.all(promises);
-    
-    // Force reload settings to ensure UI updates
-    await loadSettings();
-    
-    return results.every(result => result === true);
+    try {
+      const promises = Object.entries(newSettings).map(([key, value]) => {
+        console.log(`ذخیره تنظیم ${key}:`, value);
+        return updateSetting(key, value);
+      });
+      
+      const results = await Promise.all(promises);
+      console.log('نتایج ذخیره:', results);
+      
+      // بارگذاری مجدد تنظیمات برای اطمینان از بروزرسانی UI
+      await loadSettings();
+      
+      const allSuccessful = results.every(result => result === true);
+      
+      if (allSuccessful) {
+        console.log('همه تنظیمات با موفقیت ذخیره شدند');
+        
+        // اطلاع‌رسانی به کامپوننت‌های دیگر
+        window.dispatchEvent(new CustomEvent('siteSettingsChanged', { 
+          detail: newSettings 
+        }));
+        
+        return true;
+      } else {
+        console.error('برخی تنظیمات ذخیره نشدند');
+        return false;
+      }
+    } catch (error) {
+      console.error('خطا در ذخیره تنظیمات:', error);
+      return false;
+    }
   };
 
   return {
