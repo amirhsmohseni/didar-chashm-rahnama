@@ -41,6 +41,8 @@ const ImageUploadSection = ({
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `site-images/${fileName}`;
 
+      console.log('Starting upload to Supabase Storage...');
+      
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('uploads')
@@ -50,14 +52,16 @@ const ImageUploadSection = ({
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        console.error('Supabase upload error:', uploadError);
         
-        // Fallback to object URL for immediate preview
+        // Fallback to local URL for immediate use
         const imageUrl = URL.createObjectURL(file);
         onImageChange(imageUrl);
         toast.success(`${title} آپلود شد (محلی)`);
         return;
       }
+
+      console.log('Upload successful:', uploadData);
 
       // Get public URL
       const { data: urlData } = supabase.storage
@@ -65,6 +69,7 @@ const ImageUploadSection = ({
         .getPublicUrl(uploadData.path);
 
       if (urlData?.publicUrl) {
+        console.log('Public URL generated:', urlData.publicUrl);
         onImageChange(urlData.publicUrl);
         toast.success(`${title} با موفقیت آپلود شد`);
       } else {
@@ -73,7 +78,7 @@ const ImageUploadSection = ({
     } catch (error) {
       console.error('Error uploading image:', error);
       
-      // Fallback to object URL
+      // Always provide fallback for immediate use
       const imageUrl = URL.createObjectURL(file);
       onImageChange(imageUrl);
       toast.success(`${title} آپلود شد (محلی)`);

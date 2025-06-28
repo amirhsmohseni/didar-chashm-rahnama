@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -18,7 +19,7 @@ interface FormData {
   hero_description: string;
   site_logo: string;
   site_background: string;
-  [key: string]: string; // Index signature to make it compatible with Record<string, string>
+  [key: string]: string;
 }
 
 const SiteSettingsForm = () => {
@@ -117,22 +118,36 @@ const SiteSettingsForm = () => {
       hasChanges={hasChanges}
     >
       <div className="space-y-8">
-        {/* تصاویر سایت */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">تصاویر سایت</h3>
+        {/* بخش تصاویر سایت - اصلاح شده */}
+        <div className="bg-gray-50 p-6 rounded-lg">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            تصاویر سایت
+          </h3>
           <div className="grid md:grid-cols-2 gap-8">
-            <ImageUploadSection
-              title="لوگوی سایت"
-              currentImage={formData.site_logo}
-              onImageChange={(url) => handleInputChange('site_logo', url || '')}
-              aspectRatio="1/1"
-            />
-            <ImageUploadSection
-              title="تصویر پس‌زمینه"
-              currentImage={formData.site_background}
-              onImageChange={(url) => handleInputChange('site_background', url || '')}
-              aspectRatio="16/9"
-            />
+            <div className="space-y-2">
+              <ImageUploadSection
+                title="لوگوی سایت"
+                currentImage={formData.site_logo}
+                onImageChange={(url) => handleInputChange('site_logo', url || '')}
+                aspectRatio="1/1"
+              />
+              <p className="text-xs text-gray-500">
+                بهترین اندازه: 200x200 پیکسل، فرمت PNG یا SVG
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <ImageUploadSection
+                title="تصویر پس‌زمینه صفحه اصلی"
+                currentImage={formData.site_background}
+                onImageChange={(url) => handleInputChange('site_background', url || '')}
+                aspectRatio="16/9"
+              />
+              <p className="text-xs text-gray-500">
+                بهترین اندازه: 1920x1080 پیکسل، کیفیت بالا
+              </p>
+            </div>
           </div>
         </div>
 
