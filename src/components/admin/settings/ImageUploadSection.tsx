@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Upload, X, Eye, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ const ImageUploadSection = ({
   aspectRatio = "16/9"
 }: ImageUploadSectionProps) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(currentImage);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -42,11 +44,12 @@ const ImageUploadSection = ({
     
     try {
       // Create immediate preview
-      const previewUrl = URL.createObjectURL(file);
-      console.log('Created preview URL:', previewUrl);
+      const localPreviewUrl = URL.createObjectURL(file);
+      console.log('Created preview URL:', localPreviewUrl);
       
-      // Update UI immediately for better UX
-      onImageChange(previewUrl);
+      // Update preview immediately
+      setPreviewUrl(localPreviewUrl);
+      onImageChange(localPreviewUrl);
       toast.success(`${title} انتخاب شد، در حال آپلود...`);
       
       // Upload to Supabase in background
@@ -65,7 +68,6 @@ const ImageUploadSection = ({
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
-        // Keep the preview URL if upload fails
         toast.warning('فایل محلی بارگذاری شد ولی آپلود به سرور ناموفق بود');
         return;
       }
@@ -78,7 +80,9 @@ const ImageUploadSection = ({
         if (urlData?.publicUrl) {
           console.log('Got public URL:', urlData.publicUrl);
           // Update with server URL
-          onImageChange(urlData.publicUrl);
+          const serverUrl = urlData.publicUrl;
+          setPreviewUrl(serverUrl);
+          onImageChange(serverUrl);
           toast.success(`${title} با موفقیت آپلود شد`);
         }
       }
@@ -94,6 +98,7 @@ const ImageUploadSection = ({
 
   const handleRemove = () => {
     console.log('Removing image:', currentImage);
+    setPreviewUrl(null);
     onImageChange(null);
     toast.success(`${title} حذف شد`);
   };
@@ -103,33 +108,37 @@ const ImageUploadSection = ({
       const separator = currentImage.includes('?') ? '&' : '?';
       const refreshedUrl = `${currentImage}${separator}t=${Date.now()}`;
       console.log('Refreshing image:', refreshedUrl);
+      setPreviewUrl(refreshedUrl);
       onImageChange(refreshedUrl);
       toast.success('تصویر بروزرسانی شد');
     }
   };
 
   const handlePreview = () => {
-    if (currentImage) {
-      window.open(currentImage, '_blank');
+    const imageUrl = previewUrl || currentImage;
+    if (imageUrl) {
+      window.open(imageUrl, '_blank');
     }
   };
+
+  const displayImage = previewUrl || currentImage;
 
   return (
     <div className="space-y-3">
       <Label className="text-sm font-medium text-gray-700">{title}</Label>
       
-      {currentImage ? (
+      {displayImage ? (
         <Card className="overflow-hidden border-2 border-gray-200 hover:border-gray-300 transition-colors">
           <CardContent className="p-0">
             <div className="relative group">
               <img
-                src={currentImage}
+                src={displayImage}
                 alt={title}
                 className={`w-full object-cover ${
                   aspectRatio === "1/1" ? 'h-40' : 'h-32'
                 } transition-opacity duration-200`}
                 loading="lazy"
-                onLoad={() => console.log('Image loaded successfully:', currentImage)}
+                onLoad={() => console.log('Image loaded successfully:', displayImage)}
                 onError={(e) => {
                   console.error('Image load error:', e);
                   const target = e.target as HTMLImageElement;
@@ -144,6 +153,7 @@ const ImageUploadSection = ({
                     variant="secondary"
                     size="sm"
                     onClick={handleRefresh}
+                    disabled={isUploading}
                     className="bg-blue-500/90 hover:bg-blue-600 text-white border-0"
                     title="بروزرسانی تصویر"
                   >
@@ -155,6 +165,7 @@ const ImageUploadSection = ({
                     variant="secondary"
                     size="sm"
                     onClick={handlePreview}
+                    disabled={isUploading}
                     className="bg-white/90 hover:bg-white text-gray-800 border-0"
                     title="مشاهده تصویر"
                   >
@@ -166,6 +177,7 @@ const ImageUploadSection = ({
                     variant="destructive"
                     size="sm"
                     onClick={handleRemove}
+                    disabled={isUploading}
                     className="bg-red-500/90 hover:bg-red-600 border-0"
                     title="حذف تصویر"
                   >
@@ -178,7 +190,7 @@ const ImageUploadSection = ({
           </CardContent>
         </Card>
       ) : (
-        <Card className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors cursor-pointer">
+        <Card className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors">
           <CardContent className="p-8">
             <div className="text-center">
               <div className="flex flex-col items-center justify-center space-y-4">
@@ -196,7 +208,7 @@ const ImageUploadSection = ({
                   
                   <Button
                     variant="outline"
-                    className="relative hover:bg-gray-50 cursor-pointer"
+                    className="relative hover:bg-gray-50"
                     disabled={isUploading}
                     asChild
                   >

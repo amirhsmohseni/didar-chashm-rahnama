@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -73,14 +72,18 @@ const SiteSettingsForm = () => {
     const newValue = value || '';
     console.log(`Updating ${key}:`, newValue);
     
-    const newFormData = { ...formData, [key]: newValue };
-    setFormData(newFormData);
-    
-    // Check if there are changes
-    const hasActualChanges = JSON.stringify(newFormData) !== JSON.stringify(initialData);
-    setHasChanges(hasActualChanges);
-    
-    console.log('Form has changes:', hasActualChanges);
+    setFormData(prevData => {
+      const newFormData = { ...prevData, [key]: newValue };
+      
+      // Check if there are changes
+      const hasActualChanges = JSON.stringify(newFormData) !== JSON.stringify(initialData);
+      setHasChanges(hasActualChanges);
+      
+      console.log('Form has changes:', hasActualChanges);
+      console.log('New form data:', newFormData);
+      
+      return newFormData;
+    });
   };
 
   const handleSave = async () => {
@@ -247,7 +250,7 @@ const SiteSettingsForm = () => {
                 onChange={(e) => handleInputChange('hero_description', e.target.value)}
                 placeholder="توضیحات صفحه اصلی را وارد کنید"
                 rows={4}
-                className="rt-1"
+                className="mt-1"
               />
             </div>
           </div>
