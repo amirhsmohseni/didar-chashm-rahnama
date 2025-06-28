@@ -80,8 +80,8 @@ const Header = () => {
     <header className="bg-white shadow-sm border-b sticky top-0 z-50 backdrop-blur-sm bg-white/95">
       <div className="container mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex items-center justify-between h-14 sm:h-16">
-          {/* Logo - Moved to the far right */}
-          <div className="flex items-center order-3">
+          {/* Logo - در سمت راست */}
+          <div className="flex items-center justify-end flex-1 order-3">
             <Link to="/" className="flex items-center space-x-2 group">
               <span className="font-bold text-lg sm:text-xl lg:text-2xl text-primary ml-2 group-hover:text-primary/80 transition-colors">
                 چشم پزشکی
@@ -92,8 +92,8 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation - Enhanced spacing */}
-          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 space-x-reverse order-2 flex-1 justify-center">
+          {/* Desktop Navigation - وسط صفحه */}
+          <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 space-x-reverse order-2 flex-1 justify-center">
             {navigationItems.map((item) => (
               <NavigationItem
                 key={item.name}
@@ -120,9 +120,9 @@ const Header = () => {
             </Button>
           </div>
 
-          {/* Auth Section */}
-          <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 order-1 lg:order-3">
-            {user ? (
+          {/* Auth Section - فقط برای کاربران وارد شده */}
+          {user && (
+            <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 order-1 lg:order-3">
               <div className="flex items-center gap-1 sm:gap-2">
                 <Link to="/admin">
                   <Button 
@@ -174,19 +174,8 @@ const Header = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-            ) : (
-              <Link to="/auth">
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  className="px-3 sm:px-4 lg:px-6 text-xs sm:text-sm hover:bg-primary/90 transition-colors"
-                >
-                  <span className="hidden sm:inline">ورود / ثبت نام</span>
-                  <span className="sm:hidden">ورود</span>
-                </Button>
-              </Link>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Enhanced Mobile Navigation */}
