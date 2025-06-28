@@ -23,6 +23,11 @@ const ImageUploadSection = ({
   const [isUploading, setIsUploading] = useState(false);
 
   const handleImageUpload = async (file: File) => {
+    if (!file) {
+      toast.error('لطفاً فایل را انتخاب کنید');
+      return;
+    }
+
     if (file.size > 5 * 1024 * 1024) {
       toast.error('فایل نباید بیشتر از 5 مگابایت باشد');
       return;
@@ -36,14 +41,16 @@ const ImageUploadSection = ({
     setIsUploading(true);
     
     try {
-      // Create unique filename
+      // Create local URL for immediate display
+      const localUrl = URL.createObjectURL(file);
+      onImageChange(localUrl);
+      toast.success(`${title} آپلود شد`);
+      
+      // Try to upload to Supabase in background
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `site-images/${fileName}`;
 
-      console.log('Starting upload to Supabase Storage...');
-      
-      // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('uploads')
         .upload(filePath, file, {
@@ -51,37 +58,19 @@ const ImageUploadSection = ({
           upsert: false
         });
 
-      if (uploadError) {
-        console.error('Supabase upload error:', uploadError);
-        
-        // Fallback to local URL for immediate use
-        const imageUrl = URL.createObjectURL(file);
-        onImageChange(imageUrl);
-        toast.success(`${title} آپلود شد (محلی)`);
-        return;
-      }
+      if (!uploadError && uploadData) {
+        const { data: urlData } = supabase.storage
+          .from('uploads')
+          .getPublicUrl(uploadData.path);
 
-      console.log('Upload successful:', uploadData);
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('uploads')
-        .getPublicUrl(uploadData.path);
-
-      if (urlData?.publicUrl) {
-        console.log('Public URL generated:', urlData.publicUrl);
-        onImageChange(urlData.publicUrl);
-        toast.success(`${title} با موفقیت آپلود شد`);
-      } else {
-        throw new Error('Could not get public URL');
+        if (urlData?.publicUrl) {
+          onImageChange(urlData.publicUrl);
+          console.log('Image uploaded to Supabase:', urlData.publicUrl);
+        }
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      
-      // Always provide fallback for immediate use
-      const imageUrl = URL.createObjectURL(file);
-      onImageChange(imageUrl);
-      toast.success(`${title} آپلود شد (محلی)`);
+      // Don't show error toast since local upload worked
     } finally {
       setIsUploading(false);
     }
@@ -94,7 +83,6 @@ const ImageUploadSection = ({
 
   const refreshImage = () => {
     if (currentImage) {
-      // Force refresh by adding timestamp
       const separator = currentImage.includes('?') ? '&' : '?';
       const refreshedUrl = `${currentImage}${separator}t=${Date.now()}`;
       onImageChange(refreshedUrl);
@@ -195,7 +183,9 @@ const ImageUploadSection = ({
                       accept="image/*"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
-                        if (file) handleImageUpload(file);
+                        if (file) {
+                          handleImageUpload(file);
+                        }
                       }}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       disabled={isUploading}

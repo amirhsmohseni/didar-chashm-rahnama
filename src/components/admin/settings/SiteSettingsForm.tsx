@@ -69,10 +69,10 @@ const SiteSettingsForm = () => {
     }
   }, [settings]);
 
-  const handleInputChange = (key: keyof FormData, value: string) => {
+  const handleInputChange = (key: keyof FormData, value: string | null) => {
     console.log(`Changing ${key} from "${formData[key]}" to "${value}"`);
     
-    const newFormData = { ...formData, [key]: value };
+    const newFormData = { ...formData, [key]: value || '' };
     setFormData(newFormData);
     
     // Check if there are changes
@@ -118,7 +118,7 @@ const SiteSettingsForm = () => {
       hasChanges={hasChanges}
     >
       <div className="space-y-8">
-        {/* بخش تصاویر سایت - اصلاح شده */}
+        {/* بخش تصاویر سایت */}
         <div className="bg-gray-50 p-6 rounded-lg">
           <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
             <Settings className="h-5 w-5" />
@@ -128,8 +128,8 @@ const SiteSettingsForm = () => {
             <div className="space-y-2">
               <ImageUploadSection
                 title="لوگوی سایت"
-                currentImage={formData.site_logo}
-                onImageChange={(url) => handleInputChange('site_logo', url || '')}
+                currentImage={formData.site_logo || null}
+                onImageChange={(url) => handleInputChange('site_logo', url)}
                 aspectRatio="1/1"
               />
               <p className="text-xs text-gray-500">
@@ -140,8 +140,8 @@ const SiteSettingsForm = () => {
             <div className="space-y-2">
               <ImageUploadSection
                 title="تصویر پس‌زمینه صفحه اصلی"
-                currentImage={formData.site_background}
-                onImageChange={(url) => handleInputChange('site_background', url || '')}
+                currentImage={formData.site_background || null}
+                onImageChange={(url) => handleInputChange('site_background', url)}
                 aspectRatio="16/9"
               />
               <p className="text-xs text-gray-500">
