@@ -1,6 +1,6 @@
 
 import { useState, useCallback, memo } from 'react';
-import { Menu, X, Shield, LogOut, User } from 'lucide-react';
+import { Menu, X, Shield, LogOut, User, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
 // Memoized Navigation Item Component for better performance
 const NavigationItem = memo(({ name, href, onClick }: { name: string; href: string; onClick?: () => void }) => (
@@ -38,11 +46,16 @@ const Header = () => {
     { name: 'خانه', href: '/' },
     { name: 'خدمات', href: '/services' },
     { name: 'پزشکان', href: '/doctors' },
-    { name: 'مشاوره', href: '/consultation' },
+  ];
+
+  const aboutMenuItems = [
     { name: 'درباره ما', href: '/about' },
+    { name: 'رسانه', href: '/media' },
+  ];
+
+  const contentMenuItems = [
     { name: 'وبلاگ', href: '/blog' },
     { name: 'سوالات متداول', href: '/faq' },
-    { name: 'رسانه', href: '/media' },
   ];
 
   const handleLogout = useCallback(async () => {
@@ -92,16 +105,68 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation - وسط صفحه */}
-          <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 space-x-reverse order-2 flex-1 justify-center">
-            {navigationItems.map((item) => (
-              <NavigationItem
-                key={item.name}
-                name={item.name}
-                href={item.href}
-              />
-            ))}
-          </nav>
+          {/* Desktop Navigation with Submenus */}
+          <div className="hidden lg:flex items-center order-2 flex-1 justify-center">
+            <NavigationMenu>
+              <NavigationMenuList className="space-x-4 xl:space-x-6 space-x-reverse">
+                {/* Simple Navigation Items */}
+                {navigationItems.map((item) => (
+                  <NavigationMenuItem key={item.name}>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        to={item.href}
+                        className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium text-sm sm:text-base px-3 py-2 rounded-md hover:bg-gray-50"
+                      >
+                        {item.name}
+                      </Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                ))}
+
+                {/* About & Media Submenu */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
+                    درباره ما و رسانه
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid gap-3 p-4 w-48">
+                      {aboutMenuItems.map((item) => (
+                        <NavigationMenuLink asChild key={item.name}>
+                          <Link
+                            to={item.href}
+                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          >
+                            <div className="text-sm font-medium leading-none">{item.name}</div>
+                          </Link>
+                        </NavigationMenuLink>
+                      ))}
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                {/* Blog & FAQ Submenu */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
+                    محتوا و آموزش
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid gap-3 p-4 w-48">
+                      {contentMenuItems.map((item) => (
+                        <NavigationMenuLink asChild key={item.name}>
+                          <Link
+                            to={item.href}
+                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          >
+                            <div className="text-sm font-medium leading-none">{item.name}</div>
+                          </Link>
+                        </NavigationMenuLink>
+                      ))}
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
 
           {/* Mobile menu button */}
           <div className="lg:hidden order-1">
@@ -182,6 +247,7 @@ const Header = () => {
         {isMenuOpen && (
           <div className="lg:hidden border-t bg-white/95 backdrop-blur-sm py-4 shadow-lg">
             <nav className="flex flex-col space-y-1">
+              {/* Simple Items */}
               {navigationItems.map((item) => (
                 <NavigationItem
                   key={item.name}
@@ -190,6 +256,37 @@ const Header = () => {
                   onClick={closeMenu}
                 />
               ))}
+
+              {/* About & Media Section */}
+              <div className="px-3 py-2">
+                <div className="text-gray-500 text-xs font-semibold mb-2">درباره ما و رسانه</div>
+                {aboutMenuItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="block text-gray-700 hover:text-primary transition-colors duration-200 font-medium px-2 py-1 rounded-md hover:bg-gray-50 text-sm"
+                    onClick={closeMenu}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Content Section */}
+              <div className="px-3 py-2">
+                <div className="text-gray-500 text-xs font-semibold mb-2">محتوا و آموزش</div>
+                {contentMenuItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="block text-gray-700 hover:text-primary transition-colors duration-200 font-medium px-2 py-1 rounded-md hover:bg-gray-50 text-sm"
+                    onClick={closeMenu}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+
               {user && (
                 <Link
                   to="/admin"
