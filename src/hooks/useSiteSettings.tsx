@@ -11,14 +11,14 @@ export const useSiteSettings = () => {
   }, {} as Record<string, string>);
 
   const siteSettings = {
-    site_title: settingsObject.site_title || 'دیدار چشم رهنما',
-    site_description: settingsObject.site_description || 'مشاوره تخصصی چشم',
-    hero_title: settingsObject.hero_title || 'دیدار چشم رهنما',
-    hero_description: settingsObject.hero_subtitle || settingsObject.hero_description || 'مشاوره تخصصی و رایگان برای متقاضیان جراحی چشم',
+    site_title: settingsObject.site_title || 'Ceritamed',
+    site_description: settingsObject.site_description || 'تغییر رنگ چشم - مشاوره تخصصی',
+    hero_title: settingsObject.hero_title || 'Ceritamed',
+    hero_description: settingsObject.hero_subtitle || settingsObject.hero_description || 'مرکز تخصصی تغییر رنگ چشم و خدمات پزشکی',
     contact_phone: settingsObject.contact_phone || '021-12345678',
-    contact_email: settingsObject.contact_email || 'info@clinic.com',
+    contact_email: settingsObject.contact_email || 'info@ceritamed.com',
     contact_address: settingsObject.contact_address || 'تهران، خیابان ولیعصر',
-    site_logo: settingsObject.site_logo || '',
+    site_logo: settingsObject.site_logo || '/lovable-uploads/fa978934-c917-42be-bab6-38bfa6d1c567.png',
     site_background: settingsObject.hero_background_image || settingsObject.site_background || ''
   };
 
