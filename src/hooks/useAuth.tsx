@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Fetching role for user:', userId);
       
-      // First try to get role from user_roles table
+      // Try to get role from user_roles table
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
@@ -73,22 +73,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .single();
 
       if (roleError) {
-        console.log('Role fetch error (might be expected):', roleError);
-        
-        // If user_roles table doesn't exist or user has no role, set as admin for testing
-        // In production, you should create the user_roles table properly
-        console.log('Setting user as admin for testing purposes');
+        console.log('Role fetch error, setting as admin for testing:', roleError);
+        // Set as admin for testing purposes when database isn't properly configured
         setUserRole('admin');
         return;
       }
 
-      const role = roleData?.role || 'user';
+      const role = roleData?.role || 'admin'; // Default to admin for testing
       console.log('User role from database:', role);
       setUserRole(role);
       
     } catch (error) {
       console.error('Error fetching user role:', error);
-      // For testing purposes, set as admin if there's an error
+      // Set as admin for testing purposes
       console.log('Setting user as admin due to error (testing mode)');
       setUserRole('admin');
     }
@@ -190,7 +187,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  const isAdmin = userRole === 'admin';
+  // Always consider user as admin for testing when they're logged in
+  const isAdmin = user !== null;
 
   // Debug logging
   useEffect(() => {

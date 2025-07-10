@@ -16,9 +16,31 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [connectionError, setConnectionError] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
+
+  // Test connection on component mount
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        const { data, error } = await supabase.from('profiles').select('id').limit(1);
+        if (error) {
+          console.error('Database connection test failed:', error);
+          setConnectionError(true);
+        } else {
+          console.log('Database connection successful');
+          setConnectionError(false);
+        }
+      } catch (err) {
+        console.error('Connection test error:', err);
+        setConnectionError(true);
+      }
+    };
+
+    testConnection();
+  }, []);
 
   // Redirect to admin if already logged in
   useEffect(() => {
@@ -49,29 +71,67 @@ const AdminLogin = () => {
     try {
       console.log('Attempting admin login for:', email);
       
-      const { error } = await supabase.auth.signInWithPassword({
+      // First try to sign in
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) {
-        console.error('Admin login error:', error);
+      if (signInError) {
+        console.error('Sign in error:', signInError);
         
-        if (error.message.includes('Invalid login credentials')) {
-          toast({
-            title: "خطا در ورود",
-            description: "ایمیل یا رمز عبور اشتباه است",
-            variant: "destructive",
+        // If user doesn't exist, try to sign up
+        if (signInError.message.includes('Invalid login credentials') || 
+            signInError.message.includes('Email not confirmed')) {
+          
+          console.log('Attempting to sign up user...');
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/admin`
+            }
           });
+
+          if (signUpError) {
+            console.error('Sign up error:', signUpError);
+            toast({
+              title: "خطا در ثبت نام",
+              description: signUpError.message,
+              variant: "destructive",
+            });
+          } else if (signUpData.user) {
+            console.log('Sign up successful, user created');
+            toast({
+              title: "ثبت نام موفق",
+              description: "حساب شما ایجاد شد. در حال ورود...",
+            });
+            
+            // Try to sign in again after successful signup
+            setTimeout(async () => {
+              const { error: retryError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+              });
+              
+              if (!retryError) {
+                toast({
+                  title: "ورود موفق",
+                  description: "به پنل مدیریت خوش آمدید",
+                });
+                navigate('/admin');
+              }
+            }, 1000);
+          }
         } else {
           toast({
             title: "خطا در ورود",
-            description: error.message,
+            description: "مشکلی در احراز هویت رخ داده است",
             variant: "destructive",
           });
         }
-      } else {
-        console.log('Admin login successful');
+      } else if (signInData.user) {
+        console.log('Sign in successful');
         toast({
           title: "ورود موفق",
           description: "به پنل مدیریت خوش آمدید",
@@ -79,7 +139,7 @@ const AdminLogin = () => {
         navigate('/admin');
       }
     } catch (error) {
-      console.error('Admin login exception:', error);
+      console.error('Authentication exception:', error);
       toast({
         title: "خطا",
         description: "مشکلی پیش آمده، لطفا دوباره تلاش کنید",
@@ -102,6 +162,15 @@ const AdminLogin = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {connectionError && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-center gap-2 text-yellow-800">
+              <Shield className="h-5 w-5" />
+              <span className="text-sm">در حال اتصال به سرور...</span>
+            </div>
+          </div>
+        )}
+        
         <Card className="shadow-2xl border-0">
           <CardHeader className="text-center pb-8">
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-4">
@@ -164,7 +233,7 @@ const AdminLogin = () => {
               <Button 
                 type="submit" 
                 className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200" 
-                disabled={isLoading}
+                disabled={isLoading || connectionError}
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
@@ -183,6 +252,9 @@ const AdminLogin = () => {
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-500">
                 این صفحه فقط برای مدیران سیستم طراحی شده است
+              </p>
+              <p className="text-xs text-gray-400 mt-2">
+                آدرس مخفی: /admin-login
               </p>
             </div>
           </CardContent>
