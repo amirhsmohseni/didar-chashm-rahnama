@@ -49,7 +49,7 @@ const SiteSettingsForm = () => {
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    if (settings) {
+    if (settings && Object.keys(settings).length > 0) {
       console.log('تنظیمات در فرم بارگذاری شد:', settings);
       const newData: FormData = {
         site_title: settings.site_title || '',
@@ -63,11 +63,18 @@ const SiteSettingsForm = () => {
         site_background: settings.site_background || ''
       };
       
-      setFormData(newData);
-      setInitialData(newData);
-      setHasChanges(false);
+      // فقط اگر داده‌ها واقعاً متفاوت باشند، آپدیت کن
+      const hasDataChanged = Object.keys(newData).some(
+        key => newData[key as keyof FormData] !== formData[key as keyof FormData]
+      );
+      
+      if (hasDataChanged) {
+        setFormData(newData);
+        setInitialData(newData);
+        setHasChanges(false);
+      }
     }
-  }, [settings]);
+  }, [settings]); // فقط وابسته به settings باشد
 
   const handleInputChange = (key: keyof FormData, value: string | null) => {
     const newValue = value || '';
