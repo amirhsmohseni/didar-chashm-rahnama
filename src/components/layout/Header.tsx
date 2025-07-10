@@ -42,27 +42,32 @@ const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Navigation items in the new order from left to right
-  const navigationItems = [
-    { name: 'خانه', href: '/' },
-    { name: 'خدمات', href: '/services' },
-    { name: 'پزشکان', href: '/doctors' },
+  // Content & Education Submenu - محتوا و آموزش (first from right)
+  const contentMenuItems = [
+    { name: 'وبلاگ', href: '/blog' },
+    { name: 'سوالات متداول', href: '/faq' },
+    { name: 'رسانه', href: '/media' },
   ];
 
+  // About Submenu - درباره ما (second from right)
+  const aboutMenuItems = [
+    { name: 'درباره ما', href: '/about' },
+  ];
+
+  // Simple Navigation Items - پزشکان (third from right)
+  const doctorsItem = { name: 'پزشکان', href: '/doctors' };
+
+  // Loan Section - دریافت وام (fourth from right)
   const loanMenuItems = [
     { name: 'شرایط دریافت وام', href: '/loan-conditions' },
     { name: 'محاسبه اقساط', href: '/loan-calculator' },
     { name: 'درخواست مشاوره', href: '/consultation' },
   ];
 
-  const aboutMenuItems = [
-    { name: 'درباره ما', href: '/about' },
-  ];
-
-  const contentMenuItems = [
-    { name: 'وبلاگ', href: '/blog' },
-    { name: 'سوالات متداول', href: '/faq' },
-    { name: 'رسانه', href: '/media' },
+  // Simple Navigation Items - خدمات, خانه (fifth and sixth from right)
+  const navigationItems = [
+    { name: 'خدمات', href: '/services' },
+    { name: 'خانه', href: '/' },
   ];
 
   const handleLogout = useCallback(async () => {
@@ -118,32 +123,19 @@ const Header = () => {
             </Button>
           </div>
 
-          {/* Desktop Navigation - starts from left */}
+          {/* Desktop Navigation - starts from right to left */}
           <div className="hidden lg:flex items-center order-1 flex-1 justify-start">
             <NavigationMenu>
               <NavigationMenuList className="space-x-4 xl:space-x-6">
-                {/* Simple Navigation Items - خانه، خدمات، پزشکان */}
-                {navigationItems.map((item) => (
-                  <NavigationMenuItem key={item.name}>
-                    <NavigationMenuLink asChild>
-                      <Link
-                        to={item.href}
-                        className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium text-sm sm:text-base px-3 py-2 rounded-md hover:bg-gray-50"
-                      >
-                        {item.name}
-                      </Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                ))}
-
-                {/* Loan Section - دریافت وام */}
+                
+                {/* Content & Education Submenu - محتوا و آموزش (first from right) */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
-                    دریافت وام
+                    محتوا و آموزش
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid gap-3 p-4 w-56">
-                      {loanMenuItems.map((item) => (
+                    <div className="grid gap-3 p-4 w-48">
+                      {contentMenuItems.map((item) => (
                         <NavigationMenuLink asChild key={item.name}>
                           <Link
                             to={item.href}
@@ -157,7 +149,7 @@ const Header = () => {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* About Submenu - درباره ما */}
+                {/* About Submenu - درباره ما (second from right) */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
                     درباره ما
@@ -178,14 +170,26 @@ const Header = () => {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* Content & Education Submenu - محتوا و آموزش */}
+                {/* Doctors - پزشکان (third from right) */}
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to={doctorsItem.href}
+                      className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium text-sm sm:text-base px-3 py-2 rounded-md hover:bg-gray-50"
+                    >
+                      {doctorsItem.name}
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+
+                {/* Loan Section - دریافت وام (fourth from right) */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
-                    محتوا و آموزش
+                    دریافت وام
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="grid gap-3 p-4 w-48">
-                      {contentMenuItems.map((item) => (
+                    <div className="grid gap-3 p-4 w-56">
+                      {loanMenuItems.map((item) => (
                         <NavigationMenuLink asChild key={item.name}>
                           <Link
                             to={item.href}
@@ -198,6 +202,21 @@ const Header = () => {
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
+
+                {/* Simple Navigation Items - خدمات، خانه (fifth and sixth from right) */}
+                {navigationItems.map((item) => (
+                  <NavigationMenuItem key={item.name}>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        to={item.href}
+                        className="text-gray-700 hover:text-primary transition-colors duration-200 font-medium text-sm sm:text-base px-3 py-2 rounded-md hover:bg-gray-50"
+                      >
+                        {item.name}
+                      </Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                ))}
+
               </NavigationMenuList>
             </NavigationMenu>
           </div>
@@ -276,20 +295,11 @@ const Header = () => {
         {isMenuOpen && (
           <div className="lg:hidden border-t bg-white/95 backdrop-blur-sm py-4 shadow-lg">
             <nav className="flex flex-col space-y-1">
-              {/* Simple Items */}
-              {navigationItems.map((item) => (
-                <NavigationItem
-                  key={item.name}
-                  name={item.name}
-                  href={item.href}
-                  onClick={closeMenu}
-                />
-              ))}
-
-              {/* Loan Section */}
+              
+              {/* Content Section */}
               <div className="px-3 py-2">
-                <div className="text-gray-500 text-xs font-semibold mb-2">دریافت وام</div>
-                {loanMenuItems.map((item) => (
+                <div className="text-gray-500 text-xs font-semibold mb-2">محتوا و آموزش</div>
+                {contentMenuItems.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
@@ -316,10 +326,17 @@ const Header = () => {
                 ))}
               </div>
 
-              {/* Content Section */}
+              {/* Doctors */}
+              <NavigationItem
+                name={doctorsItem.name}
+                href={doctorsItem.href}
+                onClick={closeMenu}
+              />
+
+              {/* Loan Section */}
               <div className="px-3 py-2">
-                <div className="text-gray-500 text-xs font-semibold mb-2">محتوا و آموزش</div>
-                {contentMenuItems.map((item) => (
+                <div className="text-gray-500 text-xs font-semibold mb-2">دریافت وام</div>
+                {loanMenuItems.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
@@ -330,6 +347,16 @@ const Header = () => {
                   </Link>
                 ))}
               </div>
+
+              {/* Simple Items */}
+              {navigationItems.map((item) => (
+                <NavigationItem
+                  key={item.name}
+                  name={item.name}
+                  href={item.href}
+                  onClick={closeMenu}
+                />
+              ))}
 
               {user && (
                 <Link
