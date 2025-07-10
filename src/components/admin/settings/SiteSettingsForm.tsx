@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import SettingsLayout from './SettingsLayout';
-import ImageUploadSection from './ImageUploadSection';
+import SimpleImageUploader from './SimpleImageUploader';
 
 interface FormData {
   site_title: string;
@@ -145,7 +145,7 @@ const SiteSettingsForm = () => {
           </h3>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-2">
-              <ImageUploadSection
+              <SimpleImageUploader
                 title="لوگوی سایت"
                 currentImage={formData.site_logo || null}
                 onImageChange={(url) => handleImageChange('site_logo', url)}
@@ -157,7 +157,7 @@ const SiteSettingsForm = () => {
             </div>
             
             <div className="space-y-2">
-              <ImageUploadSection
+              <SimpleImageUploader
                 title="تصویر پس‌زمینه صفحه اصلی"
                 currentImage={formData.site_background || null}
                 onImageChange={(url) => handleImageChange('site_background', url)}
