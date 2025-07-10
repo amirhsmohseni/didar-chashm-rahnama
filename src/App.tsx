@@ -7,6 +7,7 @@ import { AuthProvider } from '@/hooks/useAuth';
 
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
+import AdminLogin from '@/pages/AdminLogin';
 import About from '@/pages/About';
 import Services from '@/pages/Services';
 import Doctors from '@/pages/Doctors';
@@ -38,6 +39,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin-login" element={<AdminLogin />} />
               <Route path="/about" element={<About />} />
               <Route path="/services" element={<Services />} />
               <Route path="/services/:slug" element={<ServiceDetail />} />
