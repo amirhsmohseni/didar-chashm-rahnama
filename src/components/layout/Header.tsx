@@ -42,7 +42,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Reordered navigation items as requested
+  // Navigation items in the new order
   const navigationItems = [
     { name: 'خانه', href: '/' },
     { name: 'خدمات', href: '/services' },
@@ -100,23 +100,11 @@ const Header = () => {
     <header className="bg-white shadow-sm border-b sticky top-0 z-50 backdrop-blur-sm bg-white/95">
       <div className="container mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex items-center justify-between h-14 sm:h-16">
-          {/* Logo - در سمت راست */}
-          <div className="flex items-center justify-end flex-1 order-3">
-            <Link to="/" className="flex items-center space-x-2 group">
-              <span className="font-bold text-lg sm:text-xl lg:text-2xl text-primary ml-2 group-hover:text-primary/80 transition-colors">
-                چشم پزشکی
-              </span>
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-lg flex items-center justify-center group-hover:bg-primary/80 transition-colors">
-                <span className="text-white font-bold text-xs sm:text-sm">چ</span>
-              </div>
-            </Link>
-          </div>
-
-          {/* Desktop Navigation with Submenus - چپ چین شده با ترتیب جدید */}
-          <div className="hidden lg:flex items-center order-2 flex-1 justify-start">
+          {/* Desktop Navigation - از سمت چپ شروع می‌شود */}
+          <div className="hidden lg:flex items-center order-1 flex-1 justify-start">
             <NavigationMenu>
               <NavigationMenuList className="space-x-4 xl:space-x-6">
-                {/* Simple Navigation Items - Reordered */}
+                {/* Simple Navigation Items - خانه، خدمات، پزشکان */}
                 {navigationItems.map((item) => (
                   <NavigationMenuItem key={item.name}>
                     <NavigationMenuLink asChild>
@@ -130,7 +118,7 @@ const Header = () => {
                   </NavigationMenuItem>
                 ))}
 
-                {/* Loan Section - Third in order */}
+                {/* Loan Section - دریافت وام */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
                     دریافت وام
@@ -151,7 +139,7 @@ const Header = () => {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* About Submenu - Fifth in order */}
+                {/* About Submenu - درباره ما */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
                     درباره ما
@@ -172,7 +160,7 @@ const Header = () => {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* Content & Education Submenu - Sixth in order */}
+                {/* Content & Education Submenu - محتوا و آموزش */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
                     محتوا و آموزش
@@ -213,9 +201,21 @@ const Header = () => {
             </Button>
           </div>
 
-          {/* Auth Section - فقط برای کاربران وارد شده */}
+          {/* Logo - در وسط */}
+          <div className="flex items-center justify-center flex-1 order-2">
+            <Link to="/" className="flex items-center space-x-2 group">
+              <span className="font-bold text-lg sm:text-xl lg:text-2xl text-primary ml-2 group-hover:text-primary/80 transition-colors">
+                چشم پزشکی
+              </span>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-lg flex items-center justify-center group-hover:bg-primary/80 transition-colors">
+                <span className="text-white font-bold text-xs sm:text-sm">چ</span>
+              </div>
+            </Link>
+          </div>
+
+          {/* Auth Section - در سمت راست */}
           {user && (
-            <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 order-1 lg:order-3">
+            <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 order-3">
               <div className="flex items-center gap-1 sm:gap-2">
                 <Link to="/admin">
                   <Button 
@@ -271,11 +271,11 @@ const Header = () => {
           )}
         </div>
 
-        {/* Enhanced Mobile Navigation - با ترتیب جدید */}
+        {/* Enhanced Mobile Navigation */}
         {isMenuOpen && (
           <div className="lg:hidden border-t bg-white/95 backdrop-blur-sm py-4 shadow-lg">
             <nav className="flex flex-col space-y-1">
-              {/* Simple Items with new order */}
+              {/* Simple Items */}
               {navigationItems.map((item) => (
                 <NavigationItem
                   key={item.name}
@@ -285,7 +285,7 @@ const Header = () => {
                 />
               ))}
 
-              {/* Loan Section - Third in mobile menu */}
+              {/* Loan Section */}
               <div className="px-3 py-2">
                 <div className="text-gray-500 text-xs font-semibold mb-2">دریافت وام</div>
                 {loanMenuItems.map((item) => (
@@ -300,7 +300,7 @@ const Header = () => {
                 ))}
               </div>
 
-              {/* About Section - Fifth in mobile menu */}
+              {/* About Section */}
               <div className="px-3 py-2">
                 <div className="text-gray-500 text-xs font-semibold mb-2">درباره ما</div>
                 {aboutMenuItems.map((item) => (
@@ -315,7 +315,7 @@ const Header = () => {
                 ))}
               </div>
 
-              {/* Content Section - Sixth in mobile menu */}
+              {/* Content Section */}
               <div className="px-3 py-2">
                 <div className="text-gray-500 text-xs font-semibold mb-2">محتوا و آموزش</div>
                 {contentMenuItems.map((item) => (
