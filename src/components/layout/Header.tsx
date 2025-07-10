@@ -1,3 +1,4 @@
+
 import { useState, useCallback, memo } from 'react';
 import { Menu, X, Shield, LogOut, User, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -41,6 +42,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Reordered navigation items as requested
   const navigationItems = [
     { name: 'خانه', href: '/' },
     { name: 'خدمات', href: '/services' },
@@ -110,11 +112,11 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation with Submenus - چپ چین شده */}
+          {/* Desktop Navigation with Submenus - چپ چین شده با ترتیب جدید */}
           <div className="hidden lg:flex items-center order-2 flex-1 justify-start">
             <NavigationMenu>
               <NavigationMenuList className="space-x-4 xl:space-x-6">
-                {/* Simple Navigation Items */}
+                {/* Simple Navigation Items - Reordered */}
                 {navigationItems.map((item) => (
                   <NavigationMenuItem key={item.name}>
                     <NavigationMenuLink asChild>
@@ -128,7 +130,28 @@ const Header = () => {
                   </NavigationMenuItem>
                 ))}
 
-                {/* About Submenu */}
+                {/* Loan Section - Third in order */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
+                    دریافت وام
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid gap-3 p-4 w-56">
+                      {loanMenuItems.map((item) => (
+                        <NavigationMenuLink asChild key={item.name}>
+                          <Link
+                            to={item.href}
+                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          >
+                            <div className="text-sm font-medium leading-none">{item.name}</div>
+                          </Link>
+                        </NavigationMenuLink>
+                      ))}
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                {/* About Submenu - Fifth in order */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
                     درباره ما
@@ -149,7 +172,7 @@ const Header = () => {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* Content & Education Submenu - رسانه منتقل شده */}
+                {/* Content & Education Submenu - Sixth in order */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
                     محتوا و آموزش
@@ -157,27 +180,6 @@ const Header = () => {
                   <NavigationMenuContent>
                     <div className="grid gap-3 p-4 w-48">
                       {contentMenuItems.map((item) => (
-                        <NavigationMenuLink asChild key={item.name}>
-                          <Link
-                            to={item.href}
-                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                          >
-                            <div className="text-sm font-medium leading-none">{item.name}</div>
-                          </Link>
-                        </NavigationMenuLink>
-                      ))}
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-
-                {/* Loan Section - جدید */}
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
-                    دریافت وام
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid gap-3 p-4 w-56">
-                      {loanMenuItems.map((item) => (
                         <NavigationMenuLink asChild key={item.name}>
                           <Link
                             to={item.href}
@@ -269,11 +271,11 @@ const Header = () => {
           )}
         </div>
 
-        {/* Enhanced Mobile Navigation */}
+        {/* Enhanced Mobile Navigation - با ترتیب جدید */}
         {isMenuOpen && (
           <div className="lg:hidden border-t bg-white/95 backdrop-blur-sm py-4 shadow-lg">
             <nav className="flex flex-col space-y-1">
-              {/* Simple Items */}
+              {/* Simple Items with new order */}
               {navigationItems.map((item) => (
                 <NavigationItem
                   key={item.name}
@@ -283,7 +285,22 @@ const Header = () => {
                 />
               ))}
 
-              {/* About Section */}
+              {/* Loan Section - Third in mobile menu */}
+              <div className="px-3 py-2">
+                <div className="text-gray-500 text-xs font-semibold mb-2">دریافت وام</div>
+                {loanMenuItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="block text-gray-700 hover:text-primary transition-colors duration-200 font-medium px-2 py-1 rounded-md hover:bg-gray-50 text-sm"
+                    onClick={closeMenu}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+
+              {/* About Section - Fifth in mobile menu */}
               <div className="px-3 py-2">
                 <div className="text-gray-500 text-xs font-semibold mb-2">درباره ما</div>
                 {aboutMenuItems.map((item) => (
@@ -298,25 +315,10 @@ const Header = () => {
                 ))}
               </div>
 
-              {/* Content Section - رسانه منتقل شده */}
+              {/* Content Section - Sixth in mobile menu */}
               <div className="px-3 py-2">
                 <div className="text-gray-500 text-xs font-semibold mb-2">محتوا و آموزش</div>
                 {contentMenuItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className="block text-gray-700 hover:text-primary transition-colors duration-200 font-medium px-2 py-1 rounded-md hover:bg-gray-50 text-sm"
-                    onClick={closeMenu}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-
-              {/* Loan Section - جدید */}
-              <div className="px-3 py-2">
-                <div className="text-gray-500 text-xs font-semibold mb-2">دریافت وام</div>
-                {loanMenuItems.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
