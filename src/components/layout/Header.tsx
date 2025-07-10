@@ -42,11 +42,17 @@ const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Navigation items in the new order
+  // Navigation items in the new order from left to right
   const navigationItems = [
     { name: 'خانه', href: '/' },
     { name: 'خدمات', href: '/services' },
     { name: 'پزشکان', href: '/doctors' },
+  ];
+
+  const loanMenuItems = [
+    { name: 'شرایط دریافت وام', href: '/loan-conditions' },
+    { name: 'محاسبه اقساط', href: '/loan-calculator' },
+    { name: 'درخواست مشاوره', href: '/consultation' },
   ];
 
   const aboutMenuItems = [
@@ -57,12 +63,6 @@ const Header = () => {
     { name: 'وبلاگ', href: '/blog' },
     { name: 'سوالات متداول', href: '/faq' },
     { name: 'رسانه', href: '/media' },
-  ];
-
-  const loanMenuItems = [
-    { name: 'شرایط دریافت وام', href: '/loan-conditions' },
-    { name: 'محاسبه اقساط', href: '/loan-calculator' },
-    { name: 'درخواست مشاوره', href: '/consultation' },
   ];
 
   const handleLogout = useCallback(async () => {
@@ -100,7 +100,25 @@ const Header = () => {
     <header className="bg-white shadow-sm border-b sticky top-0 z-50 backdrop-blur-sm bg-white/95">
       <div className="container mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex items-center justify-between h-14 sm:h-16">
-          {/* Desktop Navigation - از سمت چپ شروع می‌شود */}
+          
+          {/* Mobile menu button */}
+          <div className="lg:hidden order-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleMenu}
+              className="p-2 sm:p-3 hover:bg-gray-100 rounded-lg"
+              aria-label={isMenuOpen ? 'بستن منو' : 'باز کردن منو'}
+            >
+              {isMenuOpen ? (
+                <X className="h-5 w-5 sm:h-6 sm:w-6" />
+              ) : (
+                <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
+              )}
+            </Button>
+          </div>
+
+          {/* Desktop Navigation - starts from left */}
           <div className="hidden lg:flex items-center order-1 flex-1 justify-start">
             <NavigationMenu>
               <NavigationMenuList className="space-x-4 xl:space-x-6">
@@ -182,23 +200,6 @@ const Header = () => {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="lg:hidden order-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleMenu}
-              className="p-2 sm:p-3 hover:bg-gray-100 rounded-lg"
-              aria-label={isMenuOpen ? 'بستن منو' : 'باز کردن منو'}
-            >
-              {isMenuOpen ? (
-                <X className="h-5 w-5 sm:h-6 sm:w-6" />
-              ) : (
-                <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
-              )}
-            </Button>
           </div>
 
           {/* Logo - در وسط */}
