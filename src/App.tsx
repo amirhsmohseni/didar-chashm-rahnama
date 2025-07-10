@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
@@ -20,6 +19,8 @@ import Faq from '@/pages/Faq';
 import Admin from '@/pages/Admin';
 import NotFound from '@/pages/NotFound';
 import ServiceDetail from '@/pages/ServiceDetail';
+import LoanConditions from '@/pages/LoanConditions';
+import LoanCalculator from '@/pages/LoanCalculator';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,6 +52,8 @@ function App() {
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/media" element={<MediaCenter />} />
               <Route path="/faq" element={<Faq />} />
+              <Route path="/loan-conditions" element={<LoanConditions />} />
+              <Route path="/loan-calculator" element={<LoanCalculator />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

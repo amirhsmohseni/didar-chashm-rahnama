@@ -50,12 +50,18 @@ const Header = () => {
 
   const aboutMenuItems = [
     { name: 'درباره ما', href: '/about' },
-    { name: 'رسانه', href: '/media' },
   ];
 
   const contentMenuItems = [
     { name: 'وبلاگ', href: '/blog' },
     { name: 'سوالات متداول', href: '/faq' },
+    { name: 'رسانه', href: '/media' },
+  ];
+
+  const loanMenuItems = [
+    { name: 'شرایط دریافت وام', href: '/loan-conditions' },
+    { name: 'محاسبه اقساط', href: '/loan-calculator' },
+    { name: 'درخواست مشاوره', href: '/consultation' },
   ];
 
   const handleLogout = useCallback(async () => {
@@ -105,10 +111,10 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation with Submenus */}
-          <div className="hidden lg:flex items-center order-2 flex-1 justify-center">
+          {/* Desktop Navigation with Submenus - چپ چین شده */}
+          <div className="hidden lg:flex items-center order-2 flex-1 justify-start">
             <NavigationMenu>
-              <NavigationMenuList className="space-x-4 xl:space-x-6 space-x-reverse">
+              <NavigationMenuList className="space-x-4 xl:space-x-6">
                 {/* Simple Navigation Items */}
                 {navigationItems.map((item) => (
                   <NavigationMenuItem key={item.name}>
@@ -123,10 +129,10 @@ const Header = () => {
                   </NavigationMenuItem>
                 ))}
 
-                {/* About & Media Submenu */}
+                {/* About Submenu */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
-                    درباره ما و رسانه
+                    درباره ما
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <div className="grid gap-3 p-4 w-48">
@@ -144,7 +150,7 @@ const Header = () => {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* Blog & FAQ Submenu */}
+                {/* Content & Education Submenu - رسانه منتقل شده */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
                     محتوا و آموزش
@@ -152,6 +158,27 @@ const Header = () => {
                   <NavigationMenuContent>
                     <div className="grid gap-3 p-4 w-48">
                       {contentMenuItems.map((item) => (
+                        <NavigationMenuLink asChild key={item.name}>
+                          <Link
+                            to={item.href}
+                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          >
+                            <div className="text-sm font-medium leading-none">{item.name}</div>
+                          </Link>
+                        </NavigationMenuLink>
+                      ))}
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                {/* Loan Section - جدید */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="text-gray-700 hover:text-primary font-medium">
+                    دریافت وام
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid gap-3 p-4 w-56">
+                      {loanMenuItems.map((item) => (
                         <NavigationMenuLink asChild key={item.name}>
                           <Link
                             to={item.href}
@@ -257,9 +284,9 @@ const Header = () => {
                 />
               ))}
 
-              {/* About & Media Section */}
+              {/* About Section */}
               <div className="px-3 py-2">
-                <div className="text-gray-500 text-xs font-semibold mb-2">درباره ما و رسانه</div>
+                <div className="text-gray-500 text-xs font-semibold mb-2">درباره ما</div>
                 {aboutMenuItems.map((item) => (
                   <Link
                     key={item.name}
@@ -272,10 +299,25 @@ const Header = () => {
                 ))}
               </div>
 
-              {/* Content Section */}
+              {/* Content Section - رسانه منتقل شده */}
               <div className="px-3 py-2">
                 <div className="text-gray-500 text-xs font-semibold mb-2">محتوا و آموزش</div>
                 {contentMenuItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="block text-gray-700 hover:text-primary transition-colors duration-200 font-medium px-2 py-1 rounded-md hover:bg-gray-50 text-sm"
+                    onClick={closeMenu}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Loan Section - جدید */}
+              <div className="px-3 py-2">
+                <div className="text-gray-500 text-xs font-semibold mb-2">دریافت وام</div>
+                {loanMenuItems.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
