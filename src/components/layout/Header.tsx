@@ -1,4 +1,3 @@
-
 import { useState, useCallback, memo } from 'react';
 import { Menu, X, Shield, LogOut, User, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -111,8 +110,8 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation with Submenus - چپ چین شده */}
-          <div className="hidden lg:flex items-center order-2 flex-1 justify-start">
+          {/* Desktop Navigation with Submenus - راست چین شده */}
+          <div className="hidden lg:flex items-center order-2 flex-1 justify-end">
             <NavigationMenu>
               <NavigationMenuList className="space-x-4 xl:space-x-6">
                 {/* Simple Navigation Items */}
