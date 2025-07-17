@@ -1,4 +1,3 @@
-
 import { useSettingsManager } from './useSettingsManager';
 
 export const useSiteSettings = () => {
