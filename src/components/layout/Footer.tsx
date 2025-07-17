@@ -60,7 +60,9 @@ const Footer = () => {
                 <Phone className="h-5 w-5 text-primary" />
                 <div>
                   <p className="text-sm text-gray-400">شماره تماس:</p>
-                  <a href="tel:+989123456789" className="hover:text-primary transition-colors">+98 912 345 6789</a>
+                  <a href="tel:+989123456789" className="hover:text-primary transition-colors" dir="ltr">
+                    +98 912 345 6789
+                  </a>
                 </div>
               </li>
               <li className="flex items-center gap-3">
