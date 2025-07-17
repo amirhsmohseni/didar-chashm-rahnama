@@ -59,7 +59,7 @@ const SiteSettingsForm = () => {
         contact_address: settings.contact_address || '',
         hero_title: settings.hero_title || '',
         hero_description: settings.hero_description || '',
-        site_logo: settings.site_logo || '',
+        site_logo: settings.site_logo || '/lovable-uploads/0cc32d95-fb28-4a91-b57a-368d4a45b365.png',
         site_background: settings.site_background || ''
       };
       
@@ -154,7 +154,7 @@ const SiteSettingsForm = () => {
             <div className="space-y-2">
               <SimpleImageUploader
                 title="لوگوی سایت"
-                currentImage={formData.site_logo || null}
+                currentImage={formData.site_logo || '/lovable-uploads/0cc32d95-fb28-4a91-b57a-368d4a45b365.png'}
                 onImageChange={(url) => handleImageChange('site_logo', url)}
                 aspectRatio="1/1"
               />

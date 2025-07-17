@@ -18,7 +18,7 @@ export const useSiteSettings = () => {
     contact_phone: settingsObject.contact_phone || '021-12345678',
     contact_email: settingsObject.contact_email || 'info@ceritamed.com',
     contact_address: settingsObject.contact_address || 'تهران، خیابان ولیعصر',
-    site_logo: settingsObject.site_logo || '/lovable-uploads/fa978934-c917-42be-bab6-38bfa6d1c567.png',
+    site_logo: settingsObject.site_logo || '/lovable-uploads/0cc32d95-fb28-4a91-b57a-368d4a45b365.png',
     site_background: settingsObject.hero_background_image || settingsObject.site_background || ''
   };
 
